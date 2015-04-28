@@ -7,8 +7,11 @@
 //
 
 #include <iostream>
-using namespace std;
-int main(){
-    cout << "Duplex" << endl ;
-    
+#include <string>
+#include "configuration.h"
+
+int main()
+{
+    Configuration* config = new Configuration("../config.xml");
+    return 0;
 }
