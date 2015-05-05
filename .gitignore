@@ -21,3 +21,8 @@ DuplexVS/Debug/main.obj
 DuplexVS/DuplexVS.sln
 *.ilk
 DuplexVS/Debug/configuration.obj
+DuplexVS/Debug/vc120.pdb
+*.idb
+DuplexVS/Debug/duplex.obj
+*.pdb
+DuplexVS/Debug/state.obj
