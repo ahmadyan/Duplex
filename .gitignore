@@ -17,3 +17,7 @@ bin/DuplexVS.ilk
 DuplexVS/DuplexVS.vcxproj
 *.tlog
 DuplexVS/Debug/main.obj
+*.suo
+DuplexVS/DuplexVS.sln
+*.ilk
+DuplexVS/Debug/configuration.obj
