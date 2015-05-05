@@ -11,4 +11,5 @@ class Configuration{
         property_tree::ptree pointerTree;
 public:
     Configuration(string filename);
+	~Configuration();
 };

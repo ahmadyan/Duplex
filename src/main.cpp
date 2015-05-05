@@ -10,8 +10,8 @@
 #include <string>
 #include "configuration.h"
 
-int main()
-{
-    Configuration* config = new Configuration("../config.xml");
+int main(){
+	cout << "Duplex" << endl;
+    Configuration* config = new Configuration("config.xml");
     return 0;
 }
