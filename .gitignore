@@ -10,3 +10,10 @@
 *.xcuserstate
 
 *.xcscheme
+*.exe
+bin/DuplexVS.ilk
+*.log
+*.filters
+DuplexVS/DuplexVS.vcxproj
+*.tlog
+DuplexVS/Debug/main.obj
