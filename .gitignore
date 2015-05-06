@@ -10,6 +10,7 @@
 *.xcuserstate
 
 *.xcscheme
+<<<<<<< Updated upstream
 *.exe
 bin/DuplexVS.ilk
 *.log
@@ -26,3 +27,55 @@ DuplexVS/Debug/vc120.pdb
 DuplexVS/Debug/duplex.obj
 *.pdb
 DuplexVS/Debug/state.obj
+=======
+
+bin/duplex.build/Debug/duplex.build/dgph
+
+bin/Debug/duplex
+
+*.hmap
+
+*.d
+
+*.dia
+
+*.o
+
+*.dat
+
+*.LinkFileList
+
+bin/duplex/Build/Intermediates/duplex.build/Debug/duplex.build/dgph
+
+*.xcindexdb
+
+*.xcindexdb-shm
+
+*.xcindexdb-wal
+
+*.strings-res
+
+*.strings-cmp
+
+*.strings-dir
+
+*.strings-file
+
+*.strings-moduleurl
+
+*.strings-sym
+
+*.xcactivitylog
+
+*.db
+
+*.idx
+
+*.modulevalidation
+
+build/duplex.build/Debug/duplex.build/dgph
+
+build/duplex.build/Debug/duplex.build/dgph (Adel’s MacBook Air's conflicted copy 2015-05-05)
+
+*.xcsettings
+>>>>>>> Stashed changes
