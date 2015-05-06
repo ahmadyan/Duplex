@@ -8,8 +8,9 @@
 
 #include "duplex.h"
 
-Duplex::Duplex(){
-    
+Duplex::Duplex(Configuration* c){
+    cout << "Duplex" << endl;
+    config=c;
 }
 
 

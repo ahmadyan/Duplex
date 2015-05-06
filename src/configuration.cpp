@@ -9,7 +9,7 @@
 #include "configuration.h"
 
 Configuration::Configuration(string filename){
-	cout << "Loading configuration" << endl;
+	cout << "Loading configuration " << filename << endl;
 	property_tree::read_xml(filename, pointerTree);
 
 	// Traverse property tree example
