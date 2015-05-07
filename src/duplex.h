@@ -8,16 +8,21 @@
 #pragma once
 #include "configuration.h"
 #include "system.h"
+
 class Duplex{
     int parameterDimension;
     int objectiveDimension;
     Configuration* config;
+    State* root;
+    State* goal;
+    System* system;
     
 public:
     Duplex(Configuration*);
-    void setInitialState();
-    void setObjectiveState();
+    ~Duplex();
+    void initialize(double*);
+    void setObjective(double*);
     void optimize();
     void setSystem(System*);
-    ~Duplex();
+  
 };

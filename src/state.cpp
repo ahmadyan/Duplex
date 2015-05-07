@@ -19,3 +19,25 @@ State::~State(){
     delete parameterVector;
     delete objectiveVector;
 }
+
+void State::setObjective(double v, double i){
+    objectiveVector[i]=v;
+}
+
+void State::setParameter(double* v){
+    delete parameterVector;
+    parameterVector=v;
+}
+
+void State::setObjective(double* v){
+    delete objectiveVector;
+    objectiveVector=v;
+}
+
+double* State::getParameter(){
+    return parameterVector;
+}
+
+double* State::getObjective(){
+    return objectiveVector;
+}

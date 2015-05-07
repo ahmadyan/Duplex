@@ -7,6 +7,7 @@
 //
 
 #include "duplex.h"
+#include "system.h"
 
 Duplex::Duplex(Configuration* c){
     cout << "Duplex" << endl;
@@ -16,4 +17,22 @@ Duplex::Duplex(Configuration* c){
 
 Duplex::~Duplex(){
     
+}
+
+void Duplex::initialize(double* init){
+    root = new State(2,2);
+    root->setParameter(init);
+    system->eval(root);
+}
+
+void Duplex::setObjective(double* g){
+    goal = new State(2,2);
+    goal->setObjective(g);
+}
+
+void Duplex::setSystem(System* sys){
+    system=sys;
+}
+
+void Duplex::optimize(){
 }

@@ -7,9 +7,11 @@
 //
 #pragma once
 #include "configuration.h"
+#include "state.h"
 
 class System{
 public:
 	System(Configuration* config);
 	~System();
+    void eval(State*);
 };

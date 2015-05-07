@@ -7,6 +7,8 @@
 //
 #pragma once
 #include <vector>
+#include "configuration.h"
+
 using namespace std;
 class State{
     int id;
@@ -17,4 +19,8 @@ class State{
 public:
     State(int, int);
     ~State();
+    void setParameter(double*);
+    void setObjective(double*);
+    double* getParameter();
+    double* getObjective();
 };

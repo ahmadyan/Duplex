@@ -13,17 +13,26 @@
 #include "system.h"
 
 int main(int argc, char** argv){
-	
+    if(argc<2){
+        cout << "Usage: duplex configfile.xml" << endl ;
+        return -1;
+    }
+    
     Configuration* config = new Configuration(string(argv[1]));
     System* system = new System(config);
     Duplex* duplex = new Duplex(config);
-	    
-    duplex->setInitialState();
-    duplex->setObjectiveState();
+
+    double* init = new double[2]; init[0]=0;init[1]=0;
+    double* goal = new double[2]; goal[0]=2;goal[1]=5;
+    
     duplex->setSystem(system);
+    duplex->setInitialState(init);
+    duplex->setObjectiveState(goal);
+
     duplex->optimize();
     
     delete duplex;
+    delete system;
     delete config;
     return 0;
 }
