@@ -8,6 +8,7 @@
 
 #include "configuration.h"
 
+Configuration::Configuration(){}
 Configuration::Configuration(string filename){
 	cout << "Loading configuration " << filename << endl;
 	property_tree::read_xml(filename, pointerTree);

@@ -20,7 +20,7 @@ State::~State(){
     delete objectiveVector;
 }
 
-void State::setObjective(double v, double i){
+void State::setObjective(double v, int i){
     objectiveVector[i]=v;
 }
 
@@ -40,4 +40,12 @@ double* State::getParameter(){
 
 double* State::getObjective(){
     return objectiveVector;
+}
+
+StateType State::getType(){
+    return type;
+}
+
+void State::setType(StateType t){
+    type = t;
 }

@@ -10,6 +10,8 @@ using namespace boost;
 class Configuration{
         property_tree::ptree pointerTree;
 public:
+    Configuration();
     Configuration(string filename);
 	~Configuration();
+    
 };

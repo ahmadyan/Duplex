@@ -10,17 +10,27 @@
 #include "configuration.h"
 
 using namespace std;
+enum class StateType {StateTypeNormal, StateTypeRoot, StateTypeObjective};
+
 class State{
+    
     int id;
     int parameterDimension;
     int objectiveDimension;
     double* parameterVector;
     double* objectiveVector;
+    StateType type;
 public:
+
+
     State(int, int);
     ~State();
-    void setParameter(double*);
-    void setObjective(double*);
+    void setObjective(double v, int i);
+    void setParameter(double* v);
+    void setObjective(double* v);
     double* getParameter();
     double* getObjective();
+    
+    StateType getType();
+    void setType(StateType);
 };

@@ -24,5 +24,5 @@ public:
     void setObjective(double*);
     void optimize();
     void setSystem(System*);
-  
+    double distance();
 };

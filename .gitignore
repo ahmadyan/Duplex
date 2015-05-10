@@ -83,3 +83,21 @@ build/duplex.build/Debug/duplex.build/dgph (Adel’s MacBook Air's conflicted co
 bin/duplex
 
 build/DuplexMac.build/Debug/Duplex.build/dgph
+
+*.swift
+
+*.swift
+
+Duplex.playground/contents.xcplayground
+
+*.swift
+
+Duplex.playground/Contents.swift
+
+Duplex.playground/Results.playgrounddata
+
+Duplex.playground/Sources/SupportCode.swift
+
+Duplex/build/Debug/Duplex
+
+Duplex/build/Duplex.build/Debug/Duplex.build/dgph

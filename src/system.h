@@ -13,5 +13,6 @@ class System{
 public:
 	System(Configuration* config);
 	~System();
+    void eval(State*, double t);
     void eval(State*);
 };
