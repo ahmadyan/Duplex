@@ -101,3 +101,8 @@ Duplex.playground/Sources/SupportCode.swift
 Duplex/build/Debug/Duplex
 
 Duplex/build/Duplex.build/Debug/Duplex.build/dgph
+DuplexVS/Debug/graph.obj
+*.obj
+DuplexVS/DuplexVS.vcxproj.user
+*.sdf
+DuplexVS/DuplexVS.opensdf

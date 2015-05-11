@@ -33,4 +33,6 @@ public:
     
     StateType getType();
     void setType(StateType);
+
+	string toString();
 };

@@ -49,3 +49,18 @@ StateType State::getType(){
 void State::setType(StateType t){
     type = t;
 }
+
+string State::toString(){
+	stringstream ss;
+	ss << "State []: ";
+	for (int i = 0; i < parameterDimension; i++){
+		ss << parameterVector[i] << " ";
+	}
+	ss << endl;
+
+	for (int i = 0; i < objectiveDimension; i++){
+		ss << objectiveVector[i] << " ";
+	}
+	ss << endl;
+	return ss.str();
+}
