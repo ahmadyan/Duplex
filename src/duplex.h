@@ -8,6 +8,7 @@
 #pragma once
 #include "configuration.h"
 #include "system.h"
+#include "search.h"
 
 class Duplex{
     int parameterDimension;
@@ -16,7 +17,7 @@ class Duplex{
     State* root;
     State* goal;
     System* system;
-    
+    Search* db;
 public:
     Duplex(Configuration*);
     ~Duplex();

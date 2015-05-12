@@ -106,3 +106,7 @@ DuplexVS/Debug/graph.obj
 DuplexVS/DuplexVS.vcxproj.user
 *.sdf
 DuplexVS/DuplexVS.opensdf
+
+*.timestamp
+
+*.pcm

@@ -14,7 +14,6 @@ Duplex::Duplex(Configuration* c){
     config=c;
 }
 
-
 Duplex::~Duplex(){
     
 }
@@ -41,18 +40,35 @@ double Duplex::distance(){
 void Duplex::optimize(){
     cout << "Executing Duplex" << endl;
     int iterationCap=100;
-    vector<State*> states;
-    states.push_back(root);
+    int parameterDimension=4; int objectiveDimension=4;
+    db = new Search(objectiveDimension);
+    db->insert(root);
+    
+    //temporary:
+    double* min = new double[objectiveDimension];
+    double* max = new double[objectiveDimension];
+    for(int i=0;i<objectiveDimension;i++){
+        min[i]=0;
+        max[i]=1;
+    }
+    
     for(int i=0;i<iterationCap;i++){
-        State* near;
-        State* sample;
+        State* sample = new State(parameterDimension, objectiveDimension);
+        sample->setParameter(sample->uniformRandomVector(parameterDimension, min, max));
+        sample->setObjective(sample->uniformRandomVector(objectiveDimension, min, max));
         
-        double min_distance = distance();
-        int closest_node = 0;
-        for(int j=0;j<states.size();j++){
-            
-        }
-        near = states[closest_node];
+        db->insert(sample);
+        
+        
+        
+        //State* near;
+        //State* sample;
+        
+        //double min_distance = distance();
+        //int closest_node = 0;
+        //for(int j=0;j<states.size();j++){
+        //}
+        //near = states[closest_node];
         //choose frontier (closest state to the objective)
             //need a distance function
             //pareto selection in multi-objective optimization
@@ -64,6 +80,10 @@ void Duplex::optimize(){
     }
     
     for(int i=0;i<iterationCap; i++){
-        //print the nodes
+        cout << db->getState(i)->toString() << endl ;
     }
+    cout << "root state: " << endl ;
+    cout << root->toString() << endl ;
+    cout << db->search(root)->toString() << endl;
+    
 }

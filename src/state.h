@@ -13,7 +13,6 @@ using namespace std;
 enum class StateType {StateTypeNormal, StateTypeRoot, StateTypeObjective};
 
 class State{
-    
     int id;
     int parameterDimension;
     int objectiveDimension;
@@ -22,7 +21,6 @@ class State{
     StateType type;
 public:
 
-
     State(int, int);
     ~State();
     void setObjective(double v, int i);
@@ -30,9 +28,11 @@ public:
     void setObjective(double* v);
     double* getParameter();
     double* getObjective();
-    
     StateType getType();
     void setType(StateType);
-
 	string toString();
+    double unifRand();
+    double unifRand(double a, double b);
+    double normalRand(double mean, double std, double min, double max);
+    double* uniformRandomVector(int size, double* min, double* max);
 };

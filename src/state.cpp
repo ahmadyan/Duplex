@@ -5,8 +5,10 @@
 //  Created by Adel Ahmadyan on 4/23/15.
 //  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
 //
-
+#include <random>
 #include "state.h"
+
+using namespace std;
 
 State::State(int _parameterDimension, int _objectiveDimension){
     parameterDimension=_parameterDimension;
@@ -63,4 +65,31 @@ string State::toString(){
 	}
 	ss << endl;
 	return ss.str();
+}
+
+double State::unifRand(){
+    return rand() / double(RAND_MAX);
+}
+
+double State::unifRand(double a, double b){
+    return (b - a)*unifRand() + a;
+}
+
+double State::normalRand(double mean, double std, double min, double max){
+    std::random_device rd;
+    std::mt19937 generator(rd());
+    std::normal_distribution<double> normal(mean, std);
+    
+    double d = normal(generator);
+    if (d < min) d = min;
+    if (d>max) d = max;
+    return d;
+}
+
+double* State::uniformRandomVector(int size, double* min, double* max){
+    double* data = new double[size];
+    for (int i = 0; i<size; i++){
+        data[i]=unifRand(min[i], max[i]);
+    }
+    return data;
 }
