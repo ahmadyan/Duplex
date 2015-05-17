@@ -58,12 +58,11 @@ string State::toString(){
 	for (int i = 0; i < parameterDimension; i++){
 		ss << parameterVector[i] << " ";
 	}
-	ss << endl;
-
+    ss << " / " ;//endl;
 	for (int i = 0; i < objectiveDimension; i++){
 		ss << objectiveVector[i] << " ";
 	}
-	ss << endl;
+	//ss << endl;
 	return ss.str();
 }
 

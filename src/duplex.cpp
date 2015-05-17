@@ -8,6 +8,8 @@
 
 #include "duplex.h"
 #include "system.h"
+#include <algorithm>
+using namespace std;
 
 Duplex::Duplex(Configuration* c){
     cout << "Duplex" << endl;
@@ -37,38 +39,49 @@ double Duplex::distance(){
     return 0;
 }
 
-void Duplex::optimize(){
-    cout << "Executing Duplex" << endl;
-    int iterationCap=100;
-    int parameterDimension=4; int objectiveDimension=4;
-    db = new Search(objectiveDimension);
-    db->insert(root);
-    
-    //temporary:
-    double* min = new double[objectiveDimension];
-    double* max = new double[objectiveDimension];
+State* Duplex::generateSample(){
+    int parameterDimension=2; int objectiveDimension=2;
+    //Randomly generate a state close to the final objective
+    //todo: use gaussian distribution to generate this
+    State* qsample = new State(parameterDimension, objectiveDimension);
+    double* min = new double[std::max(parameterDimension, objectiveDimension)];
+    double* max = new double[std::max(parameterDimension, objectiveDimension)];
     for(int i=0;i<objectiveDimension;i++){
         min[i]=0;
         max[i]=1;
     }
+    qsample->setParameter(qsample->uniformRandomVector(parameterDimension, min, max));
+    qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, min, max));
+    return qsample;
+}
+
+void Duplex::optimize(){
+    cout << "Executing Duplex" << endl;
+    int iterationCap=100;
+    int parameterDimension=2; int objectiveDimension=2;
+    db = new Search(objectiveDimension);
+    db->insert(root);
+    vector<State*> bias;
     
     for(int i=0;i<iterationCap;i++){
-        State* sample = new State(parameterDimension, objectiveDimension);
-        sample->setParameter(sample->uniformRandomVector(parameterDimension, min, max));
-        sample->setObjective(sample->uniformRandomVector(objectiveDimension, min, max));
+        State* qsample = generateSample();              //generate a new bias sample
+        State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
+        double* param = qnear->getParameter();
+        bias.push_back(qsample);
         
-        db->insert(sample);
+        //Slightly change the input
+        double* input = new double[parameterDimension];
+        for(int j=0;j<parameterDimension;j++)
+            input[j] = param[j];
+        int candidate = rand()%parameterDimension;                      // select an input dimension
+        input[candidate]=qnear->unifRand(0, 1);
+        State* qnew = new State(parameterDimension, objectiveDimension);
+        qnew->setParameter(input);
         
-        
-        
-        //State* near;
-        //State* sample;
-        
-        //double min_distance = distance();
-        //int closest_node = 0;
-        //for(int j=0;j<states.size();j++){
-        //}
-        //near = states[closest_node];
+        //Evaluate
+        system->eval(qnew, 0);                  //simulate the circuit with the new input
+        db->insert(qnew);                       //add a new node to the database
+
         //choose frontier (closest state to the objective)
             //need a distance function
             //pareto selection in multi-objective optimization
@@ -76,14 +89,15 @@ void Duplex::optimize(){
             //fast search method (kd-tree or vp-tree)   --> blog-post about kd-tree vs vp-tree vs other fast search methods, effects in high dimensions
         //generate a new input pattern by slightly changing one of x's inputs
         
-        //simulate the new circuit
     }
     
+    //testing
     for(int i=0;i<iterationCap; i++){
         cout << db->getState(i)->toString() << endl ;
     }
-    cout << "root state: " << endl ;
-    cout << root->toString() << endl ;
-    cout << db->search(root)->toString() << endl;
     
+    //cleaning-up
+    for(int i=0;i<bias.size();i++){
+        delete bias[i];
+    }
 }

@@ -110,3 +110,21 @@ DuplexVS/DuplexVS.opensdf
 *.timestamp
 
 *.pcm
+
+.idea/.name
+
+*.iml
+
+.idea/misc.xml
+
+.idea/modules.xml
+
+src/.idea/vcs.xml
+
+src/.idea/workspace.xml
+
+src/.idea/modules.xml
+
+project/build/Debug/project
+
+project/build/project.build/Debug/project.build/dgph

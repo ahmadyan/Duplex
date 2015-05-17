@@ -12,17 +12,17 @@
 #include "duplex.h"
 #include "system.h"
 
-
 int main(int argc, char** argv){
-    //if(argc<2){
-    //    cout << "Usage: duplex configfile.xml" << endl ;
-    //    return -1;
-    //}
-    //Configuration* config = new Configuration(string(argv[1]));
-    Configuration* config = new Configuration();
+    if(argc<2){
+        cout << "Usage: duplex configfile.xml" << endl ;
+        return -1;
+    }
+    Configuration* config = new Configuration(string(argv[1]));
     System* system = new System(config);
     Duplex* duplex = new Duplex(config);
 
+    //vector<double> init = config->getVector<double>("system.parameters", "parameters", "init");
+    //vector<double> goal = config->getVector<double>("system.parameters", "parameters", "init");
     double* init = new double[2]; init[0]=0;init[1]=0;
     double* goal = new double[2]; goal[0]=2;goal[1]=5;
     
@@ -35,6 +35,6 @@ int main(int argc, char** argv){
     delete duplex;
     delete system;
     delete config;
-	cin.get();
+	//cin.get();
     return 0;
 }

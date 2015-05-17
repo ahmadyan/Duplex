@@ -23,6 +23,7 @@ public:
     ~Duplex();
     void initialize(double*);
     void setObjective(double*);
+    State* generateSample();
     void optimize();
     void setSystem(System*);
     double distance();

@@ -31,9 +31,7 @@ void Search::setState(State* s, int i){
     db[i]=s;
 }
 
-
-
-State* Search::search(State* s){
+State* Search::nearestNode(State* s){
     struct kdres  *set;
     cout << s->toString() << endl;
     //getting the nearest node

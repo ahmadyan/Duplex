@@ -21,7 +21,7 @@ public:
     State* getState(int i);
     void setState(State* s, int i);
     void insert(State*);
-    State* search(State*);
+    State* nearestNode(State*);
     void range(State*);
     unsigned long getSize();
 };

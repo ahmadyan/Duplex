@@ -8,10 +8,12 @@ using namespace std;
 using namespace boost;
 
 class Configuration{
-        property_tree::ptree pointerTree;
+        property_tree::ptree db;
 public:
-    Configuration();
     Configuration(string filename);
+    void save(string);
 	~Configuration();
-    
+    string get(string key);
+    template<typename T> void getParameter(string key, T* value);
+    template<typename T> vector<T> getVector(string path, string key, string name);
 };
