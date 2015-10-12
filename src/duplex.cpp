@@ -83,11 +83,18 @@ double* Duplex::generateNewInput(State* q, double temperature){
 
 void Duplex::optimize(){
     cout << "Executing Duplex" << endl;
-    int iterationCap=1000;
+    int iterationCap=100;
     int parameterDimension=2; int objectiveDimension=2;
     db = new Search(objectiveDimension);
     db->insert(root);
     root->setID(0);
+	double* max = new double[objectiveDimension];
+	double* min = new double[objectiveDimension];
+	for (int i = 0; i < objectiveDimension; i++){
+		min[i] = -3;
+		max[i] = 3;
+	}
+	error.push_back(goal->distance(root, max, min));
     vector<State*> bias;
     
     for(int i=1;i<iterationCap;i++){
@@ -112,7 +119,7 @@ void Duplex::optimize(){
                 // I don't need pareto-optimization because I'm breaking the objectives. Eucledean distance in multi-dimension objective function is pareto-optimal
             //fast search method (kd-tree or vp-tree)   --> blog-post about kd-tree vs vp-tree vs other fast search methods, effects in high dimensions
         //generate a new input pattern by slightly changing one of x's inputs
-        
+		updateError(qnew, max, min);
     }
     
     //testing
@@ -213,14 +220,28 @@ string Duplex::drawObjectiveTree(){
     //board << "set ylabel \"$" << ylabel << "$\" \n";
     //board << "set zlabel \"$" << zlabel << "$\" \n";
     cmdstr << board.str()  << "\n " << cmdstr.str() ;
-    
-    cout << cmdstr.str() << endl;
     return cmdstr.str();
 }
 
+string Duplex::plotError(){
+	stringstream cmdstr;
+	cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << error[0]+1 << "] 0 with linespoints lt \"white\" pt 0.01";
+	for (int i = 1; i < error.size(); i++){
+		double y0 = error[i - 1];
+		double y1 = error[i];
+		cmdstr << " set arrow from " << i-1 << "," << error[i-1] << " to " << i << "," << error[i] << " nohead  lc rgb \"red\" lw 2 \n";
+	}
+	cout << cmdstr.str() << endl;
+	return cmdstr.str();
+}
 
 string Duplex::draw(){
-    //
-    return drawParameterTree();
-    return drawObjectiveTree();
+	return plotError();
+    //return drawParameterTree();
+    //return drawObjectiveTree();
+}
+
+void Duplex::updateError(State* s, double* maxBound, double* minBound){
+	double d = goal->distance(s, maxBound, minBound);
+	error.push_back(min(error[error.size()-1], d));
 }

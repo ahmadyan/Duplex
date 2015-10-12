@@ -42,4 +42,5 @@ public:
     int getID();
     int getObjectiveSize();
     int getParameterSize();
+	double distance(State* a, double* max, double* min);
 };

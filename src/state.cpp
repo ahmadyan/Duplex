@@ -117,3 +117,14 @@ int State::getParameterSize(){
 int State::getObjectiveSize(){
     return objectiveDimension;
 }
+
+
+//compute the norm between current objective state and given state a
+double State::distance(State* a, double* max, double* min){
+	double d = 0;
+	for (int i = 0; i<objectiveDimension; i++){
+		d += ((objectiveVector[i] - a->objectiveVector[i]) * (objectiveVector[i] - a->objectiveVector[i]) / (max[i] - min[i]));
+	}
+	d = sqrt(d);
+	return d;
+}

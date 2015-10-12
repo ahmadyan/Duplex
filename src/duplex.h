@@ -18,6 +18,10 @@ class Duplex{
     State* goal;
     System* system;
     Search* db;
+
+	//keeps the minimum distance from any node in the tree toward the optimum point
+	//should eventually converge to zero
+	vector<double> error;
 public:
     Duplex(Configuration*);
     ~Duplex();
@@ -31,4 +35,6 @@ public:
     double* generateNewInput(State* q, double temperature);
     string drawParameterTree();
     string drawObjectiveTree();
+	void updateError(State* s, double* max, double* min);
+	string plotError();
 };
