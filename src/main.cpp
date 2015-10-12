@@ -14,11 +14,20 @@
 #include "graphics.h"
 
 int main(int argc, char** argv){
-    if(argc<2){
-        cout << "Usage: duplex configfile.xml" << endl ;
-        return -1;
-    }
-    Configuration* config = new Configuration(string(argv[1]));
+	srand((unsigned int)time(0));
+	string configFile;
+	char full[_MAX_PATH];
+	_fullpath(full, ".\\", _MAX_PATH);
+	cout << "Current working directory is: " << full << endl;
+	if (argc > 2){
+		cout << "loading configuration file " << argv[1] << endl;
+		configFile = string(full) + "config//" + argv[1];
+	}
+	else{
+		//hard-coded configuration file
+		configFile = string(full) + "config.xml";
+	}
+	Configuration* config = new Configuration(configFile);
     Graphics* graphic = new Graphics(gnuPlot);
     
     System* system = new System(config);
