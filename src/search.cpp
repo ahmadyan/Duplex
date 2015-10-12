@@ -39,7 +39,7 @@ State* Search::nearestNode(State* s){
     set = kd_nearest(kd, s->getObjective());
     if (kd_res_size(set)>0){
         State* res = (State*)kd_res_item_data(set);
-        cout << res->toString() << endl;
+        cout << "The nearest neighbor of " << s->toString() << " = " << res->toString() << endl;
         return res;
     }
     else{

@@ -8,7 +8,10 @@
 #pragma once
 #include "state.h"
 #include "kdtree.h"
+#include <iostream>
 #include <vector>
+
+using namespace std;
 
 class Search{
     int dim;

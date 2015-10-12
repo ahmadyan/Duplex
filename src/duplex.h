@@ -27,4 +27,8 @@ public:
     void optimize();
     void setSystem(System*);
     double distance();
+    string draw();
+    double* generateNewInput(State* q, double temperature);
+    string drawParameterTree();
+    string drawObjectiveTree();
 };

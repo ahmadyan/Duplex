@@ -8,6 +8,7 @@
 
 #include "configuration.h"
 #include <boost/lexical_cast.hpp>
+#include <iostream>
 
 Configuration::Configuration(string filename){
 	property_tree::read_xml(filename, db);
@@ -47,6 +48,6 @@ template<typename T> vector<T> Configuration::getVector(string key, string name,
 
 //saves the modified database into an xml file
 void Configuration::save(string filename){
-    boost::property_tree::xml_writer_settings<char> w( ' ', 2 );
-    write_xml( filename, db, std::locale(), w );
+    //boost::property_tree::xml_writer_settings<char> w( ' ', 2 );
+    //write_xml( filename, db, std::locale(), w );
 }

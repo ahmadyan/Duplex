@@ -13,7 +13,7 @@ Graphics::Graphics(string path){
     #else
         gnuplotPipe = popen(gnuplot.c_str(),"w");
     #endif
-    emptyPlot("", 0, 1, 0, 1);
+    emptyPlot("", 0,1,0,1);
 }
 
 
@@ -57,8 +57,8 @@ void Graphics::waitForKey(){
 
 void Graphics::saveToPdf(string path){
     stringstream cmdstr;
-    cmdstr << " set term post \n";
-    cmdstr << " set output \"" << path << "\"\n";
+    cmdstr << " set terminal png size 400,300 enhanced font \"Helvetica,20\" \n";
+    cmdstr << " set output '"<< path << "' \n";
     cmdstr << " replot \n";
     fprintf(gnuplotPipe, cmdstr.str().c_str());
     fflush(gnuplotPipe);
@@ -71,5 +71,4 @@ void Graphics::execute(string str){
     string buffer = "replot\n";
     fprintf(gnuplotPipe, buffer.c_str());
     fflush(gnuplotPipe);
-    
 }

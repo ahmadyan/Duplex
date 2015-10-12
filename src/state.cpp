@@ -92,3 +92,28 @@ double* State::uniformRandomVector(int size, double* min, double* max){
     }
     return data;
 }
+
+int State::getParentID(){
+    return parentID;
+}
+
+void State::setParentID(int pid){
+    parentID=pid;
+}
+
+
+int State::getID(){
+    return id;
+}
+
+void State::setID(int i){
+    id=i;
+}
+
+int State::getParameterSize(){
+    return parameterDimension;
+}
+
+int State::getObjectiveSize(){
+    return objectiveDimension;
+}
