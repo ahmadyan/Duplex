@@ -12,7 +12,7 @@
 using namespace std;
 
 Duplex::Duplex(Configuration* c){
-    cout << "Duplex" << endl;
+    cout << "Duplex initialization ..." << endl;
     config=c;
 }
 

@@ -14,6 +14,7 @@ public:
     void save(string);
 	~Configuration();
     string get(string key);
-    template<typename T> void getParameter(string key, T* value);
-    template<typename T> vector<T> getVector(string path, string key, string name);
+	template<typename T> void getParameter(string key, T* value);
+	template<typename T> vector<T> getVector(string key, string name, string label);
+
 };
