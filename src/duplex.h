@@ -13,7 +13,7 @@
 class Duplex{
     int parameterDimension;
     int objectiveDimension;
-    Configuration* config;
+	Settings* settings;
     State* root;
     State* goal;
     System* system;
@@ -23,7 +23,7 @@ class Duplex{
 	//should eventually converge to zero
 	vector<double> error;
 public:
-    Duplex(Configuration*);
+	Duplex(Settings*);
     ~Duplex();
     void initialize(double*);
     void setObjective(double*);

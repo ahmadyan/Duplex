@@ -1,7 +1,7 @@
 #include "system.h"
 #include <cmath>
 
-System::System(Configuration*){}
+System::System(Settings*){}
 System::~System(){}
 
 

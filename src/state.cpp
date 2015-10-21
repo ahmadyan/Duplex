@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
 //
 #include <random>
+#include <sstream>
 #include "state.h"
 
 using namespace std;

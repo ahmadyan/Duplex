@@ -13,6 +13,8 @@
 #include "duplex.h"
 #include "system.h"
 #include "graphics.h"
+#include <config4cpp/Configuration.h>
+using namespace config4cpp;
 
 namespace{
 	const size_t ERROR_IN_COMMAND_LINE = 1;
@@ -21,7 +23,9 @@ namespace{
 }
 
 int main(int argc, char** argv){
+	Settings*  settings = new Settings();
 	srand((unsigned int)time(0));
+
 	try{
 		namespace po = boost::program_options;
 		po::options_description desc("Options");
@@ -47,12 +51,14 @@ int main(int argc, char** argv){
 			return ERROR_IN_COMMAND_LINE;
 		}
 
+
 		cout << vm["config"].as<std::string>() << endl;
-		Configuration* config = new Configuration(vm["config"].as<std::string>());
+		settings->parse(vm["config"].as<std::string>().c_str(), "Duplex");
+		
 		Graphics* graphic = new Graphics(gnuPlot);
 
-		System* system = new System(config);
-		Duplex* duplex = new Duplex(config);
+		System* system = new System(settings);
+		Duplex* duplex = new Duplex(settings);
 
 		double* init = new double[2]; init[0] = 0; init[1] = 0;
 		double* goal = new double[2]; goal[0] = 2; goal[1] = 1;
@@ -60,23 +66,21 @@ int main(int argc, char** argv){
 		duplex->setSystem(system);
 		duplex->initialize(init);
 		duplex->setObjective(goal);
-
 		duplex->optimize();
 		graphic->execute(duplex->draw());
-		graphic->saveToPdf("output.png");
+		graphic->saveToPdf(settings->lookupString("output"));
 		delete duplex;
 		delete system;
-		delete config;
-		cin.get();
-		return 0;
-
-	}
-	catch (std::exception& e){
+		delete settings;
+	
+	}catch (SettingsException se){
+		std::cerr << "CONFIG ERROR: " << se.what() << std::endl << std::endl;
+		return ERROR_IN_COMMAND_LINE;
+	}catch (std::exception& e){
 		std::cerr << "Unhandled Exception reached the top of main: "
 			<< e.what() << ", application will now exit" << std::endl;
 		return ERROR_UNHANDLED_EXCEPTION;
-
 	}
-
-	
+	cin.get();
+	return SUCCESS;
 }

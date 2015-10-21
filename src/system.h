@@ -11,7 +11,7 @@
 
 class System{
 public:
-	System(Configuration* config);
+	System(Settings* config);
 	~System();
     void eval(State*, double t);
     void eval(State*);

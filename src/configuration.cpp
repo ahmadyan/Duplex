@@ -5,49 +5,121 @@
 //  Created by Adel Ahmadyan on 5/5/15.
 //  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
 //  This class uses boos property tree to parse xml file and lexical cast
+//  Complete overhaul on 10/21/15. Replaced my own configuration class with config4cpp library.
 
 #include "configuration.h"
-#include <boost/lexical_cast.hpp>
-#include <iostream>
+#include <config4cpp/Configuration.h>
+//#include "FallbackConfiguration.h"
+#include <stdio.h>
+#include <stdlib.h>
+using namespace config4cpp;
 
-Configuration::Configuration(string filename){
-	property_tree::read_xml(filename, db);
+// Exception
+SettingsException::SettingsException(const char * str){
+	m_str = new char[strlen(str) + 1];
+	strcpy_s(m_str, strlen(str) + 1, str);
 }
 
-Configuration::~Configuration(){}
-
-string Configuration::get(string key){
-    return db.get<string>( key, "Key Not Found");
+SettingsException::SettingsException(const SettingsException & other){
+	m_str = new char[strlen(other.m_str) + 1];
+	strcpy_s(m_str, strlen(other.m_str) + 1, other.m_str);
 }
 
-template<typename T> void Configuration::getParameter(string key, T* value){
-    try{
-        *value = boost::lexical_cast<T>(get(key));
-    }catch (const std::exception&){
-        cout << "[error] cast error in configuration " << endl ;
-        *value = 0;
-    }
+SettingsException::~SettingsException(){
+	delete[] m_str;
 }
 
-//searches for all the occurance of key.name.label and returns them as a vector
-//warning: this operation is relatively expensive and should be used as sparsely as possible
-template<typename T> vector<T> Configuration::getVector(string key, string name, string label){
-    vector<T> result;
-    BOOST_FOREACH( boost::property_tree::ptree::value_type const& node, db.get_child( key )){
-        boost::property_tree::ptree subtree = node.second;
-        if( node.first == name ){
-            BOOST_FOREACH( boost::property_tree::ptree::value_type const& v, subtree.get_child( "" ) ){
-                if ( v.first == label ){
-                    result.push_back(boost::lexical_cast<T>(subtree.get<std::string>(label)));
-                }
-            }
-        }
-    }
-    return result;
+const char *SettingsException::what() const{
+	return m_str;
 }
 
-//saves the modified database into an xml file
-void Configuration::save(string filename){
-    //boost::property_tree::xml_writer_settings<char> w( ' ', 2 );
-    //write_xml( filename, db, std::locale(), w );
+// Settings
+
+Settings::Settings(){
+	m_cfg = Configuration::create();
+	m_scope = 0;
+}
+
+Settings::~Settings(){
+	delete[] m_scope;
+	((Configuration *)m_cfg)->destroy();
+}
+
+void Settings::parse(const char *cfgSource,const char *	scope) throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+
+	m_scope = new char[strlen(scope) + 1];
+	strcpy_s(m_scope, strlen(scope) + 1, scope);
+	try {
+		if (cfgSource != 0 && strcmp(cfgSource, "") != 0) {
+			cfg->parse(cfgSource);
+		}
+		//cfg->setFallbackConfiguration(Configuration::INPUT_STRING, FallbackConfiguration::getString());
+	}
+	catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}
+
+const char * Settings::lookupString(const char * name) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		return cfg->lookupString(m_scope, name);
+	}catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}
+
+void Settings::lookupList(const char* name, const char** &array, int& arraySize) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		cfg->lookupList(m_scope, name, array, arraySize);
+	}catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}
+
+int Settings::lookupInt(const char * name) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		return cfg->lookupInt(m_scope, name);
+	} catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}
+
+float Settings::lookupFloat(const char * name) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		return cfg->lookupFloat(m_scope, name);
+	} catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}
+
+bool Settings::lookupBoolean(const char * name) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		return cfg->lookupBoolean(m_scope, name);
+	}catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}
+
+int Settings::lookupDurationMilliseconds(const char * name) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		return cfg->lookupDurationMilliseconds(m_scope, name);
+	}catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}
+
+int Settings::lookupDurationSeconds(const char * name) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		return cfg->lookupDurationSeconds(m_scope, name);
+	}catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
 }

@@ -9,11 +9,13 @@
 #include "duplex.h"
 #include "system.h"
 #include <algorithm>
+#include <iostream>
+#include <sstream>
 using namespace std;
 
-Duplex::Duplex(Configuration* c){
+Duplex::Duplex(Settings* c){
     cout << "Duplex initialization ..." << endl;
-    config=c;
+	settings = c;
 }
 
 Duplex::~Duplex(){
@@ -83,7 +85,7 @@ double* Duplex::generateNewInput(State* q, double temperature){
 
 void Duplex::optimize(){
     cout << "Executing Duplex" << endl;
-    int iterationCap=100;
+	int iterationCap = settings->lookupInt("iterations");
     int parameterDimension=2; int objectiveDimension=2;
     db = new Search(objectiveDimension);
     db->insert(root);

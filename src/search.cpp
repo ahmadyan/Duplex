@@ -1,5 +1,5 @@
 #include "search.h"
-
+#include <sstream>
 Search::Search(int d){
     dim=d;  //dim is the search dimension
     kd = kd_create(dim);
