@@ -21,13 +21,19 @@ class Duplex{
 
 	//keeps the minimum distance from any node in the tree toward the optimum point
 	//should eventually converge to zero
+	double* max;
+	double* min;
 	vector<double> error;
+	vector<State*> bias;
+
+	int iterationCap;
+
 public:
 	Duplex(Settings*);
     ~Duplex();
     void initialize(double*);
     void setObjective(double*);
-    State* generateSample();
+	
     void optimize();
     void setSystem(System*);
     double distance();
@@ -37,4 +43,8 @@ public:
     string drawObjectiveTree();
 	void updateError(State* s, double* max, double* min);
 	string plotError();
+	void update(int, State* qsample, State* qnear, State* qnew);		//update the database, biases, rewards, etc.
+	void clear();
+	State* localStep(int i, State*);
+	State* globalStep();
 };

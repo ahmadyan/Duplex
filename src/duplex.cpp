@@ -16,20 +16,33 @@ using namespace std;
 Duplex::Duplex(Settings* c){
     cout << "Duplex initialization ..." << endl;
 	settings = c;
+	iterationCap = settings->lookupInt("iterations");
+	parameterDimension = settings->lookupInt("parameters");
+	objectiveDimension = settings->lookupInt("objectives");
 }
 
 Duplex::~Duplex(){
-    
+	clear();
 }
 
 void Duplex::initialize(double* init){
-    root = new State(2,2);
+	root = new State(parameterDimension, objectiveDimension);
     root->setParameter(init);
     system->eval(root);
+	db = new Search(objectiveDimension);
+	db->insert(root);
+	root->setID(0);
+	max = new double[objectiveDimension];
+	min = new double[objectiveDimension];
+	for (int i = 0; i < objectiveDimension; i++){
+		min[i] = -3;
+		max[i] = 3;
+	}
+	error.push_back(goal->distance(root, max, min));
 }
 
 void Duplex::setObjective(double* g){
-    goal = new State(2,2);
+	goal = new State(parameterDimension, objectiveDimension);
     goal->setObjective(g);
 }
 
@@ -41,7 +54,7 @@ double Duplex::distance(){
     return 0;
 }
 
-State* Duplex::generateSample(){
+State* Duplex::globalStep(){
     int parameterDimension=2; int objectiveDimension=2;
     //Randomly generate a state close to the final objective
     //todo: use gaussian distribution to generate this
@@ -83,55 +96,36 @@ double* Duplex::generateNewInput(State* q, double temperature){
     return input;
 }
 
-void Duplex::optimize(){
-    cout << "Executing Duplex" << endl;
-	int iterationCap = settings->lookupInt("iterations");
-    int parameterDimension=2; int objectiveDimension=2;
-    db = new Search(objectiveDimension);
-    db->insert(root);
-    root->setID(0);
-	double* max = new double[objectiveDimension];
-	double* min = new double[objectiveDimension];
-	for (int i = 0; i < objectiveDimension; i++){
-		min[i] = -3;
-		max[i] = 3;
-	}
-	error.push_back(goal->distance(root, max, min));
-    vector<State*> bias;
-    
-    for(int i=1;i<iterationCap;i++){
-        State* qsample = generateSample();              //generate a new bias sample
-        State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
-        bias.push_back(qsample);
-        double temperature = (1.0*i)/iterationCap;
-        double* input = generateNewInput(qnear, temperature);
-        State* qnew = new State(parameterDimension, objectiveDimension);
-        qnew->setParameter(input);
-        //Evaluate
-        system->eval(qnew, 0);                  //simulate the circuit with the new input
-        db->insert(qnew);                       //add a new node to the database
-        
-        qnew->setID(i);
+void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
+	db->insert(qnew);                       //add a new node to the database
+	qnew->setID(i);
+	qnew->setParentID(qnear->getID());      //maintaing the tree data structure
+	bias.push_back(qsample);
+	updateError(qnew, max, min);
+}
 
-        qnew->setParentID(qnear->getID());      //maintaing the tree data structure
-        
-        //choose frontier (closest state to the objective)
-            //need a distance function
-            //pareto selection in multi-objective optimization
-                // I don't need pareto-optimization because I'm breaking the objectives. Eucledean distance in multi-dimension objective function is pareto-optimal
-            //fast search method (kd-tree or vp-tree)   --> blog-post about kd-tree vs vp-tree vs other fast search methods, effects in high dimensions
-        //generate a new input pattern by slightly changing one of x's inputs
-		updateError(qnew, max, min);
-    }
-    
-    //testing
-    for(int i=0;i<iterationCap; i++){
-        cout << db->getState(i)->toString() << endl ;
-    }
-    
-    //cleaning-up
-    for(int i=0;i<bias.size();i++){
-        delete bias[i];
+void Duplex::clear(){
+	for (int i = 0; i<bias.size(); i++){
+		delete bias[i];
+	}
+}
+
+State* Duplex::localStep(int i, State* qnear){
+	double temperature = (1.0*i) / iterationCap;
+	double* input = generateNewInput(qnear, temperature);
+	State* qnew = new State(parameterDimension, objectiveDimension);
+	qnew->setParameter(input);
+	return qnew;
+}
+
+
+void Duplex::optimize(){
+    for(int i=1;i<iterationCap;i++){
+		State* qsample = globalStep();              //generate a new bias sample
+        State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
+		State* qnew = localStep(i, qnear); 
+		system->eval(qnew, 0);                  //simulate the circuit with the new input
+		update(i, qsample, qnear, qnew);
     }
 }
 
@@ -245,5 +239,6 @@ string Duplex::draw(){
 
 void Duplex::updateError(State* s, double* maxBound, double* minBound){
 	double d = goal->distance(s, maxBound, minBound);
-	error.push_back(min(error[error.size()-1], d));
+	double e = error[error.size() - 1];
+	error.push_back(fmin(e, d));
 }

@@ -64,8 +64,8 @@ int main(int argc, char** argv){
 		double* goal = new double[2]; goal[0] = 2; goal[1] = 1;
 
 		duplex->setSystem(system);
-		duplex->initialize(init);
 		duplex->setObjective(goal);
+		duplex->initialize(init);
 		duplex->optimize();
 		graphic->execute(duplex->draw());
 		graphic->saveToPdf(settings->lookupString("output"));
