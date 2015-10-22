@@ -11,7 +11,7 @@
 #include "search.h"
 
 enum class Temperature { temperatureexp, temperaturefast, temperatureboltz };
-enum class Annealing { annealingfast, annealingboltz};
+enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annealingboltzrandom};
 
 class Duplex{
 	Settings* settings;
@@ -32,7 +32,8 @@ class Duplex{
 	Annealing annealingOption;
 	double t0;			//initial temperature
 	double temperature; //current temperature 
-
+	double stepLength;
+	double initialStepLength;
 	//Duplex outputs:
 	vector<double> error; //keeps the minimum distance from any node in the tree toward the optimum point (Hopefully converges to 0)
 	vector<State*> bias; 
@@ -57,4 +58,5 @@ public:
 	State* localStep(int i, State*);
 	State* globalStep();
 	void computeTemperature(int i);
+	void computeStepLength();
 };
