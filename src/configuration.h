@@ -23,6 +23,7 @@ public:
 	//--------
 	// Lookup-style functions.
 	//--------
+	bool check(const char* name, const char* value) const throw (SettingsException);
 	const char * lookupString(const char * name) const throw (SettingsException);
 	void lookupList(
 		const char *	name,

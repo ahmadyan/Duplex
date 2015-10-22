@@ -123,3 +123,15 @@ int Settings::lookupDurationSeconds(const char * name) const throw (SettingsExce
 		throw SettingsException(ex.c_str());
 	}
 }
+
+bool Settings::check(const char * name, const char* value) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	try {
+		const char* result = cfg->lookupString(m_scope, name);
+		if (strcmp(result, value) == 0) return true;
+		else false;
+	}
+	catch (const ConfigurationException & ex) {
+		throw SettingsException(ex.c_str());
+	}
+}

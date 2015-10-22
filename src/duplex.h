@@ -10,23 +10,32 @@
 #include "system.h"
 #include "search.h"
 
+enum class Temperature { temperatureexp, temperaturefast, temperatureboltz };
+enum class Annealing { annealingfast, annealingboltz};
+
 class Duplex{
-    int parameterDimension;
-    int objectiveDimension;
 	Settings* settings;
-    State* root;
-    State* goal;
-    System* system;
     Search* db;
 
-	//keeps the minimum distance from any node in the tree toward the optimum point
-	//should eventually converge to zero
+	//System:
+	State* root;
+	State* goal;
+	System* system;
 	double* max;
 	double* min;
-	vector<double> error;
-	vector<State*> bias;
-
+	int parameterDimension;
+	int objectiveDimension;
+	
+	//Duplex options
 	int iterationCap;
+	Temperature temperatureOption;
+	Annealing annealingOption;
+	double t0;			//initial temperature
+	double temperature; //current temperature 
+
+	//Duplex outputs:
+	vector<double> error; //keeps the minimum distance from any node in the tree toward the optimum point (Hopefully converges to 0)
+	vector<State*> bias; 
 
 public:
 	Duplex(Settings*);
@@ -47,4 +56,5 @@ public:
 	void clear();
 	State* localStep(int i, State*);
 	State* globalStep();
+	void computeTemperature(int i);
 };

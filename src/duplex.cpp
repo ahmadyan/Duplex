@@ -19,6 +19,32 @@ Duplex::Duplex(Settings* c){
 	iterationCap = settings->lookupInt("iterations");
 	parameterDimension = settings->lookupInt("parameters");
 	objectiveDimension = settings->lookupInt("objectives");
+	
+	t0 = settings->lookupFloat("initial_temperature");
+	temperature = t0;
+	if (settings->check("temperature", "fast")){
+		temperatureOption = Temperature::temperaturefast;
+	}
+	else if (settings->check("temperature", "boltz")){
+		temperatureOption = Temperature::temperatureboltz;
+	}
+	else if (settings->check("temperature", "exp")){
+		temperatureOption = Temperature::temperatureexp;
+	}
+	else{
+		cout << "Temperature option not found in the config file. Possible options are [fast, boltz, exp].";
+		exit(2);
+	}
+
+	if (settings->check("annealing", "fast")){
+		annealingOption = Annealing::annealingfast;
+	}else if (settings->check("annealing", "boltz")){
+		annealingOption = Annealing::annealingboltz;
+	}else{
+		cout << "Annealing option not found in the config file/ Possible options are [fast, boltz]";
+		exit(2);
+	}
+
 }
 
 Duplex::~Duplex(){
@@ -37,6 +63,7 @@ void Duplex::initialize(double* init){
 	for (int i = 0; i < objectiveDimension; i++){
 		min[i] = -3;
 		max[i] = 3;
+
 	}
 	error.push_back(goal->distance(root, max, min));
 }
@@ -55,7 +82,6 @@ double Duplex::distance(){
 }
 
 State* Duplex::globalStep(){
-    int parameterDimension=2; int objectiveDimension=2;
     //Randomly generate a state close to the final objective
     //todo: use gaussian distribution to generate this
     State* qsample = new State(parameterDimension, objectiveDimension);
@@ -82,9 +108,10 @@ double* Duplex::generateNewInput(State* q, double temperature){
     for(int j=0;j<pSize;j++) input[j] = param[j];
     int candidate = rand()%pSize;   // select an input dimension
     
+
     double stepLength = 0;
-    //stepLength = q->unifRand(-1, 1)*(1-temperature);     //annealing-linear
-    stepLength = q->unifRand(-0.5, 0.5)*(1-temperature);     //annealing-boltz
+    //stepLength = q->unifRand(-1, 1)*(temperature);     //annealing-linear
+    stepLength = q->unifRand(-0.5, 0.5)*(temperature);     //annealing-boltz
     //stepLength = q->unifRand(-0.1, 0.1);              //slow-steps
     
     //How should we change the inputs to the duplex? rapidly or slowly?
@@ -110,8 +137,22 @@ void Duplex::clear(){
 	}
 }
 
+void Duplex::computeTemperature(int i){
+	switch (temperatureOption){
+	case Temperature::temperaturefast:
+		temperature = t0 * (1- (1.0*i) / iterationCap );
+		break;
+	case Temperature::temperatureboltz:
+		temperature = t0 / log(i+2);
+		break;
+	case Temperature::temperatureexp:
+		temperature = temperature*0.95;
+		break;
+	}
+}
+
 State* Duplex::localStep(int i, State* qnear){
-	double temperature = (1.0*i) / iterationCap;
+	computeTemperature(i);
 	double* input = generateNewInput(qnear, temperature);
 	State* qnew = new State(parameterDimension, objectiveDimension);
 	qnew->setParameter(input);
