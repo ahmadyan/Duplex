@@ -20,7 +20,10 @@ class State{
     double* parameterVector;
     double* objectiveVector;
     StateType type;
+	double* reward;	//used for reinforcement learning
+	double rewardCDF;
 public:
+
 
     State(int, int);
     ~State();
@@ -43,4 +46,8 @@ public:
     int getObjectiveSize();
     int getParameterSize();
 	double distance(State* a, double* max, double* min);
+
+	double* getRewardVector();
+	double  getRewardCDF();
+	void setReward(double*, double);
 };

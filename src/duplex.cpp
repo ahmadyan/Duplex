@@ -14,15 +14,21 @@
 using namespace std;
 
 Duplex::Duplex(Settings* c){
-    cout << "Duplex initialization ..." << endl;
+	cout << "Duplex initialization ..." << endl;
 	settings = c;
 	iterationCap = settings->lookupInt("iterations");
 	parameterDimension = settings->lookupInt("parameters");
 	objectiveDimension = settings->lookupInt("objectives");
-	
+
 	t0 = settings->lookupFloat("initial_temperature");
 	temperature = t0;
 	initialStepLength = settings->lookupFloat("initial_step_length");
+	reinforcementLearningOption = settings->check("reinforcement_learning", "enable");
+	if (reinforcementLearningOption){
+		minAward = settings->lookupFloat("min_reward");
+		maxAward = settings->lookupFloat("max_reward");
+		delta = settings->lookupFloat("delta_reward");
+	}
 	if (settings->check("temperature", "fast")){
 		temperatureOption = Temperature::temperaturefast;
 	}
@@ -56,8 +62,12 @@ Duplex::~Duplex(){
 }
 
 void Duplex::initialize(double* init){
+	double* reward = new double[parameterDimension];
+	for (int i = 0; i < parameterDimension; i++)
+		reward[i] = 1;
 	root = new State(parameterDimension, objectiveDimension);
     root->setParameter(init);
+	root->setReward(reward, (double)parameterDimension);
     system->eval(root);
 	db = new Search(objectiveDimension);
 	db->insert(root);
@@ -67,7 +77,6 @@ void Duplex::initialize(double* init){
 	for (int i = 0; i < objectiveDimension; i++){
 		min[i] = -3;
 		max[i] = 3;
-
 	}
 	error.push_back(goal->distance(root, max, min));
 }
@@ -79,10 +88,6 @@ void Duplex::setObjective(double* g){
 
 void Duplex::setSystem(System* sys){
     system=sys;
-}
-
-double Duplex::distance(){
-    return 0;
 }
 
 State* Duplex::globalStep(){
@@ -104,18 +109,51 @@ State* Duplex::globalStep(){
 }
 
 //slightly changes the input
-double* Duplex::generateNewInput(State* q, double temperature){
+double* Duplex::generateNewInput(State* q){
     int pSize = q->getParameterSize();
     double* param = q->getParameter();
     double* input = new double[pSize];
-    
     for(int j=0;j<pSize;j++) input[j] = param[j];
-
-	//choosing which parameter to change
-    int candidate = rand()%pSize;   // select an input dimension
-        
-    input[candidate] += stepLength;
+	input[nextCandidateParameter] += stepLength;
     return input;
+}
+
+
+void Duplex::updateReward(State* qnear, State* qnew){
+	double distance = goal->distance(qnew, max, min);
+	double pdistance = goal->distance(qnear, max, min);
+	double* reward = new double[parameterDimension];
+	double* preward = qnear->getRewardVector();
+	for (int i = 0; i < parameterDimension; i++){
+		reward[i] = preward[i];
+	}
+
+	
+	double award = (distance - pdistance) / delta;
+	if (award < minAward) award = minAward;
+	if (award > maxAward) award = maxAward;
+	reward[nextCandidateParameter] = +1;
+	if (reward[nextCandidateParameter] < minAward) reward[nextCandidateParameter] = minAward;
+	if (reward[nextCandidateParameter] > maxAward) reward[nextCandidateParameter] = maxAward;
+
+	double sum = reward[nextCandidateParameter] - preward[nextCandidateParameter];
+
+	qnew->setReward(reward, qnear->getRewardCDF() + sum); 
+}
+
+int Duplex::computeNextCandidateParameter(State* qnear){
+	if (reinforcementLearningOption){
+		double random = qnear->getRewardCDF() * ((double)rand() / (RAND_MAX));
+		double* reward = qnear->getRewardVector();
+		for (int i = 0; i < parameterDimension; i++){
+			random -= reward[i];
+			if (random <= 0) return i;
+		}
+		return parameterDimension - 1;
+	}else{
+		nextCandidateParameter = rand() % qnear->getParameterSize();
+		return nextCandidateParameter;
+	}
 }
 
 void Duplex::computeTemperature(int i){
@@ -154,7 +192,9 @@ void Duplex::computeStepLength(){
 State* Duplex::localStep(int i, State* qnear){
 	computeTemperature(i);
 	computeStepLength();
-	double* input = generateNewInput(qnear, temperature);
+	nextCandidateParameter = computeNextCandidateParameter(qnear);
+	cout << nextCandidateParameter << endl;
+	double* input = generateNewInput(qnear);
 	State* qnew = new State(parameterDimension, objectiveDimension);
 	qnew->setParameter(input);
 	return qnew;
@@ -170,20 +210,6 @@ void Duplex::optimize(){
     }
 }
 
-double minimum(double a, double b, double min){
-    double m = min;
-    if(a<m) m=a;
-    if(b<m) m=b;
-    return m;
-}
-
-double maximum(double a, double b, double max){
-    double m = max;
-    if(a>m) m=a;
-    if(b>m) m=b;
-    return m;
-}
-
 void Duplex::updateError(State* s, double* maxBound, double* minBound){
 	double d = goal->distance(s, maxBound, minBound);
 	double e = error[error.size() - 1];
@@ -196,6 +222,7 @@ void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
 	qnew->setParentID(qnear->getID());      //maintaing the tree data structure
 	bias.push_back(qsample);
 	updateError(qnew, max, min);
+	updateReward(qnear, qnew);
 }
 
 void Duplex::clear(){
@@ -203,6 +230,21 @@ void Duplex::clear(){
 		delete bias[i];
 	}
 }
+
+double minimum(double a, double b, double min){
+	double m = min;
+	if (a<m) m = a;
+	if (b<m) m = b;
+	return m;
+}
+
+double maximum(double a, double b, double max){
+	double m = max;
+	if (a>m) m = a;
+	if (b>m) m = b;
+	return m;
+}
+
 
 //
 //		Plotting methods for Duplex
@@ -245,7 +287,7 @@ string Duplex::drawParameterTree(){
 	//board << "set zlabel \"$" << zlabel << "$\" \n";
 	cmdstr << board.str() << "\n " << cmdstr.str();
 
-	cout << cmdstr.str() << endl;
+	//cout << cmdstr.str() << endl;
 	return cmdstr.str();
 }
 
@@ -285,7 +327,7 @@ string Duplex::plotError(){
 		double y1 = error[i];
 		cmdstr << " set arrow from " << i - 1 << "," << error[i - 1] << " to " << i << "," << error[i] << " nohead  lc rgb \"red\" lw 2 \n";
 	}
-	cout << cmdstr.str() << endl;
+	//cout << cmdstr.str() << endl;
 	return cmdstr.str();
 }
 
@@ -294,3 +336,5 @@ string Duplex::draw(){
 	//return drawParameterTree();
 	//return drawObjectiveTree();
 }
+
+

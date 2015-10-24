@@ -34,10 +34,14 @@ class Duplex{
 	double temperature; //current temperature 
 	double stepLength;
 	double initialStepLength;
+	bool reinforcementLearningOption;
+	int nextCandidateParameter;
 	//Duplex outputs:
 	vector<double> error; //keeps the minimum distance from any node in the tree toward the optimum point (Hopefully converges to 0)
 	vector<State*> bias; 
-
+	double minAward;
+	double maxAward;
+	double delta;
 public:
 	Duplex(Settings*);
     ~Duplex();
@@ -45,10 +49,9 @@ public:
     void setObjective(double*);
 	
     void optimize();
-    void setSystem(System*);
-    double distance();
+    void setSystem(System*);   
     string draw();
-    double* generateNewInput(State* q, double temperature);
+    double* generateNewInput(State* q);
     string drawParameterTree();
     string drawObjectiveTree();
 	void updateError(State* s, double* max, double* min);
@@ -59,4 +62,6 @@ public:
 	State* globalStep();
 	void computeTemperature(int i);
 	void computeStepLength();
+	int Duplex::computeNextCandidateParameter(State* qnear);
+	void updateReward(State* qnear, State* qnew);
 };

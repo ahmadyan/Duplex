@@ -15,12 +15,14 @@ State::State(int _parameterDimension, int _objectiveDimension){
     parameterDimension=_parameterDimension;
     objectiveDimension=_objectiveDimension;
     parameterVector = new double[parameterDimension]();
+	reward          = new double[parameterDimension]();
     objectiveVector = new double[objectiveDimension]();
 }
 
 State::~State(){
     delete parameterVector;
     delete objectiveVector;
+	delete reward;
 }
 
 void State::setObjective(double v, int i){
@@ -128,4 +130,17 @@ double State::distance(State* a, double* max, double* min){
 	}
 	d = sqrt(d);
 	return d;
+}
+
+double* State::getRewardVector(){
+	return reward;
+}
+
+double State::getRewardCDF(){
+	return rewardCDF;
+}
+
+void State::setReward(double* r, double s){
+	reward = r;
+	rewardCDF = s;
 }
