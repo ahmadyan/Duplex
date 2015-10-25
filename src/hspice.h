@@ -15,6 +15,6 @@ public:
 	~Hspice();
 
 	void generateNetlist();
-	void runSimulation();
+	void runSimulation(vector<double> parameters, vector<string> settings);
 	void parseSimulationLog();
 };
