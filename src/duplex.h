@@ -62,6 +62,6 @@ public:
 	State* globalStep();
 	void computeTemperature(int i);
 	void computeStepLength();
-	int Duplex::computeNextCandidateParameter(State* qnear);
+	int  computeNextCandidateParameter(State* qnear);
 	void updateReward(State* qnear, State* qnew);
 };

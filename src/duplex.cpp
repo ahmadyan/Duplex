@@ -8,6 +8,7 @@
 
 #include "duplex.h"
 #include "system.h"
+#include <cmath>
 #include <algorithm>
 #include <iostream>
 #include <sstream>

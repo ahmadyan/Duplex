@@ -12,7 +12,7 @@ void Hspice::generateNetlist(){
 
 void Hspice::runSimulation(vector<double> parameters, vector<string> settings){
   vector<double> result;
-
+/*
 	bool dcSimulation = false;
 	if (setting[2].compare("dc") == 0){
 		dcSimulation = true;
@@ -63,7 +63,7 @@ void Hspice::runSimulation(vector<double> parameters, vector<string> settings){
 		result.push_back(tmp[i]);
 	}
 	return result;
-
+*/
 }
 
 void Hspice::parseSimulationLog(){

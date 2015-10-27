@@ -14,6 +14,14 @@
 #include <stdlib.h>
 using namespace config4cpp;
 
+#if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
+int strcpy_s(char *strDestination, size_t numberOfElements, const char *strSource){
+    strcpy(strDestination, strSource);
+    return 0;
+}
+#endif
+
+
 // Exception
 SettingsException::SettingsException(const char * str){
 	m_str = new char[strlen(str) + 1];
@@ -129,7 +137,7 @@ bool Settings::check(const char * name, const char* value) const throw (Settings
 	try {
 		const char* result = cfg->lookupString(m_scope, name);
 		if (strcmp(result, value) == 0) return true;
-		else false;
+		else return false;
 	}
 	catch (const ConfigurationException & ex) {
 		throw SettingsException(ex.c_str());
