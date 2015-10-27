@@ -8,8 +8,13 @@
 #pragma once
 #include "configuration.h"
 #include "state.h"
+#include "hspice.h"
+enum simulatorType { HSPICE, GSL, MATLAB, INTERNAL };
 
 class System{
+	Settings* config;
+	simulatorType type;
+	Hspice* engine;
 public:
 	System(Settings* config);
 	~System();

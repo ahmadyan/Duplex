@@ -10,11 +10,23 @@
 #include "state.h"
 
 class Hspice{
+	Settings* config;
+	string templateFile;
+	string netlistFile;
+	string icfilename;
+	double dt;
+	const int unluckyThirteen = 13;
+
 public:
 	Hspice(Settings* config);
 	~Hspice();
 
-	void generateNetlist();
-	void runSimulation(vector<double> parameters, vector<string> settings);
+	void generateNetlist(vector<double> parameters, vector<string> setting);
+	void runSimulation();
 	void parseSimulationLog();
+	vector<double> getFinalState();
+	vector<double> parse(string s);
+	bool is_only_ascii_whitespace(const std::string& str);
+	double unit(char u);
+	double* parseICFile(string fileName);
 };
