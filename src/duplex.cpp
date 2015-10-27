@@ -11,6 +11,7 @@
 #include <cmath>
 #include <algorithm>
 #include <iostream>
+#include <iomanip>
 #include <sstream>
 using namespace std;
 
@@ -62,7 +63,30 @@ Duplex::~Duplex(){
 	clear();
 }
 
-void Duplex::initialize(double* init){
+double* Duplex::getInitialState(){
+	int parameterSize = settings->lookupInt("parameters");
+	double* init = new double[parameterSize];
+	bool initialStateAssignmentIsRandom = settings->check("initial_state_assignment", "random");
+	for (int i = 0; i < parameterSize; i++){
+		if (initialStateAssignmentIsRandom){
+			stringstream ss;
+			ss << "uid-";
+			ss << setfill('0') << setw(9) << i;
+			ss << "-parameter.range.";
+			double min = settings->lookupFloat((ss.str() + "min").c_str());
+			double max = settings->lookupFloat((ss.str() + "max").c_str());
+			init[i] = (max - min)*((1.0*rand()) / RAND_MAX) + min;
+		}
+	}
+
+	for (int i = 0; i < parameterSize; i++){
+		cout << init[i] << endl;
+	}
+	return init;
+}
+
+void Duplex::initialize(){
+	double* init = getInitialState();
 	double* reward = new double[parameterDimension];
 	for (int i = 0; i < parameterDimension; i++)
 		reward[i] = 1;
@@ -82,7 +106,15 @@ void Duplex::initialize(double* init){
 	error.push_back(goal->distance(root, max, min));
 }
 
-void Duplex::setObjective(double* g){
+void Duplex::setObjective(){
+	double* g = new double(objectiveDimension);
+	for (int i = 0; i < objectiveDimension; i++){
+		stringstream ss;
+		ss << "uid-";
+		ss << setfill('0') << setw(9) << i;
+		ss << "-performance.goal";
+		g[i] = settings->lookupFloat(ss.str().c_str());
+	}
 	goal = new State(parameterDimension, objectiveDimension);
     goal->setObjective(g);
 }
@@ -118,7 +150,6 @@ double* Duplex::generateNewInput(State* q){
 	input[nextCandidateParameter] += stepLength;
     return input;
 }
-
 
 void Duplex::updateReward(State* qnear, State* qnew){
 	double distance = goal->distance(qnew, max, min);

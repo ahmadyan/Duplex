@@ -45,8 +45,9 @@ class Duplex{
 public:
 	Duplex(Settings*);
     ~Duplex();
-    void initialize(double*);
-    void setObjective(double*);
+	double* getInitialState();
+    void initialize();
+    void setObjective();
 	
     void optimize();
     void setSystem(System*);   

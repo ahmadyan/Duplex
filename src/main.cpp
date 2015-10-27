@@ -50,22 +50,14 @@ int main(int argc, char** argv){
 			std::cerr << desc << std::endl;
 			return ERROR_IN_COMMAND_LINE;
 		}
-
-
 		cout << vm["config"].as<std::string>() << endl;
 		settings->parse(vm["config"].as<std::string>().c_str(), "Duplex");
-		
 		Graphics* graphic = new Graphics(gnuPlot);
-
 		System* system = new System(settings);
 		Duplex* duplex = new Duplex(settings);
-
-		double* init = new double[2]; init[0] = 0; init[1] = 0;
-		double* goal = new double[2]; goal[0] = 2; goal[1] = 1;
-
 		duplex->setSystem(system);
-		duplex->setObjective(goal);
-		duplex->initialize(init);
+		duplex->setObjective();
+		duplex->initialize();
 		duplex->optimize();
 		graphic->execute(duplex->draw());
 		graphic->saveToPdf(settings->lookupString("output"));

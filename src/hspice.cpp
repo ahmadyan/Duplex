@@ -12,9 +12,9 @@
 
 Hspice::Hspice(Settings* s){
 	config = s;
-	templateFile = config->lookupString("netlist_template");
-	netlistFile = config->lookupString("temporary_netlist");
-	dt = config->lookupFloat("simulation_time");
+	templateFile = config->lookupString("simulation.template");
+	netlistFile = config->lookupString("simulation.netlist");
+	dt = config->lookupFloat("simulation.time");
 }
 
 Hspice::~Hspice(){

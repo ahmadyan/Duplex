@@ -3,7 +3,7 @@
 
 System::System(Settings* s){
 	config = s;
-	if (config->check("simulation_engine", "hspice")){
+	if (config->check("simulation.engine", "hspice")){
 		type = HSPICE;
 		engine = new Hspice(config);
 	}else{
@@ -19,7 +19,7 @@ void System::eval(State* s){
 
 void System::eval(State* s, double t){
 	if (type == HSPICE){
-		engine->generateNetlist();
+		//engine->generateNetlist();
 		engine->runSimulation();
 		engine->parseSimulationLog();
 	}
