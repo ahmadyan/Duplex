@@ -30,6 +30,7 @@ public:
 	virtual int lookupDurationMilliseconds(const char * name) const throw(SettingsException);
 	virtual int lookupDurationSeconds(const char * name) const throw(SettingsException);
     vector<string> listVariables(const char* name, const char*) const throw (SettingsException);
+	vector<string> listValues(const char* name, const char*) const throw (SettingsException);
     void test() const throw (SettingsException);
 private:
 	char* m_scope;

@@ -1,4 +1,5 @@
 #include "system.h"
+#include <iostream>
 #include <cmath>
 #include <string>
 using namespace std;
@@ -32,11 +33,10 @@ void System::eval(State* s, double t){
         setting.push_back(simulationICFileSource);
         setting.push_back(simulationType);
     
-        vector<string> objectives;
-        int objectiveSize = 2;
-        for(int i=0;i<objectiveSize; i++){
-            objectives.push_back("");
-        }
+		vector<string> objectives = config->listValues("objective", "uid-objective.name");
+		for (int i = 0; i < objectives.size(); i++){
+			cout << objectives[i] << endl;
+		}
         
         engine->generateNetlist(s->getParameter(), setting);
         engine->runSimulation(simulationLogFilename);

@@ -22,6 +22,10 @@ int strcpy_s(char *strDestination, size_t numberOfElements, const char *strSourc
     strcpy(strDestination, strSource);
     return 0;
 }
+int strcat_s(char *strDestination, const char *strSource){
+	strcat(strDestination, strSource);
+	return 0;
+}
 #endif
 
 
@@ -147,6 +151,34 @@ bool Settings::check(const char * name, const char* value) const throw (Settings
 	}
 }
 
+// list the values for all the uid-elements matching the uid name. the scope is defined as m_scope.name
+// for example, parameter.uid-parameter.name --> returns the names for all parameter.uid-parameter
+vector<string> Settings::listValues(const char* name, const char* uid) const throw (SettingsException){
+	Configuration * cfg = (Configuration *)m_cfg;
+	vector<string> list;
+	char scope[100];
+	strcpy_s(scope, m_scope);
+	strcat_s(scope, ".");
+	strcat_s(scope, name);
+	config4cpp::StringVector result;
+	try {
+		cfg->listLocallyScopedNames(m_scope, name, Configuration::CFG_SCOPE_AND_VARS, true, result);
+		for (int i = 0; i<result.length(); i++){
+			if (cfg->uidEquals(result[i], uid)){
+				list.push_back(cfg->lookupString(scope, result[i]));
+			}
+		}
+	}
+	catch (const ConfigurationException & ex) {
+		cout << ex.c_str() << endl;
+		throw SettingsException(ex.c_str());
+	}
+	return list;
+}
+
+// list the names of all uids matching the uid in the m_scope.name scope
+// for example, parameter.uid-parameter.name --> returns parameter.uid-000000000-parameter.name, parameter.uid-000000001-parameter.name, etc.
+// note this doesn't return the actual name, instead it just says what the uid variable is listed as, should use lookup afterward.
 vector<string> Settings::listVariables(const char* name, const char* sub) const throw (SettingsException){
     Configuration * cfg = (Configuration *)m_cfg;
     vector<string> list;
