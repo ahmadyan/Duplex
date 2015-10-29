@@ -27,7 +27,7 @@ public:
 
 	void generateNetlist(double* parameters, vector<string> setting);
 	void runSimulation(string);
-	double* parseSimulationLog(vector<string> objectives);
+	double* parseSimulationLog(string, vector<string> objectives);
 	vector<double> getFinalState();
 	vector<double> parse(string s);
 	bool is_only_ascii_whitespace(const std::string& str);

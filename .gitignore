@@ -136,3 +136,4 @@ bin/output.png
 *.xcbkptlist
 *.sp
 bin/output.png
+bin/Sim.txt

@@ -50,28 +50,15 @@ void Hspice::runSimulation(string simulationLogFilename){
 	system(hspiceCommand.c_str());
 }
 
-double* Hspice::parseSimulationLog(vector<string> objectives){
+double* Hspice::parseSimulationLog(string filename, vector<string> objectives){
     double* result = new double[objectiveSize];
     for(int i=0;i<objectiveSize;i++){
-        cout << objectives[i] << endl ;
+        cout << objectives[i] << endl;
+
         result[i]=0;
     }
     return result;
-	/*
-	//system("cat Sim.txt | grep 5.0000000000n > grep.txt");		// grep the line containing my results at sim time 10ns
-	//string line;
-	//ifstream simResult("grep.txt");
-	//while (simResult.good()){
-	//	getline(simResult, line);
-	//	if (line.size() > 0){
-	//		cout << "Sim: " << line << endl;
-	//		result = System::parse(line);
-	//		break;
-	//	}
-	//}
-	//simResult.close();
-
-	*/
+	
 }
 
 vector<double> Hspice::getFinalState(){

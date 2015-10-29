@@ -26,21 +26,18 @@ void System::eval(State* s, double t){
         string simulationICFileResult = "sim_ic";
         string simulationICFileSource = "sim_ic";
         string simulationType = "dc";   //restarts every simulation from time t=0
-        string simulationLogFilename = "sim" + to_string(unique_id) + ".log";
-        
+        //string simulationLogFilename = "sim" + to_string(unique_id) + ".log";
+		string simulationLogFilename = "sim.txt";
         vector<string> setting;
         setting.push_back(simulationICFileResult);
         setting.push_back(simulationICFileSource);
-        setting.push_back(simulationType);
-    
+        setting.push_back(simulationType);  
 		vector<string> objectives = config->listValues("objective", "uid-objective.name");
-		for (int i = 0; i < objectives.size(); i++){
-			cout << objectives[i] << endl;
-		}
-        
-        engine->generateNetlist(s->getParameter(), setting);
-        engine->runSimulation(simulationLogFilename);
-		//engine->parseSimulationLog();
+
+        //engine->generateNetlist(s->getParameter(), setting);
+        //engine->runSimulation(simulationLogFilename);
+		double* result = engine->parseSimulationLog(simulationLogFilename, objectives);
+ 		s->setObjective(result);
 	}
 	
 	if (type == INTERNAL){
