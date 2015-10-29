@@ -15,12 +15,14 @@ Hspice::Hspice(Settings* s){
 	templateFile = config->lookupString("simulation.template");
 	netlistFile = config->lookupString("simulation.netlist");
 	dt = config->lookupFloat("simulation.time");
+    parameterSize = config->lookupInt("parameter.size");
+    objectiveSize = config->lookupInt("objective.size");
 }
 
 Hspice::~Hspice(){
 }
 
-void Hspice::generateNetlist(vector<double> parameters, vector<string> setting){
+void Hspice::generateNetlist(double* parameters, vector<string> setting){
 	icfilename = setting[0];
 	bool dcSimulation = false;
 	if (setting[2].compare("dc") == 0){
@@ -28,7 +30,7 @@ void Hspice::generateNetlist(vector<double> parameters, vector<string> setting){
 	}
 	stringstream sed;
 	sed << "cat " << templateFile << "  | sed ";
-	for (int i = parameters.size() - 1; i >= 0; i--){
+	for (int i = parameterSize - 1; i >= 0; i--){
 		sed << "-e s/$PARAM_" << i << "/" << parameters[i] << "/ ";
 	}
 	if (dcSimulation){
@@ -43,12 +45,18 @@ void Hspice::generateNetlist(vector<double> parameters, vector<string> setting){
 	system(sed.str().c_str());
 }
 
-void Hspice::runSimulation(){
-	string hspiceCommand = "hspice " + netlistFile + " > Sim.txt";
+void Hspice::runSimulation(string simulationLogFilename){
+	string hspiceCommand = "hspice " + netlistFile + " > " + simulationLogFilename;
 	system(hspiceCommand.c_str());
 }
 
-void Hspice::parseSimulationLog(){
+double* Hspice::parseSimulationLog(vector<string> objectives){
+    double* result = new double[objectiveSize];
+    for(int i=0;i<objectiveSize;i++){
+        cout << objectives[i] << endl ;
+        result[i]=0;
+    }
+    return result;
 	/*
 	//system("cat Sim.txt | grep 5.0000000000n > grep.txt");		// grep the line containing my results at sim time 10ns
 	//string line;

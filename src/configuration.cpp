@@ -12,7 +12,10 @@
 //#include "FallbackConfiguration.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <iostream>
+
 using namespace config4cpp;
+using namespace std;
 
 #if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
 int strcpy_s(char *strDestination, size_t numberOfElements, const char *strSource){
@@ -142,4 +145,34 @@ bool Settings::check(const char * name, const char* value) const throw (Settings
 	catch (const ConfigurationException & ex) {
 		throw SettingsException(ex.c_str());
 	}
+}
+
+vector<string> Settings::listVariables(const char* name, const char* sub) const throw (SettingsException){
+    Configuration * cfg = (Configuration *)m_cfg;
+    vector<string> list;
+    config4cpp::StringVector result;
+    try {
+        cfg->listLocallyScopedNames(m_scope, name, Configuration::CFG_SCOPE_AND_VARS, true, result);
+        for(int i=0;i<result.length();i++){
+            if (cfg->uidEquals(result[i], sub))
+                list.push_back(string(result[i]));
+        }
+    } catch (const ConfigurationException & ex) {
+        throw SettingsException(ex.c_str());
+    }
+    return list;
+}
+
+void Settings::test() const throw (SettingsException){
+    Configuration * cfg = (Configuration *)m_cfg;
+    config4cpp::StringVector result;
+    try {
+        //cfg->listLocallyScopedNames(m_scope, "", Configuration::CFG_SCOPE_AND_VARS, true, result);
+        cfg->listFullyScopedNames(m_scope, "", Configuration::CFG_SCOPE_AND_VARS, true, result);
+        for(int i=0;i<result.length();i++){
+            std::cout << result[i] << std::endl ;
+        }
+    } catch (const ConfigurationException & ex) {
+        throw SettingsException(ex.c_str());
+    }
 }

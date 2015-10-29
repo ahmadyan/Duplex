@@ -19,8 +19,8 @@ Duplex::Duplex(Settings* c){
 	cout << "Duplex initialization ..." << endl;
 	settings = c;
 	iterationCap = settings->lookupInt("iterations");
-	parameterDimension = settings->lookupInt("parameters");
-	objectiveDimension = settings->lookupInt("objectives");
+	parameterDimension = settings->lookupInt("parameter.size");
+	objectiveDimension = settings->lookupInt("objective.size");
 
 	t0 = settings->lookupFloat("initial_temperature");
 	temperature = t0;
@@ -64,24 +64,19 @@ Duplex::~Duplex(){
 }
 
 double* Duplex::getInitialState(){
-	int parameterSize = settings->lookupInt("parameters");
-	double* init = new double[parameterSize];
+	double* init = new double[parameterDimension];
 	bool initialStateAssignmentIsRandom = settings->check("initial_state_assignment", "random");
-	for (int i = 0; i < parameterSize; i++){
-		if (initialStateAssignmentIsRandom){
-			stringstream ss;
-			ss << "uid-";
-			ss << setfill('0') << setw(9) << i;
-			ss << "-parameter.range.";
-			double min = settings->lookupFloat((ss.str() + "min").c_str());
-			double max = settings->lookupFloat((ss.str() + "max").c_str());
-			init[i] = (max - min)*((1.0*rand()) / RAND_MAX) + min;
-		}
-	}
-
-	for (int i = 0; i < parameterSize; i++){
-		cout << init[i] << endl;
-	}
+    
+    vector<string> parameters = settings->listVariables("parameter", "uid-parameter");
+    for(int i=0;i<parameters.size();i++){
+        if (initialStateAssignmentIsRandom){
+            double min = settings->lookupFloat(("parameter." + parameters[i] + ".range.min").c_str());
+            double max = settings->lookupFloat(("parameter." + parameters[i] + ".range.max").c_str());
+            init[i] = (max - min)*((1.0*rand()) / RAND_MAX) + min;
+        }else{
+            init[i] = settings->lookupFloat(("parameter." + parameters[i] + ".init").c_str());
+        }
+    }
 	return init;
 }
 
@@ -108,14 +103,11 @@ void Duplex::initialize(){
 
 void Duplex::setObjective(){
 	double* g = new double(objectiveDimension);
-	for (int i = 0; i < objectiveDimension; i++){
-		stringstream ss;
-		ss << "uid-";
-		ss << setfill('0') << setw(9) << i;
-		ss << "-performance.goal";
-		g[i] = settings->lookupFloat(ss.str().c_str());
-	}
-	goal = new State(parameterDimension, objectiveDimension);
+    vector<string> objectives = settings->listVariables("objective", "uid-objective");
+    for(int i=0;i<objectives.size();i++){
+        g[i] = settings->lookupFloat(("objective." + objectives[i] + ".goal").c_str());
+    }
+    goal = new State(parameterDimension, objectiveDimension);
     goal->setObjective(g);
 }
 
@@ -225,7 +217,6 @@ State* Duplex::localStep(int i, State* qnear){
 	computeTemperature(i);
 	computeStepLength();
 	nextCandidateParameter = computeNextCandidateParameter(qnear);
-	cout << nextCandidateParameter << endl;
 	double* input = generateNewInput(qnear);
 	State* qnew = new State(parameterDimension, objectiveDimension);
 	qnew->setParameter(input);

@@ -1,5 +1,7 @@
 #include "system.h"
 #include <cmath>
+#include <string>
+using namespace std;
 
 System::System(Settings* s){
 	config = s;
@@ -10,8 +12,8 @@ System::System(Settings* s){
 		type = INTERNAL;
 	}
 }
-System::~System(){}
-
+System::~System(){
+}
 
 void System::eval(State* s){
     return eval(s, 0);
@@ -19,9 +21,26 @@ void System::eval(State* s){
 
 void System::eval(State* s, double t){
 	if (type == HSPICE){
-		//engine->generateNetlist();
-		engine->runSimulation();
-		engine->parseSimulationLog();
+        int unique_id = s->getID();
+        string simulationICFileResult = "sim_ic";
+        string simulationICFileSource = "sim_ic";
+        string simulationType = "dc";   //restarts every simulation from time t=0
+        string simulationLogFilename = "sim" + to_string(unique_id) + ".log";
+        
+        vector<string> setting;
+        setting.push_back(simulationICFileResult);
+        setting.push_back(simulationICFileSource);
+        setting.push_back(simulationType);
+    
+        vector<string> objectives;
+        int objectiveSize = 2;
+        for(int i=0;i<objectiveSize; i++){
+            objectives.push_back("");
+        }
+        
+        engine->generateNetlist(s->getParameter(), setting);
+        engine->runSimulation(simulationLogFilename);
+		//engine->parseSimulationLog();
 	}
 	
 	if (type == INTERNAL){
