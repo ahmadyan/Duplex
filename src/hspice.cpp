@@ -2,6 +2,7 @@
 #include <cmath>
 #include <iostream>
 #include <fstream>
+#include <iostream>
 #include <sstream>
 #include <strstream>
 #include <string>
@@ -9,6 +10,7 @@
 #include <cstdlib>
 #include <cstdio>
 #include <stdio.h>
+#include <regex>
 
 Hspice::Hspice(Settings* s){
 	config = s;
@@ -51,12 +53,43 @@ void Hspice::runSimulation(string simulationLogFilename){
 }
 
 double* Hspice::parseSimulationLog(string filename, vector<string> objectives){
-    double* result = new double[objectiveSize];
-    for(int i=0;i<objectiveSize;i++){
-        cout << objectives[i] << endl;
+	double* result = new double[objectiveSize];
+	ifstream logfile(filename);
+	int lineno = 0;
+	string regex_str = "[a-z_][a-z_0-9]*\\=[a-z0-9]+";
+	regex reg1(regex_str, regex_constants::icase);
+	string s;
+	if (logfile.is_open()){
+		while (getline(logfile, s)){
+			lineno++;
+			if (regex_search(s, reg1)){
+				cout << lineno << " " << s << endl;
+			}
+		}
+		logfile.close();
+	}
+	
 
-        result[i]=0;
-    }
+
+
+	//
+
+	//
+
+
+	//string s;
+	//
+
+
+
+
+
+
+   // for(int i=0;i<objectiveSize;i++){
+   //     cout << objectives[i] << endl;
+//
+   //     result[i]=0;
+   // }
     return result;
 	
 }
