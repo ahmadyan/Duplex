@@ -18,13 +18,18 @@ using namespace config4cpp;
 using namespace std;
 
 #if defined(unix) || defined(__unix) || defined(__unix__) || defined(__APPLE__)
-int strcpy_s(char *strDestination, size_t numberOfElements, const char *strSource){
+int strcpy_s(char *strDestination, const char *strSource){
     strcpy(strDestination, strSource);
     return 0;
 }
+
+int strcpy_s(char *strDestination, size_t numberOfElements, const char *strSource){
+    return strcpy_s(strDestination, strSource);
+}
+
 int strcat_s(char *strDestination, const char *strSource){
-	strcat(strDestination, strSource);
-	return 0;
+    strcat(strDestination, strSource);
+    return 0;
 }
 #endif
 

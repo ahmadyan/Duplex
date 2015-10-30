@@ -11,6 +11,7 @@
 #include <cstdio>
 #include <stdio.h>
 #include <regex>
+ #include <boost/lexical_cast.hpp>
 
 Hspice::Hspice(Settings* s){
 	config = s;
@@ -54,44 +55,40 @@ void Hspice::runSimulation(string simulationLogFilename){
 
 double* Hspice::parseSimulationLog(string filename, vector<string> objectives){
 	double* result = new double[objectiveSize];
+    for(int i=0;i<objectiveSize;i++){
+        result[i]=-1;
+    }
+    
+    //generate the regex for each objective
+    vector<regex> regs;
+    for(int i=0;i<objectives.size();i++){
+        const string floating_point_regex = "([-+]?[0-9]*\\.?[0-9]+)[eE]([-+]?[0-9]+)?";
+        const string whitespace_regex = "^[ \t]*";
+        regex  reg(whitespace_regex + objectives[i] + "= "  +floating_point_regex );
+        regs.push_back(reg);
+    }
+    
+    //parse the logfile, for each line, check it against all the regular-expressions
 	ifstream logfile(filename);
 	int lineno = 0;
-	string regex_str = "[a-z_][a-z_0-9]*\\=[a-z0-9]+";
-	regex reg1(regex_str, regex_constants::icase);
 	string s;
 	if (logfile.is_open()){
 		while (getline(logfile, s)){
 			lineno++;
-			if (regex_search(s, reg1)){
-				cout << lineno << " " << s << endl;
-			}
+            for(int i=0;i<regs.size();i++){
+                auto res = cmatch{};
+                if( regex_search(s.c_str(), res, regs[i])){
+                    double significand = boost::lexical_cast<double>(res[1]);
+                    double exponent = boost::lexical_cast<double>(res[2]);
+                    double value = significand * pow(10, exponent);
+                    result[i] = value;
+                    cout << lineno << ": " << objectives[i] << " " << value << endl;
+                }
+            }
 		}
 		logfile.close();
 	}
-	
-
-
-
-	//
-
-	//
-
-
-	//string s;
-	//
-
-
-
-
-
-
-   // for(int i=0;i<objectiveSize;i++){
-   //     cout << objectives[i] << endl;
-//
-   //     result[i]=0;
-   // }
-    return result;
-	
+	return result;
 }
 
 vector<double> Hspice::getFinalState(){
