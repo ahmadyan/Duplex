@@ -8,6 +8,7 @@
 #pragma once
 #include <vector>
 #include "configuration.h"
+#include <boost/property_tree/ptree.hpp>
 
 using namespace std;
 enum class StateType {StateTypeNormal, StateTypeRoot, StateTypeObjective};
@@ -50,4 +51,5 @@ public:
 	double* getRewardVector();
 	double  getRewardCDF();
 	void setReward(double*, double);
+    void save(boost::property_tree::ptree*);
 };

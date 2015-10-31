@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
 //
 #pragma once
+#include <boost/property_tree/ptree.hpp>
 #include "configuration.h"
 #include "system.h"
 #include "search.h"
@@ -65,4 +66,5 @@ public:
 	void computeStepLength();
 	int  computeNextCandidateParameter(State* qnear);
 	void updateReward(State* qnear, State* qnew);
+    void save(boost::property_tree::ptree* ptree);
 };

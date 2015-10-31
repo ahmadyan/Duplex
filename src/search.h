@@ -10,6 +10,7 @@
 #include "kdtree.h"
 #include <iostream>
 #include <vector>
+#include <boost/property_tree/ptree.hpp>
 
 using namespace std;
 
@@ -27,4 +28,5 @@ public:
     State* nearestNode(State*);
     void range(State*);
     unsigned long getSize();
+    void save(boost::property_tree::ptree*);
 };

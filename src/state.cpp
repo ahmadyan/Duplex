@@ -144,3 +144,17 @@ void State::setReward(double* r, double s){
 	reward = r;
 	rewardCDF = s;
 }
+
+void State::save(boost::property_tree::ptree* pt){
+    stringstream param, obj, rew;
+    for(int i=0;i<parameterDimension;i++) param << parameterVector[i] << " ";
+    for(int i=0;i<objectiveDimension;i++) obj << objectiveVector[i] << " ";
+    for(int i=0;i<parameterDimension;i++) rew << reward[i] << " ";
+    
+    pt->put("id", id);
+    pt->put("parameter", param.str());
+    pt->put("objective", obj.str());
+    pt->put("reward", rew.str());
+    if(type == StateType::StateTypeRoot )
+        pt->put("<xmlattr>.root", true);
+}

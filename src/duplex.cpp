@@ -360,4 +360,11 @@ string Duplex::draw(){
 	//return drawObjectiveTree();
 }
 
+void Duplex::save(boost::property_tree::ptree* ptree){
+    ptree->add("duplex.version", 1);
+    boost::property_tree::ptree& data = ptree->add("duplex.data", "");
+    db->save(&data);
+    boost::property_tree::ptree& er = ptree->add("duplex.error", "");
+}
+
 

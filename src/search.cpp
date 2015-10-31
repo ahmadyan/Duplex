@@ -69,5 +69,11 @@ void Search::range(State* s){
     //   }else{
     //       cout << "[error] 2" << endl ;
     //   }
+}
 
+void Search::save(boost::property_tree::ptree* ptree){
+    for(auto s: db){
+        boost::property_tree::ptree& node = ptree->add("node", "");
+        s->save(&node);
+    }
 }

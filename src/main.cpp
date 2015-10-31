@@ -14,6 +14,8 @@
 #include "system.h"
 #include "graphics.h"
 #include <config4cpp/Configuration.h>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
 using namespace config4cpp;
 
 namespace{
@@ -61,6 +63,11 @@ int main(int argc, char** argv){
 		duplex->optimize();
 		graphic->execute(duplex->draw());
 		graphic->saveToPdf(settings->lookupString("output"));
+        boost::property_tree::ptree ptree;
+        duplex->save(&ptree);
+        ofstream savefile(settings->lookupString("savefile"));
+        write_xml(savefile, ptree);
+        savefile.close();
 		delete duplex;
 		delete system;
 		delete settings;
@@ -73,6 +80,6 @@ int main(int argc, char** argv){
 			<< e.what() << ", application will now exit" << std::endl;
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
-	cin.get();
+	//cin.get();
 	return SUCCESS;
 }
