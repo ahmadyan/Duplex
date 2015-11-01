@@ -80,6 +80,6 @@ int main(int argc, char** argv){
 			<< e.what() << ", application will now exit" << std::endl;
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
-	//cin.get();
+	cin.get();
 	return SUCCESS;
 }

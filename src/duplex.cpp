@@ -99,6 +99,7 @@ void Duplex::initialize(){
 		max[i] = 3;
 	}
 	error.push_back(goal->distance(root, max, min));
+    currentDistance.push_back(goal->distance(root, max, min));
 }
 
 void Duplex::setObjective(){
@@ -237,6 +238,7 @@ void Duplex::updateError(State* s, double* maxBound, double* minBound){
 	double d = goal->distance(s, maxBound, minBound);
 	double e = error[error.size() - 1];
 	error.push_back(fmin(e, d));
+    currentDistance.push_back(d);
 }
 
 void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
@@ -346,25 +348,41 @@ string Duplex::plotError(){
 	stringstream cmdstr;
 	cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << error[0] + 1 << "] 0 with linespoints lt \"white\" pt 0.01";
 	for (int i = 1; i < error.size(); i++){
-		double y0 = error[i - 1];
-		double y1 = error[i];
 		cmdstr << " set arrow from " << i - 1 << "," << error[i - 1] << " to " << i << "," << error[i] << " nohead  lc rgb \"red\" lw 2 \n";
 	}
-	//cout << cmdstr.str() << endl;
 	return cmdstr.str();
 }
 
+string Duplex::plotDistance(){
+    stringstream cmdstr;
+    cmdstr << "plot [" << 0 << ":" << currentDistance.size() << "][" << 0 << ":" << currentDistance[0] + 1 << "] 0 with linespoints lt \"white\" pt 0.01";
+    for (int i = 1; i < currentDistance.size(); i++){
+        cmdstr << " set arrow from " << i - 1 << "," << currentDistance[i - 1] << " to " << i << "," << currentDistance[i] << " nohead  lc rgb \"red\" lw 2 \n";
+    }
+    return cmdstr.str();
+}
+
 string Duplex::draw(){
-	return plotError();
+    return plotDistance();
+	//return plotError();
 	//return drawParameterTree();
 	//return drawObjectiveTree();
 }
+
 
 void Duplex::save(boost::property_tree::ptree* ptree){
     ptree->add("duplex.version", 1);
     boost::property_tree::ptree& data = ptree->add("duplex.data", "");
     db->save(&data);
-    boost::property_tree::ptree& er = ptree->add("duplex.error", "");
+
+    boost::property_tree::ptree& node = ptree->add("duplex.stat", "");
+    for(int i=0;i<iterationCap;i++){
+        boost::property_tree::ptree& iter = node.add("iteration", "");
+        iter.add("id", i);
+        iter.add("error", error[i]);
+        iter.add("distance", currentDistance[i]);
+        iter.put("<xmlattr>.id", i);
+    }
 }
 
 

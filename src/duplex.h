@@ -38,6 +38,7 @@ class Duplex{
 	bool reinforcementLearningOption;
 	int nextCandidateParameter;
 	//Duplex outputs:
+    vector<double> currentDistance;
 	vector<double> error; //keeps the minimum distance from any node in the tree toward the optimum point (Hopefully converges to 0)
 	vector<State*> bias; 
 	double minAward;
@@ -58,6 +59,7 @@ public:
     string drawObjectiveTree();
 	void updateError(State* s, double* max, double* min);
 	string plotError();
+    string plotDistance();
 	void update(int, State* qsample, State* qnear, State* qnew);		//update the database, biases, rewards, etc.
 	void clear();
 	State* localStep(int i, State*);
