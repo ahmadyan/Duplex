@@ -50,6 +50,7 @@ int main(int argc, char** argv){
 		} catch (po::error& e){
 			std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
 			std::cerr << desc << std::endl;
+			cin.get();
 			return ERROR_IN_COMMAND_LINE;
 		}
 		cout << vm["config"].as<std::string>() << endl;
@@ -74,10 +75,12 @@ int main(int argc, char** argv){
 	
 	}catch (SettingsException se){
 		std::cerr << "CONFIG ERROR: " << se.what() << std::endl << std::endl;
+		cin.get();
 		return ERROR_IN_COMMAND_LINE;
 	}catch (std::exception& e){
 		std::cerr << "Unhandled Exception reached the top of main: "
 			<< e.what() << ", application will now exit" << std::endl;
+		cin.get();
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
 	cin.get();

@@ -27,18 +27,17 @@ void System::eval(State* s, double t){
         string simulationICFileSource = "sim_ic";
         string simulationType = "dc";   //restarts every simulation from time t=0
         //string simulationLogFilename = "sim" + to_string(unique_id) + ".log";
-		string simulationLogFilename = "/Users/adel/Dropbox/temporary/test/sim.txt";
+		string simulationLogFilename = "C:\\Users\\adel\\code\\Duplex\\bin\\sim.log";
         vector<string> setting;
         setting.push_back(simulationICFileResult);
         setting.push_back(simulationICFileSource);
         setting.push_back(simulationType);
 		vector<string> objectives = config->listValues("objective", "uid-objective.keyword");
 
-        //engine->generateNetlist(s->getParameter(), setting);
-        //engine->runSimulation(simulationLogFilename);
+        engine->generateNetlist(s->getParameter(), setting);
+        engine->runSimulation(simulationLogFilename);
 		double* result = engine->parseSimulationLog(simulationLogFilename, objectives);
  		s->setObjective(result);
-        exit(2);
 	}
 	
 	if (type == INTERNAL){
