@@ -64,7 +64,9 @@ double* Hspice::parseSimulationLog(string filename, vector<string> objectives){
     for(int i=0;i<objectives.size();i++){
         const string floating_point_regex = "([-+]?[0-9]*\\.?[0-9]+)[eE]([-+]?[0-9]+)?";
         const string whitespace_regex = "^[ \t]*";
-        regex  reg(whitespace_regex + objectives[i] + "= "  +floating_point_regex );
+        const string extraspace_regex = "[ ]*";
+        string regexString = whitespace_regex + objectives[i] + "=" + extraspace_regex + floating_point_regex;
+        regex  reg( regexString );
         regs.push_back(reg);
     }
     
