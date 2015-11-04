@@ -25,7 +25,7 @@ Hspice::Hspice(Settings* s){
 Hspice::~Hspice(){
 }
 
-void Hspice::generateNetlist(double* parameters, vector<string> setting){
+void Hspice::generateNetlist(vector<string> parameterName, vector<string> parameterUnit, double* parameters, vector<string> setting){
 	icfilename = setting[0];
 	bool dcSimulation = false;
 	if (setting[2].compare("dc") == 0){
@@ -33,8 +33,8 @@ void Hspice::generateNetlist(double* parameters, vector<string> setting){
 	}
 	stringstream sed;
 	sed << "cat " << templateFile << "  | sed ";
-	for (int i = parameterSize - 1; i >= 0; i--){
-		sed << "-e s/$PARAM_" << i << "/" << parameters[i] << "/ ";
+    for (int i = 0; i < parameterName.size();i++ ){
+		sed << "-e s/__" << parameterName[i] << "/" << parameters[i] << parameterUnit[i] << "/ ";
 	}
 	if (dcSimulation){
 		sed << "-e s/$tran/" << "\".tran " << dt / 10 << " " << dt << "\"/ ";

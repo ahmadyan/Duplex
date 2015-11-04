@@ -25,7 +25,7 @@ public:
 	Hspice(Settings* config);
 	~Hspice();
 
-	void generateNetlist(double* parameters, vector<string> setting);
+	void generateNetlist(vector<string> parameterName, vector<string> parameterUnit, double* parameters, vector<string> setting);
 	void runSimulation(string);
 	double* parseSimulationLog(string, vector<string> objectives);
 	vector<double> getFinalState();

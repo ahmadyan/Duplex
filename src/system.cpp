@@ -35,7 +35,10 @@ void System::eval(State* s, double t){
         setting.push_back(simulationType);
 		vector<string> objectives = config->listValues("objective", "uid-objective.keyword");
 
-        //engine->generateNetlist(s->getParameter(), setting);
+        vector<string> parameterName = config->listValues("parameter", "uid-parameter.name");
+        vector<string> parameterUnit = config->listValues("parameter", "uid-parameter.unit");
+        
+        engine->generateNetlist(parameterName, parameterUnit, s->getParameter(), setting);
         //engine->runSimulation(simulationLogFilename);
 		double* result = engine->parseSimulationLog(simulationLogFilename, objectives);
  		s->setObjective(result);
