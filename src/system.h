@@ -15,6 +15,17 @@ class System{
 	Settings* config;
 	simulatorType type;
 	Hspice* engine;
+    
+    //parameters for hspice simulations
+    string simulationICFileResult ;
+    string simulationICFileSource ;
+    string simulationType;
+    string simulationLogFilename;
+    vector<string> setting;
+    vector<string> objectives;
+    vector<string> parameterName;
+    vector<string> parameterUnit;
+    
 public:
 	System(Settings* config);
 	~System();

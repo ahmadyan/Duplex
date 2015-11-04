@@ -47,7 +47,7 @@ State* Search::nearestNode(State* s){
 }
 
 void Search::range(State* s){
-    struct kdres *presults;
+    //struct kdres *presults;
     //getting the set of nearest node for different time-frames
     //struct kdres *kd_nearest_range(struct kdtree *tree, const double *pos, double range);
     //presults = kd_nearest_range(kd, q_sample->get(), 0.01);

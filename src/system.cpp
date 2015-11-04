@@ -9,6 +9,17 @@ System::System(Settings* s){
 	if (config->check("simulation.engine", "hspice")){
 		type = HSPICE;
 		engine = new Hspice(config);
+        
+        simulationICFileResult = "sim_ic";
+        simulationICFileSource = "sim_ic";
+        simulationType = "dc";   //restarts every simulation from time t=0
+        simulationLogFilename = config->lookupString("simulation.logfile");
+        setting.push_back(simulationICFileResult);
+        setting.push_back(simulationICFileSource);
+        setting.push_back(simulationType);
+        objectives = config->listValues("objective", "uid-objective.keyword");
+        parameterName = config->listValues("parameter", "uid-parameter.name");
+        parameterUnit = config->listValues("parameter", "uid-parameter.unit");
 	}else{
 		type = INTERNAL;
 	}
@@ -22,22 +33,7 @@ void System::eval(State* s){
 
 void System::eval(State* s, double t){
 	if (type == HSPICE){
-        int unique_id = s->getID();
-        string simulationICFileResult = "sim_ic";
-        string simulationICFileSource = "sim_ic";
-        string simulationType = "dc";   //restarts every simulation from time t=0
-        //string simulationLogFilename = "sim" + to_string(unique_id) + ".log";
-		//string simulationLogFilename = "C:\\Users\\adel\\code\\Duplex\\bin\\sim.log";
-        string simulationLogFilename = "/Users/adel/Dropbox/temporary/bin/sim_default.log";
-        vector<string> setting;
-        setting.push_back(simulationICFileResult);
-        setting.push_back(simulationICFileSource);
-        setting.push_back(simulationType);
-		vector<string> objectives = config->listValues("objective", "uid-objective.keyword");
-
-        vector<string> parameterName = config->listValues("parameter", "uid-parameter.name");
-        vector<string> parameterUnit = config->listValues("parameter", "uid-parameter.unit");
-        
+        //int unique_id = s->getID();
         engine->generateNetlist(parameterName, parameterUnit, s->getParameter(), setting);
         //engine->runSimulation(simulationLogFilename);
 		double* result = engine->parseSimulationLog(simulationLogFilename, objectives);

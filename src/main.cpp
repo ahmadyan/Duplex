@@ -53,7 +53,6 @@ int main(int argc, char** argv){
 			cin.get();
 			return ERROR_IN_COMMAND_LINE;
 		}
-		cout << vm["config"].as<std::string>() << endl;
 		settings->parse(vm["config"].as<std::string>().c_str(), "Duplex");
 		Graphics* graphic = new Graphics(gnuPlot);
 		System* system = new System(settings);
