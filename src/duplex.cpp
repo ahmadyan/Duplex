@@ -348,7 +348,7 @@ string Duplex::drawObjectiveTree(){
 
 string Duplex::plotError(){
 	stringstream cmdstr;
-	cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << error[0] + 1 << "] 0 with linespoints lt \"white\" pt 0.01";
+	cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << 1.1*error[0] << "] 0 with linespoints lt \"white\" pt 0.01";
 	for (int i = 1; i < error.size(); i++){
 		cmdstr << " set arrow from " << i - 1 << "," << error[i - 1] << " to " << i << "," << error[i] << " nohead  lc rgb \"red\" lw 2 \n";
 	}
@@ -357,7 +357,7 @@ string Duplex::plotError(){
 
 string Duplex::plotDistance(){
     stringstream cmdstr;
-    cmdstr << "plot [" << 0 << ":" << currentDistance.size() << "][" << 0 << ":" << currentDistance[0] + 1 << "] 0 with linespoints lt \"white\" pt 0.01";
+    cmdstr << "plot [" << 0 << ":" << currentDistance.size() << "][" << 0 << ":" << 2.0*currentDistance[0] << "] 0 with linespoints lt \"white\" pt 0.01";
     for (int i = 1; i < currentDistance.size(); i++){
         cmdstr << " set arrow from " << i - 1 << "," << currentDistance[i - 1] << " to " << i << "," << currentDistance[i] << " nohead  lc rgb \"red\" lw 2 \n";
     }
@@ -365,10 +365,15 @@ string Duplex::plotDistance(){
 }
 
 string Duplex::draw(){
-    //return plotDistance();
-	return plotError();
-	//return drawParameterTree();
-	//return drawObjectiveTree();
+	if (settings->check("plot.type", "error")){
+		return plotError();
+	}else if (settings->check("plot.type", "distance")){
+		return plotDistance();
+	}else if (settings->check("plot.type", "tree.parameter")){
+		return drawParameterTree();
+	}else if (settings->check("plot.type", "tree.objective")){
+		return drawObjectiveTree();
+	}
 }
 
 

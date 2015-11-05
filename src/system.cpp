@@ -35,9 +35,9 @@ void System::eval(State* s, double t){
 	if (type == HSPICE){
         //int unique_id = s->getID();
         engine->generateNetlist(parameterName, parameterUnit, s->getParameter(), setting);
-        //engine->runSimulation(simulationLogFilename);
+        engine->runSimulation(simulationLogFilename);
 		double* result = engine->parseSimulationLog(simulationLogFilename, objectives);
- 		s->setObjective(result);
+		s->setObjective(result);
 	}
 	
 	if (type == INTERNAL){
