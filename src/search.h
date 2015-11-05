@@ -29,4 +29,5 @@ public:
     void range(State*);
     unsigned long getSize();
     void save(boost::property_tree::ptree*);
+    void load(boost::property_tree::ptree*);
 };

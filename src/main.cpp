@@ -16,6 +16,8 @@
 #include <config4cpp/Configuration.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+
 using namespace config4cpp;
 
 namespace{
@@ -54,21 +56,36 @@ int main(int argc, char** argv){
 			return ERROR_IN_COMMAND_LINE;
 		}
 		settings->parse(vm["config"].as<std::string>().c_str(), "Duplex");
-		Graphics* graphic = new Graphics(gnuPlot);
-		System* system = new System(settings);
+		
+        System* system = new System(settings);
 		Duplex* duplex = new Duplex(settings);
-		duplex->setSystem(system);
-		duplex->setObjective();
-		duplex->initialize();
-		duplex->optimize();
-		graphic->execute(duplex->draw());
-		graphic->saveToPdf(settings->lookupString("output"));
-        boost::property_tree::ptree ptree;
-        duplex->save(&ptree);
-        ofstream savefile(settings->lookupString("savefile"));
-        write_xml(savefile, ptree);
-        savefile.close();
-		delete duplex;
+        boost::property_tree::ptree ptree;  //used to load/save the data
+        if(settings->check("mode", "load")){
+            read_xml(settings->lookupString("savefile"), ptree);               // Load the XML file into the property tree.
+            duplex->load(&ptree);
+        }else{
+            duplex->setSystem(system);
+            duplex->setObjective();
+            duplex->initialize();
+            duplex->optimize();
+            
+            //saving the results into an xml file
+            duplex->save(&ptree);
+            ofstream savefile(settings->lookupString("savefile"));
+            write_xml(savefile, ptree);
+            savefile.close();
+        }
+        
+        
+        if(settings->check("plot.enable", "true")){
+            Graphics* graphic = new Graphics(gnuPlot);
+            graphic->execute(duplex->draw());
+            graphic->saveToPdf(settings->lookupString("output"));
+            delete graphic;
+        }
+        
+        //clean-up
+        delete duplex;
 		delete system;
 		delete settings;
 	

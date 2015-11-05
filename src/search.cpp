@@ -1,5 +1,8 @@
 #include "search.h"
 #include <sstream>
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/xml_parser.hpp>
+#include <boost/foreach.hpp>
 Search::Search(int d){
     dim=d;  //dim is the search dimension
     kd = kd_create(dim);
@@ -72,8 +75,21 @@ void Search::range(State* s){
 }
 
 void Search::save(boost::property_tree::ptree* ptree){
+    ptree->add("iterations", getSize());
     for(auto s: db){
         boost::property_tree::ptree& node = ptree->add("node", "");
         s->save(&node);
+    }
+}
+
+void Search::load(boost::property_tree::ptree* ptree){
+    int size = ptree->get<int>("iterations");
+    auto pnodes = ptree->get_child("");
+    for(auto v: pnodes){
+        if(v.first=="node"){
+            State* s = new State(2, 2);
+            s->load(&v.second);
+            insert(s);
+        }
     }
 }

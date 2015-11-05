@@ -57,6 +57,8 @@ Duplex::Duplex(Settings* c){
 		cout << "Annealing option not found in the config file/ Possible options are [fast, boltz]";
 		exit(2);
 	}
+    
+    db = new Search(objectiveDimension);
 }
 
 Duplex::~Duplex(){
@@ -89,7 +91,7 @@ void Duplex::initialize(){
     root->setParameter(init);
 	root->setReward(reward, (double)parameterDimension);
     system->eval(root);
-	db = new Search(objectiveDimension);
+
 	db->insert(root);
 	root->setID(0);
 	max = new double[objectiveDimension];
@@ -363,10 +365,10 @@ string Duplex::plotDistance(){
 }
 
 string Duplex::draw(){
-    return plotDistance();
+    //return plotDistance();
 	//return plotError();
 	//return drawParameterTree();
-	//return drawObjectiveTree();
+	return drawObjectiveTree();
 }
 
 
@@ -383,6 +385,11 @@ void Duplex::save(boost::property_tree::ptree* ptree){
         iter.add("distance", currentDistance[i]);
         iter.put("<xmlattr>.id", i);
     }
+}
+
+void Duplex::load(boost::property_tree::ptree* ptree){
+    boost::property_tree::ptree& data = ptree->get_child("duplex.data");
+    db->load(&data);
 }
 
 

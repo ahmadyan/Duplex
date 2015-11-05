@@ -16,6 +16,9 @@ Graphics::Graphics(string path){
     emptyPlot("", 0,1,0,1);
 }
 
+Graphics::~Graphics(){
+    
+}
 
 void Graphics::emptyPlot(string title, double xmin, double xmax, double ymin, double ymax, double zmin, double zmax, int angleX, int angleY, string xlabel, string ylabel, string zlabel){
     stringstream cmdstr;

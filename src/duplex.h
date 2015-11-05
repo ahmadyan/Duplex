@@ -69,4 +69,5 @@ public:
 	int  computeNextCandidateParameter(State* qnear);
 	void updateReward(State* qnear, State* qnew);
     void save(boost::property_tree::ptree* ptree);
+    void load(boost::property_tree::ptree* ptree);
 };

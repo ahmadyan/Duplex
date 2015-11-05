@@ -51,5 +51,7 @@ public:
 	double* getRewardVector();
 	double  getRewardCDF();
 	void setReward(double*, double);
+    vector<string> split(const string &s, char delim);
     void save(boost::property_tree::ptree*);
+    void load(boost::property_tree::ptree*);
 };

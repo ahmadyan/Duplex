@@ -6,6 +6,7 @@
 //  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
 //
 #include <random>
+#include <iostream>
 #include <sstream>
 #include "state.h"
 
@@ -152,9 +153,42 @@ void State::save(boost::property_tree::ptree* pt){
     for(int i=0;i<parameterDimension;i++) rew << reward[i] << " ";
     
     pt->put("id", id);
+    pt->put("parent", parentID);
     pt->put("parameter", param.str());
     pt->put("objective", obj.str());
     pt->put("reward", rew.str());
     if(type == StateType::StateTypeRoot )
         pt->put("<xmlattr>.root", true);
+}
+
+vector<string> State::split(const string &s, char delim){
+    vector<string> elems;
+    stringstream ss(s);
+    string item;
+    while (getline(ss, item, delim)) {
+        elems.push_back(item);
+    }
+    return elems;
+}
+
+void State::load(boost::property_tree::ptree* pt){
+    id = pt->get<int>("id");
+    parentID = pt->get<int>("parent");
+    vector<string> params = split(pt->get<string>("parameter"), ' ');
+    for(int i=0;i<params.size();i++){
+        parameterVector[i] = stod(params[i]);
+    }
+
+    vector<string> objectives = split(pt->get<string>("objective"), ' ');
+    for(int i=0;i<objectives.size();i++){
+        objectiveVector[i] = stod(objectives[i]);
+    }
+    
+    vector<string> rew = split(pt->get<string>("reward"), ' ');
+    for(int i=0;i<rew.size();i++){
+        reward[i] = stod(rew[i]);
+    }
+    
+    parameterDimension = (int)params.size();
+    objectiveDimension = (int)objectives.size();
 }
