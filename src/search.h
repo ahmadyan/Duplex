@@ -6,20 +6,21 @@
 //  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
 //
 #pragma once
-#include "state.h"
-#include "kdtree.h"
 #include <iostream>
 #include <vector>
 #include <boost/property_tree/ptree.hpp>
-
+#include "state.h"
+#include "kdtree.h"
+#include "configuration.h"
 using namespace std;
 
 class Search{
+    Settings* config;
     int dim;
     vector<State*> db;
     struct kdtree *kd;
 public:
-	Search(int);
+	Search(Settings*);
 	~Search();
     //State operator[] (const int i);
     State* getState(int i);

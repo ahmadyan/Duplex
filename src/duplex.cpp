@@ -58,7 +58,7 @@ Duplex::Duplex(Settings* c){
 		exit(2);
 	}
     
-    db = new Search(objectiveDimension);
+    db = new Search(settings);
 }
 
 Duplex::~Duplex(){
@@ -366,9 +366,9 @@ string Duplex::plotDistance(){
 
 string Duplex::draw(){
     //return plotDistance();
-	//return plotError();
+	return plotError();
 	//return drawParameterTree();
-	return drawObjectiveTree();
+	//return drawObjectiveTree();
 }
 
 
@@ -390,6 +390,15 @@ void Duplex::save(boost::property_tree::ptree* ptree){
 void Duplex::load(boost::property_tree::ptree* ptree){
     boost::property_tree::ptree& data = ptree->get_child("duplex.data");
     db->load(&data);
+    
+    auto pnodes = ptree->get_child("duplex.stat");
+    for(auto v: pnodes){
+        if(v.first=="iteration"){
+            cout << v.second.get<int>("id") << endl;
+            error.push_back(v.second.get<double>("error"));
+            currentDistance.push_back(v.second.get<double>("distance"));
+        }
+    }
 }
 
 

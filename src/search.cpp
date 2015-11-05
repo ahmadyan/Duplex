@@ -3,8 +3,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
-Search::Search(int d){
-    dim=d;  //dim is the search dimension
+Search::Search(Settings* c){
+    config=c;
+    dim=config->lookupInt("objective.size");    //dim is the search dimension
     kd = kd_create(dim);
 }
 
@@ -83,11 +84,14 @@ void Search::save(boost::property_tree::ptree* ptree){
 }
 
 void Search::load(boost::property_tree::ptree* ptree){
-    int size = ptree->get<int>("iterations");
+    int parameterSize = config->lookupInt("parameter.size");
+    int objectiveSize = config->lookupInt("objective.size");
+    //int size = ptree->get<int>("iterations");
     auto pnodes = ptree->get_child("");
     for(auto v: pnodes){
         if(v.first=="node"){
-            State* s = new State(2, 2);
+            //dim is the search dimension
+            State* s = new State(parameterSize, objectiveSize);
             s->load(&v.second);
             insert(s);
         }
