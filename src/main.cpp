@@ -78,7 +78,7 @@ int main(int argc, char** argv){
         
         
         if(settings->check("plot.enable", "true")){
-            Graphics* graphic = new Graphics(gnuPlot);
+            Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));
             graphic->execute(duplex->draw());
             graphic->saveToPdf(settings->lookupString("output"));
             delete graphic;
