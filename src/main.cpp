@@ -16,7 +16,6 @@
 #include <config4cpp/Configuration.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
-#include <boost/property_tree/xml_parser.hpp>
 
 using namespace config4cpp;
 
@@ -76,7 +75,6 @@ int main(int argc, char** argv){
             savefile.close();
         }
         
-        
         if(settings->check("plot.enable", "true")){
             Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));
             graphic->execute(duplex->draw());
@@ -88,7 +86,6 @@ int main(int argc, char** argv){
         delete duplex;
 		delete system;
 		delete settings;
-	
 	}catch (SettingsException se){
 		std::cerr << "CONFIG ERROR: " << se.what() << std::endl << std::endl;
 		cin.get();
@@ -99,6 +96,6 @@ int main(int argc, char** argv){
 		cin.get();
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
-	cin.get();
+    cin.get();
 	return SUCCESS;
 }

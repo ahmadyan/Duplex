@@ -44,6 +44,8 @@ class Duplex{
 	double minAward;
 	double maxAward;
 	double delta;
+    double* goalRegionBoxMin;
+    double* goalRegionBoxMax;
 public:
 	Duplex(Settings*);
     ~Duplex();

@@ -16,7 +16,6 @@
 using namespace std;
 
 Duplex::Duplex(Settings* c){
-	cout << "Duplex initialization ..." << endl;
 	settings = c;
 	iterationCap = settings->lookupInt("iterations");
 	parameterDimension = settings->lookupInt("parameter.size");
@@ -94,26 +93,33 @@ void Duplex::initialize(){
 
 	db->insert(root);
 	root->setID(0);
-	max = new double[objectiveDimension];
-	min = new double[objectiveDimension];
-	for (int i = 0; i < objectiveDimension; i++){
-		min[i] = -3;
-		max[i] = 3;
-	}
+    
+    //setting boundaries for the objectives
+    vector<string> objectiveGoalMinStringVector = settings->listValues("objective", "uid-objective.goal.min");
+    vector<string> objectiveGoalMaxStringVector = settings->listValues("objective", "uid-objective.goal.max");
+    vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
+    vector<string> objectiveMaxStringVector = settings->listValues("objective", "uid-objective.max");
+    goalRegionBoxMin = new double[objectiveDimension];
+    goalRegionBoxMax = new double[objectiveDimension];
+    max = new double[objectiveDimension];
+    min = new double[objectiveDimension];
+    for(int i=0;i<objectiveDimension;i++){
+        goalRegionBoxMin[i] = stod(objectiveGoalMinStringVector[i]) ;
+        goalRegionBoxMax[i] = stod(objectiveGoalMaxStringVector[i]) ;
+        min[i] = stod(objectiveMinStringVector[i]);
+        max[i] = stod(objectiveMaxStringVector[i]);
+    }
 	error.push_back(goal->distance(root, max, min));
     currentDistance.push_back(goal->distance(root, max, min));
 
-	vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
-	vector<string> objectivemaxStringVector = settings->listValues("objective", "uid-objective.min");
-
-
+	
 }
 
 void Duplex::setObjective(){
 	double* g = new double(objectiveDimension);
     vector<string> objectives = settings->listVariables("objective", "uid-objective");
     for(int i=0;i<objectives.size();i++){
-        g[i] = settings->lookupFloat(("objective." + objectives[i] + ".goal").c_str());
+        g[i] = settings->lookupFloat(("objective." + objectives[i] + ".goal.optimum").c_str());
     }
     goal = new State(parameterDimension, objectiveDimension);
     goal->setObjective(g);
@@ -125,20 +131,9 @@ void Duplex::setSystem(System* sys){
 
 
 State* Duplex::globalStep(){
-    //Randomly generate a state close to the final objective
-    //todo: use gaussian distribution to generate this
     State* qsample = new State(parameterDimension, objectiveDimension);
-    double* min = new double[std::max(parameterDimension, objectiveDimension)];
-    double* max = new double[std::max(parameterDimension, objectiveDimension)];
-
-    min[0]=1.8; max[0]=0.8;
-    min[1]=2.2; max[1]=1.2;
-    //for(int i=0;i<objectiveDimension;i++){
-    //    min[i]=0;
-    //    max[i]=1;
-    //}
-    qsample->setParameter(qsample->uniformRandomVector(parameterDimension, min, max));
-    qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, min, max));
+    qsample->setParameter(qsample->uniformRandomVector(parameterDimension, goalRegionBoxMin, goalRegionBoxMax));
+    qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax));
     return qsample;
 }
 
@@ -161,7 +156,6 @@ void Duplex::updateReward(State* qnear, State* qnew){
 		reward[i] = preward[i];
 	}
 
-	
 	double award = (distance - pdistance) / delta;
 	if (award < minAward) award = minAward;
 	if (award > maxAward) award = maxAward;
@@ -354,7 +348,7 @@ string Duplex::drawObjectiveTree(){
 
 string Duplex::plotError(){
 	stringstream cmdstr;
-	cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << 1.1*error[0] << "] 0 with linespoints lt \"white\" pt 0.01";
+	cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << 1.1*error[0] << "] 0 with linespoints lt \"white\" pt 0.01" << endl;
 	for (int i = 1; i < error.size(); i++){
 		cmdstr << " set arrow from " << i - 1 << "," << error[i - 1] << " to " << i << "," << error[i] << " nohead  lc rgb \"red\" lw 2 \n";
 	}
@@ -363,7 +357,7 @@ string Duplex::plotError(){
 
 string Duplex::plotDistance(){
     stringstream cmdstr;
-    cmdstr << "plot [" << 0 << ":" << currentDistance.size() << "][" << 0 << ":" << 2.0*currentDistance[0] << "] 0 with linespoints lt \"white\" pt 0.01";
+    cmdstr << "plot [" << 0 << ":" << currentDistance.size() << "][" << 0 << ":" << 2.0*currentDistance[0] << "] 0 with linespoints lt \"white\" pt 0.01" << endl;
     for (int i = 1; i < currentDistance.size(); i++){
         cmdstr << " set arrow from " << i - 1 << "," << currentDistance[i - 1] << " to " << i << "," << currentDistance[i] << " nohead  lc rgb \"red\" lw 2 \n";
     }
@@ -379,7 +373,9 @@ string Duplex::draw(){
 		return drawParameterTree();
 	}else if (settings->check("plot.type", "tree.objective")){
 		return drawObjectiveTree();
-	}
+    }else{
+        return "";
+    }
 }
 
 
