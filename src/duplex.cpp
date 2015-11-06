@@ -102,6 +102,11 @@ void Duplex::initialize(){
 	}
 	error.push_back(goal->distance(root, max, min));
     currentDistance.push_back(goal->distance(root, max, min));
+
+	vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
+	vector<string> objectivemaxStringVector = settings->listValues("objective", "uid-objective.min");
+
+
 }
 
 void Duplex::setObjective(){
@@ -118,13 +123,14 @@ void Duplex::setSystem(System* sys){
     system=sys;
 }
 
+
 State* Duplex::globalStep(){
     //Randomly generate a state close to the final objective
     //todo: use gaussian distribution to generate this
     State* qsample = new State(parameterDimension, objectiveDimension);
     double* min = new double[std::max(parameterDimension, objectiveDimension)];
     double* max = new double[std::max(parameterDimension, objectiveDimension)];
-    
+
     min[0]=1.8; max[0]=0.8;
     min[1]=2.2; max[1]=1.2;
     //for(int i=0;i<objectiveDimension;i++){
