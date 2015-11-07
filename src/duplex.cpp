@@ -228,6 +228,7 @@ State* Duplex::localStep(int i, State* qnear){
 
 void Duplex::optimize(){
     for(int i=1;i<iterationCap;i++){
+		cout << i << endl;
 		State* qsample = globalStep();              //generate a new bias sample
         State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
 		State* qnew = localStep(i, qnear); 

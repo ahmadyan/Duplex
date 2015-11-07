@@ -43,7 +43,7 @@ int main(int argc, char** argv){
 			// --help option
 			if (vm.count("help")){		
 				std::cout << "Duplex optimization engine. " << std::endl
-					      << "Version 0.0.1  (C) 2015 Seyed Nematollah (Adel) Ahmadyan, All right reserved." << std::endl
+					      << "Version 0.1    (C) 2015 Seyed Nematollah (Adel) Ahmadyan, All right reserved." << std::endl
 					      << desc << std::endl;
 				return SUCCESS;
 			}
@@ -96,6 +96,5 @@ int main(int argc, char** argv){
 		cin.get();
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
-    cin.get();
 	return SUCCESS;
 }
