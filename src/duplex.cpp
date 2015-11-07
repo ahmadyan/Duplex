@@ -82,23 +82,26 @@ double* Duplex::getInitialState(){
 }
 
 void Duplex::initialize(){
-	double* init = getInitialState();
-	double* reward = new double[parameterDimension];
-	for (int i = 0; i < parameterDimension; i++)
+	cout << "Duplex initialization started. It make take a while to analyze the root." << endl;
+	double* init = getInitialState();															
+	double* reward = new double[parameterDimension];											
+																								
+	for (int i = 0; i < parameterDimension; i++)												
 		reward[i] = 1;
-	root = new State(parameterDimension, objectiveDimension);
-    root->setParameter(init);
-	root->setReward(reward, (double)parameterDimension);
-    system->eval(root);
+	root = new State(parameterDimension, objectiveDimension);									
+	root->setParameter(init);																	
+	root->setReward(reward, (double)parameterDimension);										
+	system->eval(root);																			
 
-	db->insert(root);
-	root->setID(0);
-    
+	db->insert(root);																			
+	root->setID(0);																				
+	cout << "Root node set." << endl;
     //setting boundaries for the objectives
     vector<string> objectiveGoalMinStringVector = settings->listValues("objective", "uid-objective.goal.min");
     vector<string> objectiveGoalMaxStringVector = settings->listValues("objective", "uid-objective.goal.max");
     vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
     vector<string> objectiveMaxStringVector = settings->listValues("objective", "uid-objective.max");
+	cout << "Goals are set." << endl;
     goalRegionBoxMin = new double[objectiveDimension];
     goalRegionBoxMax = new double[objectiveDimension];
     max = new double[objectiveDimension];
@@ -109,10 +112,11 @@ void Duplex::initialize(){
         min[i] = stod(objectiveMinStringVector[i]);
         max[i] = stod(objectiveMaxStringVector[i]);
     }
+	
+
 	error.push_back(goal->distance(root, max, min));
     currentDistance.push_back(goal->distance(root, max, min));
-
-	
+	cout << "Error and distance set." << endl;
 }
 
 void Duplex::setObjective(){

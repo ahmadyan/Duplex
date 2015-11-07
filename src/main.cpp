@@ -25,16 +25,24 @@ namespace{
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
+bool verbose = true;
+void log(string str){
+	if (verbose){
+		cout << str << endl;
+	}
+}
+
 int main(int argc, char** argv){
+	log("Duplex optimization tool.");
 	Settings*  settings = new Settings();
 	srand((unsigned int)time(0));
-
+	log("settings created, procceeding to parsing arguments");
 	try{
 		namespace po = boost::program_options;
 		po::options_description desc("Options");
 		desc.add_options()
 			("help", "Print help messages")
-			("verbose,v", po::value<int>(), "print words with verbosity")
+			("verbose,v", po::value<int>(), "print words with verbosity (0 or 1)")
 			("config,c", po::value<string>(), "Specifies the configuration file")
 			("like", "this");
 		po::variables_map vm;
@@ -54,20 +62,27 @@ int main(int argc, char** argv){
 			cin.get();
 			return ERROR_IN_COMMAND_LINE;
 		}
+		cout << "Parsing arguments complete. Proceed to parsing config file ..." << endl;
 		settings->parse(vm["config"].as<std::string>().c_str(), "Duplex");
-		
+
+		try{
+			verbose = vm["verbose"].as<int>();
+		}catch (exception& e){
+			verbose = settings->lookupBoolean("verbose");
+		}
+
+		log("Parsing config file complete.");
         System* system = new System(settings);
-		Duplex* duplex = new Duplex(settings);
+		Duplex* duplex = new Duplex(settings);				log("Duplex core created.");
         boost::property_tree::ptree ptree;  //used to load/save the data
         if(settings->check("mode", "load")){
             read_xml(settings->lookupString("savefile"), ptree);               // Load the XML file into the property tree.
             duplex->load(&ptree);
         }else{
-            duplex->setSystem(system);
-            duplex->setObjective();
-            duplex->initialize();
-            duplex->optimize();
-            
+			duplex->setSystem(system);						log("System set.");
+			duplex->setObjective();							log("Objective set.");
+			duplex->initialize();							log("Duplex initialization complete.");
+			duplex->optimize();
             //saving the results into an xml file
             duplex->save(&ptree);
             ofstream savefile(settings->lookupString("savefile"));
@@ -96,5 +111,6 @@ int main(int argc, char** argv){
 		cin.get();
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
+	cin.get();
 	return SUCCESS;
 }

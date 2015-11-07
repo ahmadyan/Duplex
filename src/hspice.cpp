@@ -104,7 +104,6 @@ vector<double> Hspice::getFinalState(){
 	return result;
 }
 
-
 //The input is something like this:
 //5.0000000000n   226.6820055575m   71.3468319456m  -71.3468319456m
 // The first number is transient simulation time, the rest are variables that need to be converted to double
