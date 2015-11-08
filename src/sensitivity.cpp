@@ -15,7 +15,6 @@ Sensitivity::Sensitivity(int iS, int oS, double threshold){
 			sensitivityMatrix[i][j] = 0.0;
 		}
 	}
-	cout << "Constructing sensitivity matrix " << inputSize << " " << outputSize << endl;
 }
 
 Sensitivity::~Sensitivity(){
@@ -63,21 +62,38 @@ void Sensitivity::commit(){
 }
 
 void Sensitivity::generateSensitivityMatrix(){
-	//Normalize sensitivity matrix
-	//find max
-	double max = -1;
-	for (int i = 0; i < inputSize; i++){
-		for (int j = 0; j < outputSize; j++){
-			if (sensitivityMatrix[i][j]>max)
-				max = sensitivityMatrix[i][j];
-		}
-	}
+	//Normalize sensitivity matrix by each column
+	//find max for each column
+	double* max = new double[outputSize];
+	for (int i = 0; i < inputSize;i++)
+		max[i] = *max_element(sensitivityMatrix[i], sensitivityMatrix[i] + outputSize);
+
+	//for (int i = 0; i < outputSize; i++){
+	//	cout << max[i] << endl;
+	//}
+
+	//cout << "Pre-normalized SM:" << endl;
+	//for (int i = 0; i < inputSize; i++){
+	//	for (int j = 0; j < outputSize; j++){
+	//		cout << sensitivityMatrix[i][j] << " ";
+	//	}cout << endl;
+	//}
+
 	//normalize
+	//todo: we are traversling the matrix incorrectly, need bugfix
 	for (int i = 0; i < inputSize; i++){
 		for (int j = 0; j < outputSize; j++){
-			sensitivityMatrix[i][j] = sensitivityMatrix[i][j]/max;
+			sensitivityMatrix[i][j] = sensitivityMatrix[i][j]/max[i];
 		}
 	}
+
+	for (int i = 0; i < inputSize; i++){
+		for (int j = 0; j < outputSize; j++){
+			cout << sensitivityMatrix[i][j] << " ";
+		}cout << endl;
+	}
+	//cin.get();
+	delete max;
 }
 
 void Sensitivity::save(boost::property_tree::ptree* ptree){

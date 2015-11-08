@@ -22,11 +22,12 @@ def main():
 
     print(workingDirectory)
     os.chdir(workingDirectory)
-    total = 100
+    total = 1
     with open(matlabfile, 'w') as f:
         f.write('error=zeros('+ str(total) +', 100);\n')
 
-    for i in range(1, total):
+    for i in range(0, total):
+        print('Running #' + str(i))
         os.environ['DUPLEX_SIM_ID'] = str(i)
         duplexArgument = '--config'
         duplex = subprocess.Popen([duplexCommand, duplexArgument, configfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
