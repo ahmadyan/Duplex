@@ -24,13 +24,14 @@
 
 #pragma once
 #include <vector>
+#include <boost/property_tree/ptree.hpp>
 using namespace std;
 
 class Sensitivity{
 	int totalQueries; 
 	int inputSize;
 	int outputSize;
-
+	double relativeSensitivityThreshold;
 	vector<int> inputStack; 
 	vector<double> inputDeltaStack; 
 	vector<double> inputValueStack; 
@@ -46,11 +47,12 @@ class Sensitivity{
 
 	double** sensitivityMatrix; 
 public:
-	Sensitivity(int, int);
+	Sensitivity(int, int, double);
 	~Sensitivity();
 	void setInputOutputMinMax(double* iMin, double* iMax, double* oMin, double* oMax);
 	void pushBackInputChange(int, double, double);
 	void pushBackOutputChange(int, double, double);
 	void commit();
 	void generateSensitivityMatrix(); 
+	void save(boost::property_tree::ptree* ptree);
 };

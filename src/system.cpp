@@ -49,7 +49,8 @@ void System::eval(State* s, double t){
 		//j[0] = pow(x[0], 2) + pow(x[1], 2);
 		//j[1] = 10-x[0]*x[1];
 		j[0] = x[0]+x[1];
-		j[1] = x[0]*x[1];
+		j[1] = x[0];// *x[1];
+
 		s->setObjective(j);
 	}
 }

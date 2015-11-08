@@ -10,6 +10,7 @@
 #include "configuration.h"
 #include "system.h"
 #include "search.h"
+#include "sensitivity.h"
 
 enum class Temperature { temperatureexp, temperaturefast, temperatureboltz };
 enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annealingboltzrandom};
@@ -17,6 +18,7 @@ enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annea
 class Duplex{
 	Settings* settings;
     Search* db;
+	Sensitivity* sensitivity;
 
 	//System:
 	State* root;
@@ -50,26 +52,31 @@ public:
 	Duplex(Settings*);
     ~Duplex();
 	double* getInitialState();
-    void initialize();
+	void setSystem(System*);
+	void initialize();
     void setObjective();
 	
     void optimize();
-    void setSystem(System*);   
-    string draw();
-    double* generateNewInput(State* q);
+    
+	string draw();
     string drawParameterTree();
     string drawObjectiveTree();
-	void updateError(State* s, double* max, double* min);
 	string plotError();
     string plotDistance();
+
 	void update(int, State* qsample, State* qnear, State* qnew);		//update the database, biases, rewards, etc.
+	void updateSensitivity(State* qnear, State* qnew);
+	void updateReward(State* qnear, State* qnew);
+	void updateError(State* s, double* max, double* min);
+
 	void clear();
+	double* generateNewInput(State* q);
 	State* localStep(int i, State*);
 	State* globalStep();
 	void computeTemperature(int i);
 	void computeStepLength();
 	int  computeNextCandidateParameter(State* qnear);
-	void updateReward(State* qnear, State* qnew);
+	
     void save(boost::property_tree::ptree* ptree);
     void load(boost::property_tree::ptree* ptree);
 };

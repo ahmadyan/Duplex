@@ -58,6 +58,7 @@ Duplex::Duplex(Settings* c){
 	}
     
     db = new Search(settings);
+	sensitivity = new Sensitivity(parameterDimension, objectiveDimension, (double)settings->lookupFloat("sensitivity-analysis.relativeSensitivityThreshold"));
 }
 
 Duplex::~Duplex(){
@@ -227,6 +228,7 @@ State* Duplex::localStep(int i, State* qnear){
 	double* input = generateNewInput(qnear);
 	State* qnew = new State(parameterDimension, objectiveDimension);
 	qnew->setParameter(input);
+	sensitivity->pushBackInputChange(nextCandidateParameter, qnew->getParameter()[nextCandidateParameter], stepLength);
 	return qnew;
 }
 
@@ -239,6 +241,8 @@ void Duplex::optimize(){
 		system->eval(qnew, 0);                  //simulate the circuit with the new input
 		update(i, qsample, qnear, qnew);
     }
+
+	sensitivity->generateSensitivityMatrix();
 }
 
 void Duplex::updateError(State* s, double* maxBound, double* minBound){
@@ -248,6 +252,16 @@ void Duplex::updateError(State* s, double* maxBound, double* minBound){
     currentDistance.push_back(d);
 }
 
+void Duplex::updateSensitivity(State* qnear, State* qnew){
+	double* obj = qnew->getObjective();
+	double* obj_near = qnear->getObjective();
+	for (int i = 0; i < objectiveDimension; i++){
+		double delta = abs(obj[i] - obj_near[i]);
+			sensitivity->pushBackOutputChange(i, obj[i], delta);
+	}
+	sensitivity->commit();
+}
+
 void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
 	db->insert(qnew);                       //add a new node to the database
 	qnew->setID(i);
@@ -255,6 +269,7 @@ void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
 	bias.push_back(qsample);
 	updateError(qnew, max, min);
 	updateReward(qnear, qnew);
+	updateSensitivity(qnear, qnew);
 }
 
 void Duplex::clear(){
@@ -383,13 +398,16 @@ string Duplex::draw(){
     }
 }
 
-
 void Duplex::save(boost::property_tree::ptree* ptree){
     ptree->add("duplex.version", 1);
     boost::property_tree::ptree& data = ptree->add("duplex.data", "");
     db->save(&data);
 
+	boost::property_tree::ptree& sense = ptree->add("duplex.sensitivity", "");
+	sensitivity->save(&sense);
+
     boost::property_tree::ptree& node = ptree->add("duplex.stat", "");
+
     for(int i=0;i<iterationCap;i++){
         boost::property_tree::ptree& iter = node.add("iteration", "");
         iter.add("id", i);
@@ -412,5 +430,3 @@ void Duplex::load(boost::property_tree::ptree* ptree){
         }
     }
 }
-
-
