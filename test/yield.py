@@ -48,5 +48,5 @@ def main():
         for i in range(1, size+1):
             f.write('yield('+str(i)+',:)=' + str(pareto[i-1]) +';\n')
         f.write('scatter(yield(:,1), yield(:,2))\n')
-        
+
 if  __name__ =='__main__':main()
