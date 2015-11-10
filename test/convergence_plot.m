@@ -33,15 +33,17 @@ end
 watercolor = watercolor ./ samples;
 
 
-% Use moving-average filter to smooth the results
+%  Low-pass filter to smooth the results
 % Only use this if the resolution is high to smoothen the plot
-
-for i=3:resolution-2,
-  for j=1:x,
-    watercolor(i, j) = (watercolor(i-2,j) + 2*watercolor(i-1,j) + 3*watercolor(i,j) + 2*watercolor(i+1, j) +  watercolor(i+2, j) )/ 9;
+pass=10;
+for p=1:pass,
+  for i=2:resolution-1,%
+    for j=1:x,
+      %watercolor(i, j) = (watercolor(i-2,j) + 2*watercolor(i-1,j) + 3*watercolor(i,j) + 2*watercolor(i+1, j) +  watercolor(i+2, j) )/ 9;
+      watercolor(i, j) = (watercolor(i-1,j) + watercolor(i,j) + watercolor(i+1,j) )/ 3;
+    end
   end
 end
-
 
 
 flood = zeros(x);
@@ -54,12 +56,15 @@ for i=1:x,
   end
 end
 
+scale = 1.5;
 for i=1:resolution,
   for j=1:x,
-    watercolor(i, j) = watercolor(i,j)/flood(j);
+    watercolor(i, j) = scale*watercolor(i,j)/flood(j);
+    if(watercolor(i,j)>1),
+      watercolor(i,j)=1;
+    end
   end
 end
-
 
 % Plot the Results
 figure
@@ -81,3 +86,6 @@ end
 % over draw the expected error
 ExError = ExError ./ max;
 plot(ExError, 'k', 'LineWidth',2 );
+axis tight
+ e2 = error(20,:) ./ max;
+ plot(e2, '-r');
