@@ -75,7 +75,7 @@ for i=1:resolution-1,
     q = [j    j     j+1   j+1 ];
     p = p./resolution;
     if(watercolor(i,j) > 0),
-      color = [ 1-watercolor(i, j) 1-watercolor(i, j)  1-watercolor(i, j) ];
+      color = [ 1-watercolor(i, j) 1-watercolor(i, j)  watercolor(i, j) ];
     else,
       color = [1 1 1];
     end
