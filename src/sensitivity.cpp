@@ -1,4 +1,5 @@
 #include <iostream>
+#include <cmath>
 #include "sensitivity.h"
 
 Sensitivity::Sensitivity(int iS, int oS, double threshold){
@@ -38,7 +39,6 @@ void Sensitivity::pushBackInputChange(int input, double value, double delta){
 }
 
 void Sensitivity::pushBackOutputChange(int input, double value, double delta){
-
 	if (delta/abs(value) > relativeSensitivityThreshold){
 		outputStack.push_back(input);
 		outputDeltaStack.push_back(delta);
