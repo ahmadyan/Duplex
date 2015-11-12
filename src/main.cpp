@@ -9,6 +9,7 @@
 #include <boost/program_options.hpp>
 #include <iostream>
 #include <string>
+#include "log.h"
 #include "configuration.h"
 #include "duplex.h"
 #include "system.h"
@@ -25,18 +26,12 @@ namespace{
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
-bool verbose = true;
-void log(string str){
-	if (verbose){
-		cout << str << endl;
-	}
-}
-
 int main(int argc, char** argv){
-	log("Duplex optimization tool.");
+    Log* log = new Log(true);
+	log->log("Duplex optimization tool.");
 	Settings*  settings = new Settings();
 	srand((unsigned int)time(0));
-	log("settings created, procceeding to parsing arguments");
+	log->log("settings created, procceeding to parsing arguments");
 	try{
 		namespace po = boost::program_options;
 		po::options_description desc("Options");
@@ -65,24 +60,28 @@ int main(int argc, char** argv){
 		cout << "Parsing arguments complete. Proceed to parsing config file ..." << endl;
 		settings->parse(vm["config"].as<std::string>().c_str(), "Duplex");
 
+        bool verbose=true;
 		try{
-			verbose = vm["verbose"].as<int>();
+            verbose = vm["verbose"].as<int>();
 		}catch (exception& e){
-			verbose = settings->lookupBoolean("verbose");
+            verbose = settings->lookupBoolean("verbose");
 		}
+        log->setVerbose(verbose);
 
-		log("Parsing config file complete.");
+		log->log("Parsing config file complete.");
         System* system = new System(settings);
-		Duplex* duplex = new Duplex(settings);				log("Duplex core created.");
+		Duplex* duplex = new Duplex(settings);				log->log("Duplex core created.");
         boost::property_tree::ptree ptree;  //used to load/save the data
         if(settings->check("mode", "load")){
             read_xml(settings->lookupString("savefile"), ptree);               // Load the XML file into the property tree.
             duplex->load(&ptree);
         }else{
-			duplex->setSystem(system);						log("System set.");
-			duplex->setObjective();							log("Objective set.");
-			duplex->initialize();							log("Duplex initialization complete.");
+			duplex->setSystem(system);						log->log("System set.");
+			duplex->setObjective();							log->log("Objective set.");
+			duplex->initialize();							log->log("Duplex initialization complete.");
+            log->tick();
 			duplex->optimize();
+            log->tock("Duplex main optimizatio loop");
             //saving the results into an xml file
             duplex->save(&ptree);
             ofstream savefile(settings->lookupString("savefile"));
