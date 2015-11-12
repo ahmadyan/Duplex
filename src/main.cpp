@@ -27,11 +27,11 @@ namespace{
 }
 
 int main(int argc, char** argv){
-    Log* log = new Log(true);
-	log->log("Duplex optimization tool.");
+    Log log;
+    log << "Duplex optimization tool." << endl ;
 	Settings*  settings = new Settings();
 	srand((unsigned int)time(0));
-	log->log("settings created, procceeding to parsing arguments");
+    log << "settings created, procceeding to parsing arguments" << endl ;
 	try{
 		namespace po = boost::program_options;
 		po::options_description desc("Options");
@@ -66,22 +66,22 @@ int main(int argc, char** argv){
 		}catch (exception& e){
             verbose = settings->lookupBoolean("verbose");
 		}
-        log->setVerbose(verbose);
+        //log->setVerbose(verbose);
 
-		log->log("Parsing config file complete.");
+        log << "Parsing config file complete." << endl ;
         System* system = new System(settings);
-		Duplex* duplex = new Duplex(settings);				log->log("Duplex core created.");
+        Duplex* duplex = new Duplex(settings);				log << "Duplex core created." << endl ;
         boost::property_tree::ptree ptree;  //used to load/save the data
         if(settings->check("mode", "load")){
             read_xml(settings->lookupString("savefile"), ptree);               // Load the XML file into the property tree.
             duplex->load(&ptree);
         }else{
-			duplex->setSystem(system);						log->log("System set.");
-			duplex->setObjective();							log->log("Objective set.");
-			duplex->initialize();							log->log("Duplex initialization complete.");
-            log->tick();
+            duplex->setSystem(system);						log << "System set." ;
+            duplex->setObjective();							log << "Objective set. " ;
+            duplex->initialize();							log << "Duplex initialization complete." ;
+            log.tick();
 			duplex->optimize();
-            log->tock("Duplex main optimizatio loop");
+            log.tock("Duplex main optimizatio loop");
             //saving the results into an xml file
             duplex->save(&ptree);
             ofstream savefile(settings->lookupString("savefile"));
@@ -110,7 +110,8 @@ int main(int argc, char** argv){
 		cin.get();
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
-	
+    
+    log << "Shutting down" << endl ;
 	cin.get();
 	return SUCCESS;
 }
