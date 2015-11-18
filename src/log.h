@@ -45,9 +45,10 @@ public:
     template<typename T> Log& operator<< (const T& data){
         auto now        = chrono::system_clock::now();
         auto now_time_t = chrono::system_clock::to_time_t( now );
-        auto now_tm     = localtime( &now_time_t );
+		struct tm now_tm;
+		localtime_s(&now_tm, &now_time_t);
         
-        if(newline) out << _log_header << "(" << now_tm->tm_hour << ":" << now_tm->tm_min << ":" << now_tm->tm_sec << "): " << data;
+        if(newline) out << _log_header << "(" << now_tm.tm_hour << ":" << now_tm.tm_min << ":" << now_tm.tm_sec << "): " << data;
         else out << data;
         newline = false;
         return (*this);
