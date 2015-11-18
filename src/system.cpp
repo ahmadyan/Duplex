@@ -1,11 +1,17 @@
 #include "system.h"
 #include <iostream>
+#include <algorithm>
 #include <cmath>
 #include <string>
+#include <boost/algorithm/string/replace.hpp>
+#include "expression.h"
 using namespace std;
 
 System::System(Settings* s){
 	config = s;
+	parameterSize = config->lookupInt("parameter.size");
+	objectiveSize = config->lookupInt("objective.size");
+
 	if (config->check("simulation.engine", "hspice")){
 		type = HSPICE;
 		engine = new Hspice(config);
@@ -22,6 +28,8 @@ System::System(Settings* s){
         parameterUnit = config->listValues("parameter", "uid-parameter.unit");
 	}else{
 		type = INTERNAL;
+		functions = config->listValues("objective", "uid-objective.function");
+		variables = config->listValues("parameter", "uid-parameter.name");
 	}
 }
 System::~System(){
@@ -41,17 +49,22 @@ void System::eval(State* s, double t){
 	}
 	
 	if (type == INTERNAL){
-		//f1(x,y) = 31-x1^2 exp(-x1^2 - (x2+1)^2) - 10(x1/5 - x1^3 - x2^5)
-		//f2(x,y) = x-y
-		double* x = s->getParameter();
-		double* j = new double[2];
-
-		//j[0] = pow(x[0], 2) + pow(x[1], 2);
-		//j[1] = 10-x[0]*x[1];
-		j[0] = x[0]+x[1];
-		j[1] = x[0];// *x[1];
-
-		s->setObjective(j);
+		double* parameters = s->getParameter();
+		double* objectives = new double[objectiveSize];
+		for (int i = 0; i < objectiveSize; i++){
+			const expression::grammar<double, std::string::const_iterator> eg;
+			const double close_enough = std::numeric_limits<double>::epsilon();
+			std::string expression = functions[i];
+			for (int j = 0; j < parameterSize; j++){
+				boost::replace_all(expression, variables[j], to_string(parameters[j]));
+			}
+			std::string::const_iterator iter = expression.begin();
+			std::string::const_iterator end = expression.end();
+			double result;
+			parse(iter, end, eg, result);
+			objectives[i] = result;
+		}
+		s->setObjective(objectives);
 	}
 }
 

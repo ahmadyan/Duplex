@@ -26,6 +26,11 @@ class System{
     vector<string> parameterName;
     vector<string> parameterUnit;
     
+	//for internal simulator
+	int parameterSize;
+	int objectiveSize; 
+	vector<string> functions;
+	vector<string> variables;
 public:
 	System(Settings* config);
 	~System();

@@ -27,7 +27,7 @@ namespace{
 }
 
 int main(int argc, char** argv){
-    Log log;
+	Log log;
     log << "Duplex optimization tool." << endl ;
 	Settings*  settings = new Settings();
 	srand((unsigned int)time(0));
