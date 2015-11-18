@@ -112,6 +112,6 @@ int main(int argc, char** argv){
 	}
     
     log << "Shutting down" << endl ;
-	cin.get();
+	//cin.get();
 	return SUCCESS;
 }

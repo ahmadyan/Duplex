@@ -12,7 +12,7 @@ def main():
     if (platform.system() == "Windows"):
         workingDirectory = "C:\\Users\\adel\\code\\Duplex\\bin"
         duplexCommand = "C:\\Users\\adel\\code\\Duplex\\DuplexVS\\DuplexVS.exe"
-        configfile = "C:\\Users\\adel\\code\\Duplex\\bin\\inverter.cfg"
+        configfile = "C:\\Users\\adel\\code\\Duplex\\bin\\generic.cfg"
         matlabfile = "C:\\Users\\adel\\code\\Duplex\\bin\\error.m"
     else:
         workingDirectory = "/Users/adel/code/Duplex/bin/"
@@ -30,12 +30,12 @@ def main():
         print('Running #' + str(i))
         os.environ['DUPLEX_SIM_ID'] = str(i)
         duplexArgument = '--config'
-        #duplex = subprocess.Popen([duplexCommand, duplexArgument, configfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-        #output, error = duplex.communicate('\n')
-        #print(output)
+        duplex = subprocess.Popen([duplexCommand, duplexArgument, configfile], stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        output, error = duplex.communicate('\n')
+        print(output)
 
         error = []
-        root = xml.etree.ElementTree.parse('inv_save'+str(i)+'.xml').getroot()
+        root = xml.etree.ElementTree.parse('save'+str(i)+'.xml').getroot()
         for iterations in root.findall('./stat/iteration/error'):
             error.append(float(iterations.text))
 

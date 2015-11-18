@@ -75,7 +75,7 @@ for i=1:resolution-1,
     q = [j    j     j+1   j+1 ];
     p = p./resolution;
     if(watercolor(i,j) > 0),
-      color = [ 1-watercolor(i, j) 1-watercolor(i, j)  watercolor(i, j) ];
+      color = [ 1-watercolor(i, j) 1-watercolor(i, j)  1-watercolor(i, j) ];
     else,
       color = [1 1 1];
     end
@@ -85,7 +85,7 @@ end
 
 % over draw the expected error
 ExError = ExError ./ max;
-plot(ExError, 'k', 'LineWidth',2 );
+plot(ExError, 'b', 'LineWidth',2 );
 axis tight
  e2 = error(20,:) ./ max;
  plot(e2, '-r');
