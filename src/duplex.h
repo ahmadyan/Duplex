@@ -57,7 +57,7 @@ public:
     void setObjective();
 	
     void optimize();
-    
+	void simulated_annealing();
 	string draw();
     string drawParameterTree();
     string drawObjectiveTree();

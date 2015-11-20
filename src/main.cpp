@@ -80,7 +80,13 @@ int main(int argc, char** argv){
             duplex->setObjective();							log << "Objective set. " ;
             duplex->initialize();							log << "Duplex initialization complete." ;
             log.tick();
-			duplex->optimize();
+			if (settings->check("mode", "duplex")){
+				duplex->optimize();
+			}else if (settings->check("mode", "simulated-annealing")){
+				duplex->simulated_annealing();
+			}else{
+				log << "Unknown optimization mode is selected. Duplex currently supports: [load, duplex, simulated-annealing]";
+			}
             log.tock("Duplex main optimizatio loop");
             //saving the results into an xml file
             duplex->save(&ptree);
@@ -112,6 +118,6 @@ int main(int argc, char** argv){
 	}
     
     log << "Shutting down" << endl ;
-	//cin.get();
+	cin.get();
 	return SUCCESS;
 }

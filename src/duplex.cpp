@@ -232,6 +232,7 @@ State* Duplex::localStep(int i, State* qnear){
 	return qnew;
 }
 
+
 void Duplex::optimize(){
     for(int i=1;i<iterationCap;i++){
 		cout << i << endl;
@@ -243,6 +244,26 @@ void Duplex::optimize(){
     }
 
 	sensitivity->generateSensitivityMatrix();
+}
+
+void Duplex::simulated_annealing(){
+	State* bestState = root;
+	auto bestEnergy = goal->distance(root, max, min);
+	for (int i = 1; i<iterationCap; i++){
+		cout << i << endl;
+		auto qsample = new State(parameterDimension, objectiveDimension);
+		qsample->setParameter(qsample->uniformRandomVector(parameterDimension, goalRegionBoxMin, goalRegionBoxMax));
+		system->eval(qsample, 0);  
+		auto r = (1.0*rand()) / RAND_MAX;
+		auto energy = goal->distance(qsample, max, min);
+		auto t = exp((bestEnergy - energy) / (20 * i));
+		cout << "random=" << r << " temperature=" << t << " energy=" << energy << " best" << bestEnergy << endl;
+		if ((energy < bestEnergy) || (t<r)){
+			bestState = qsample;
+			bestEnergy = energy;
+		}
+		updateError(bestState, max, min);
+	}
 }
 
 void Duplex::updateError(State* s, double* maxBound, double* minBound){
