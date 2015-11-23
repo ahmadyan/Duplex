@@ -102,6 +102,7 @@ void Duplex::initialize(){
     vector<string> objectiveGoalMaxStringVector = settings->listValues("objective", "uid-objective.goal.max");
     vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
     vector<string> objectiveMaxStringVector = settings->listValues("objective", "uid-objective.max");
+	
 	cout << "Goals are set." << endl;
 
 	for (int i = 0; i < objectiveGoalMinStringVector.size(); i++){
@@ -112,14 +113,22 @@ void Duplex::initialize(){
     goalRegionBoxMin = new double[objectiveDimension];
     goalRegionBoxMax = new double[objectiveDimension];
     max = new double[objectiveDimension];
-    min = new double[objectiveDimension];
-    for(int i=0;i<objectiveDimension;i++){
+    min = new double[objectiveDimension];	
+	for(int i=0;i<objectiveDimension;i++){
         goalRegionBoxMin[i] = stod(objectiveGoalMinStringVector[i]) ;
         goalRegionBoxMax[i] = stod(objectiveGoalMaxStringVector[i]) ;
         min[i] = stod(objectiveMinStringVector[i]);
         max[i] = stod(objectiveMaxStringVector[i]);
     }
 	
+	vector<string> parametersMinStringVector = settings->listValues("parameter", "uid-parameter.range.min");
+	vector<string> parametersMaxStringVector = settings->listValues("parameter", "uid-parameter.range.max");
+	parameterMin = new double[parameterDimension];
+	parameterMax = new double[parameterDimension];
+	for (int i = 0; i < parameterDimension; i++){
+		parameterMin[i] = stod(parametersMinStringVector[i]);;
+		parameterMax[i] = stod(parametersMaxStringVector[i]);;
+	}
 
 	error.push_back(goal->distance(root, max, min));
     currentDistance.push_back(goal->distance(root, max, min));
@@ -155,6 +164,8 @@ double* Duplex::generateNewInput(State* q){
     double* input = new double[pSize];
     for(int j=0;j<pSize;j++) input[j] = param[j];
 	input[nextCandidateParameter] += stepLength;
+	if (input[nextCandidateParameter] < parameterMin[nextCandidateParameter]) input[nextCandidateParameter] = parameterMin[nextCandidateParameter];
+	if (input[nextCandidateParameter] > parameterMax[nextCandidateParameter]) input[nextCandidateParameter] = parameterMax[nextCandidateParameter];
     return input;
 }
 
@@ -206,6 +217,7 @@ void Duplex::computeTemperature(int i){
 		temperature = temperature*0.95;
 		break;
 	}
+	if (temperature < 0.05) temperature = 0.05;
 }
 
 void Duplex::computeStepLength(){ 

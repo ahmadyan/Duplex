@@ -45,7 +45,6 @@ void Hspice::generateNetlist(vector<string> parameterName, vector<string> parame
 		sed << "-e s/$load/" << "\".load file=" << setting[1] << "\"/";
 	}*/
 	sed << " > " << netlistFile << endl;
-	cout << sed.str() << endl;
 	system(sed.str().c_str());
 }
 
