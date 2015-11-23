@@ -34,17 +34,18 @@ void Hspice::generateNetlist(vector<string> parameterName, vector<string> parame
 	stringstream sed;
 	sed << "cat " << templateFile << "  | sed ";
     for (int i = 0; i < parameterName.size();i++ ){
-		sed << "-e s/__" << parameterName[i] << "/" << parameters[i] << parameterUnit[i] << "/ ";
+		sed << "-e s/" << parameterName[i] << "/" << parameters[i] << parameterUnit[i] << "/ ";
 	}
-	if (dcSimulation){
+	/*if (dcSimulation){
 		sed << "-e s/$tran/" << "\".tran " << dt / 10 << " " << dt << "\"/ ";
 		sed << "-e s/$save/" << "\".save type=ic file=" << setting[0] << " level=all time=" << dt << "\"/ ";
 	}else{
 		sed << "-e s/$tran/" << "\".tran " << dt / 10 << " " << dt << " uic" << "\"/ ";
 		sed << "-e s/$save/" << "\".save type=ic file=" << setting[0] << " level=all time=" << dt << "\"/ ";
 		sed << "-e s/$load/" << "\".load file=" << setting[1] << "\"/";
-	}
+	}*/
 	sed << " > " << netlistFile << endl;
+	cout << sed.str() << endl;
 	system(sed.str().c_str());
 }
 

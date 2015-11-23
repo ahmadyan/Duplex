@@ -103,6 +103,12 @@ void Duplex::initialize(){
     vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
     vector<string> objectiveMaxStringVector = settings->listValues("objective", "uid-objective.max");
 	cout << "Goals are set." << endl;
+
+	for (int i = 0; i < objectiveGoalMinStringVector.size(); i++){
+		cout << objectiveGoalMinStringVector[i] << endl;
+	}
+
+
     goalRegionBoxMin = new double[objectiveDimension];
     goalRegionBoxMax = new double[objectiveDimension];
     max = new double[objectiveDimension];

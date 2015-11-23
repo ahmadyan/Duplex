@@ -134,3 +134,9 @@ bin/*.st0
 bin/*.pa0
 bin/*.tr0
 bin/*.xml
+*.ac0
+bin/plot_colored_fill.m
+*.lib
+bin/opamp_test.sw0
+*.ma0
+*.sw0

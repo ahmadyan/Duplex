@@ -93,7 +93,7 @@ void Sensitivity::generateSensitivityMatrix(){
 		}cout << endl;
 	}
 	//cin.get();
-	delete max;
+	//delete max;
 }
 
 void Sensitivity::save(boost::property_tree::ptree* ptree){
