@@ -66,8 +66,6 @@ int main(int argc, char** argv){
 		}catch (exception& e){
             verbose = settings->lookupBoolean("verbose");
 		}
-        //log->setVerbose(verbose);
-
         log << "Parsing config file complete." << endl ;
         System* system = new System(settings);
         Duplex* duplex = new Duplex(settings);				log << "Duplex core created." << endl ;

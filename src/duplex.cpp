@@ -261,7 +261,8 @@ void Duplex::optimize(){
 		update(i, qsample, qnear, qnew);
     }
 
-	sensitivity->generateSensitivityMatrix();
+	if (settings->check("sensitivity-analysis.enable", "true"))
+		sensitivity->generateSensitivityMatrix();
 }
 
 void Duplex::simulated_annealing(){
