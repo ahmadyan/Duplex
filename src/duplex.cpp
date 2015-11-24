@@ -139,16 +139,20 @@ void Duplex::setObjective(){
 	double* g = new double(objectiveDimension);
     vector<string> objectives = settings->listVariables("objective", "uid-objective");
     for(int i=0;i<objectives.size();i++){
-        g[i] = settings->lookupFloat(("objective." + objectives[i] + ".goal.optimum").c_str());
+		string val = settings->lookupString(("objective." + objectives[i] + ".goal.optimum").c_str());
+		g[i] = stod(val);
     }
     goal = new State(parameterDimension, objectiveDimension);
     goal->setObjective(g);
+	cout << endl << objectiveDimension << " " << objectives.size() << endl;
+	for (int i = 0; i < objectiveDimension; i++){
+		cout << g[i] << endl;
+	}
 }
 
 void Duplex::setSystem(System* sys){
     system=sys;
 }
-
 
 State* Duplex::globalStep(){
     State* qsample = new State(parameterDimension, objectiveDimension);

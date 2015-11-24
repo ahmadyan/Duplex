@@ -140,3 +140,4 @@ bin/plot_colored_fill.m
 bin/opamp_test.sw0
 *.ma0
 *.sw0
+bin/yield_samples.m
