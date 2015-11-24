@@ -141,3 +141,6 @@ bin/opamp_test.sw0
 *.ma0
 *.sw0
 bin/yield_samples.m
+bin/yield_samples.m
+bin/yield_samples.m
+bin/yield_samples.m

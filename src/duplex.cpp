@@ -136,17 +136,11 @@ void Duplex::initialize(){
 }
 
 void Duplex::setObjective(){
-	double* g = new double(objectiveDimension);
-    vector<string> objectives = settings->listVariables("objective", "uid-objective");
-    for(int i=0;i<objectives.size();i++){
-		string val = settings->lookupString(("objective." + objectives[i] + ".goal.optimum").c_str());
-		g[i] = stod(val);
-    }
-    goal = new State(parameterDimension, objectiveDimension);
-    goal->setObjective(g);
-	cout << endl << objectiveDimension << " " << objectives.size() << endl;
+	goal = new State(parameterDimension, objectiveDimension);
+	vector<string> objectives = settings->listVariables("objective", "uid-objective");
 	for (int i = 0; i < objectiveDimension; i++){
-		cout << g[i] << endl;
+		string val = settings->lookupString(("objective." + objectives[i] + ".goal.optimum").c_str());
+		goal->setObjective(stod(val), i);
 	}
 }
 

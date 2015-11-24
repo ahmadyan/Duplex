@@ -11,7 +11,7 @@ global matlabfile
 
 def isWithinTheGoalRegion(objectives):
     isOptimalState = True
-    if (objectives[0] < 2e9):       # bandwidth is less than 2GHz
+    if (objectives[0] < 4e9):       # bandwidth is less than 2GHz
         isOptimalState=False
     if (objectives[1] < 30):       #gain
         isOptimalState=False
@@ -36,19 +36,21 @@ def main():
 
     os.chdir(workingDirectory)
     iteration = 0
+    goal_samples = 0
     root = xml.etree.ElementTree.parse(duplexsavefile).getroot()
     pareto = []
     variableSize=7
     for p in root.findall('./data/node'):
-        iteration += 1
-        print(iteration)
-        if(iteration<2000):
+        if(goal_samples<500):
+            iteration += 1
             candid = False
             for obj in p.iter('objective'):
                 objectives = obj.text.split()
                 for i,x in enumerate(objectives):
                     objectives[i]=float(x)
-                candid = isWithinTheGoalRegion(objectives)
+                if ( isWithinTheGoalRegion(objectives)):
+                    candid=True
+                    goal_samples += 1
             if(candid):
                 for param in p.iter('parameter'):
                     parameters = param.text.split()
@@ -56,6 +58,9 @@ def main():
                         parameters[i]=float(x)
                         variableSize=i
                     pareto.append(parameters)
+
+    print(iteration)
+    print(goal_samples)
 
     size = len(pareto)
     with open(matlabfile, 'w') as f:
