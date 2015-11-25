@@ -68,31 +68,19 @@ void Sensitivity::generateSensitivityMatrix(){
 	for (int i = 0; i < inputSize;i++)
 		max[i] = *max_element(sensitivityMatrix[i], sensitivityMatrix[i] + outputSize);
 
-	//for (int i = 0; i < outputSize; i++){
-	//	cout << max[i] << endl;
-	//}
-
-	//cout << "Pre-normalized SM:" << endl;
-	//for (int i = 0; i < inputSize; i++){
-	//	for (int j = 0; j < outputSize; j++){
-	//		cout << sensitivityMatrix[i][j] << " ";
-	//	}cout << endl;
-	//}
-
 	//normalize
 	//todo: we are traversling the matrix incorrectly, need bugfix
-	for (int i = 0; i < inputSize; i++){
-		for (int j = 0; j < outputSize; j++){
-			sensitivityMatrix[i][j] = sensitivityMatrix[i][j]/max[i];
-		}
-	}
+	//for (int i = 0; i < inputSize; i++){
+	//	for (int j = 0; j < outputSize; j++){
+	//		sensitivityMatrix[i][j] = sensitivityMatrix[i][j]/max[i];
+	//	}
+	//}
 
 	for (int i = 0; i < inputSize; i++){
 		for (int j = 0; j < outputSize; j++){
 			cout << sensitivityMatrix[i][j] << " ";
 		}cout << endl;
 	}
-	//cin.get();
 	//delete max;
 }
 
