@@ -26,6 +26,7 @@ class Duplex{
 	System* system;
 	double* max;
 	double* min;
+	double* opt;
 	int parameterDimension;
 	int objectiveDimension;
 	
@@ -38,6 +39,7 @@ class Duplex{
 	double stepLength;
 	double initialStepLength;
 	bool reinforcementLearningOption;
+	bool shrinkGoalRegionWithTemperateOption;
 	int nextCandidateParameter;
 	//Duplex outputs:
     vector<double> currentDistance;
