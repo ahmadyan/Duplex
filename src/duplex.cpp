@@ -176,10 +176,14 @@ double* Duplex::generateNewInput(State* q){
     int pSize = q->getParameterSize();
     double* param = q->getParameter();
     double* input = new double[pSize];
-    for(int j=0;j<pSize;j++) input[j] = param[j];
-	input[nextCandidateParameter] += stepLength;
-	if (input[nextCandidateParameter] < parameterMin[nextCandidateParameter]) input[nextCandidateParameter] = parameterMin[nextCandidateParameter];
-	if (input[nextCandidateParameter] > parameterMax[nextCandidateParameter]) input[nextCandidateParameter] = parameterMax[nextCandidateParameter];
+	for (int i = 0; i < pSize; i++){
+		input[i] = param[i] + computeStepLength();
+		if (input[i] < parameterMin[i]) input[i] = parameterMin[i];
+		if (input[i] > parameterMax[i]) input[i] = parameterMax[i];
+	}
+	//input[nextCandidateParameter] += stepLength;
+	//if (input[nextCandidateParameter] < parameterMin[nextCandidateParameter]) input[nextCandidateParameter] = parameterMin[nextCandidateParameter];
+	//if (input[nextCandidateParameter] > parameterMax[nextCandidateParameter]) input[nextCandidateParameter] = parameterMax[nextCandidateParameter];
     return input;
 }
 
@@ -234,7 +238,7 @@ void Duplex::computeTemperature(int i){
 	if (temperature < 0.05) temperature = 0.05;
 }
 
-void Duplex::computeStepLength(){ 
+double Duplex::computeStepLength(){ 
 	double maxStep = initialStepLength * rand() / double(RAND_MAX);
 	int direction = 1; if (rand() % 2 == 0) direction = -1;
 	switch (annealingOption){
@@ -251,11 +255,12 @@ void Duplex::computeStepLength(){
 		stepLength = direction * maxStep * temperature;
 		break;
 	}
+	return stepLength;
+
 }
 
 State* Duplex::localStep(int i, State* qnear){
 	computeTemperature(i);
-	computeStepLength();
 	nextCandidateParameter = computeNextCandidateParameter(qnear);
 	double* input = generateNewInput(qnear);
 	State* qnew = new State(parameterDimension, objectiveDimension);

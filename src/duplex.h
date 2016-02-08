@@ -79,7 +79,7 @@ public:
 	State* localStep(int i, State*);
 	State* globalStep();
 	void computeTemperature(int i);
-	void computeStepLength();
+	double computeStepLength();
 	int  computeNextCandidateParameter(State* qnear);
 	
     void save(boost::property_tree::ptree* ptree);
