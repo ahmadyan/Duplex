@@ -63,6 +63,7 @@ public:
 	
     void optimize();
 	void simulated_annealing();
+	void functionalOptimization();
 	string draw();
     string drawParameterTree();
     string drawObjectiveTree();

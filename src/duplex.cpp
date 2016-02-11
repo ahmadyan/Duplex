@@ -87,36 +87,31 @@ void Duplex::initialize(){
 	cout << "Duplex initialization started. It make take a while to analyze the root." << endl;
 	double* init = getInitialState();															
 	double* reward = new double[parameterDimension];											
-																								
+								
+
 	for (int i = 0; i < parameterDimension; i++)												
 		reward[i] = 1;
-	root = new State(parameterDimension, objectiveDimension);									
-	root->setParameter(init);																	
-	root->setReward(reward, (double)parameterDimension);										
-	system->eval(root);																			
-
-	db->insert(root);																			
-	root->setID(0);																				
-	cout << "Root node set." << endl;
-    //setting boundaries for the objectives
-    vector<string> objectiveGoalMinStringVector = settings->listValues("objective", "uid-objective.goal.min");
-    vector<string> objectiveGoalMaxStringVector = settings->listValues("objective", "uid-objective.goal.max");
-    vector<string> objectiveMinStringVector     = settings->listValues("objective", "uid-objective.min");
-    vector<string> objectiveMaxStringVector     = settings->listValues("objective", "uid-objective.max");
-	vector<string> objectiveOptimumStringVector = settings->listValues("objective", "uid-objective.goal.optimum");	
-    goalRegionBoxMin = new double[objectiveDimension];
-    goalRegionBoxMax = new double[objectiveDimension];
-    max = new double[objectiveDimension];
-    min = new double[objectiveDimension];	
+	
+	//setting boundaries for the objectives
+	vector<string> objectiveGoalMinStringVector = settings->listValues("objective", "uid-objective.goal.min");
+	vector<string> objectiveGoalMaxStringVector = settings->listValues("objective", "uid-objective.goal.max");
+	vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
+	vector<string> objectiveMaxStringVector = settings->listValues("objective", "uid-objective.max");
+	vector<string> objectiveOptimumStringVector = settings->listValues("objective", "uid-objective.goal.optimum");
+	goalRegionBoxMin = new double[objectiveDimension];
+	goalRegionBoxMax = new double[objectiveDimension];
+	max = new double[objectiveDimension];
+	min = new double[objectiveDimension];
 	opt = new double[objectiveDimension];
-	for(int i=0;i<objectiveDimension;i++){
-        goalRegionBoxMin[i] = stod(objectiveGoalMinStringVector[i]) ;
-        goalRegionBoxMax[i] = stod(objectiveGoalMaxStringVector[i]) ;
-        min[i] = stod(objectiveMinStringVector[i]);
-        max[i] = stod(objectiveMaxStringVector[i]);
+	for (int i = 0; i<objectiveDimension; i++){
+		goalRegionBoxMin[i] = stod(objectiveGoalMinStringVector[i]);
+		goalRegionBoxMax[i] = stod(objectiveGoalMaxStringVector[i]);
+		min[i] = stod(objectiveMinStringVector[i]);
+		max[i] = stod(objectiveMaxStringVector[i]);
 		opt[i] = stod(objectiveOptimumStringVector[i]);
-    }
+	}
 	cout << "Goals are set." << endl;
+
 
 	vector<string> parametersMinStringVector = settings->listValues("parameter", "uid-parameter.range.min");
 	vector<string> parametersMaxStringVector = settings->listValues("parameter", "uid-parameter.range.max");
@@ -127,8 +122,58 @@ void Duplex::initialize(){
 		parameterMax[i] = stod(parametersMaxStringVector[i]);;
 	}
 
-	error.push_back(goal->distance(root, max, min));
-    currentDistance.push_back(goal->distance(root, max, min));
+	if (settings->check("mode", "fopt")){
+		double b = settings->lookupFloat("parameter.b");
+		double c0 = settings->lookupFloat("parameter.c0");
+		int pathSegments = settings->lookupInt("initialPathSegments");
+		root = new State(parameterDimension, objectiveDimension);
+		root->setParameter(init);
+		db->insert(root);
+		root->setID(0);
+		error.push_back(0);
+		currentDistance.push_back(0);
+
+		for (int i = 1; i < pathSegments-1; i++){
+			State* q = new State(parameterDimension, objectiveDimension);
+			double* p = new double[parameterDimension];
+			p[0] = i;	//time
+			for (int j = 1; j < parameterDimension; j++){
+				p[j] = q->unifRand(parameterMin[j], parameterMax[j]);
+			}
+			q->setParameter(p);
+			q->setID(i);
+			q->setParentID(i - 1);
+			db->insert(q);
+			error.push_back(0);
+			currentDistance.push_back(0);
+		}
+
+		//connect the last point to b
+		State* last = new State(parameterDimension, objectiveDimension);
+		double* p = new double[parameterDimension];
+		p[0] = pathSegments;
+		p[1] = b;
+		p[2] = 0;
+		last->setParameter(p);
+		last->setID(pathSegments - 1);
+		last->setParentID(pathSegments - 2);
+		db->insert(last);
+		error.push_back(0);
+		currentDistance.push_back(0);
+
+		cout << "Initial curve is set." << endl;
+	}else{
+		root = new State(parameterDimension, objectiveDimension);
+		root->setParameter(init);
+		root->setReward(reward, (double)parameterDimension);
+		system->eval(root);
+
+		db->insert(root);
+		root->setID(0);
+		cout << "Root node set." << endl;
+		error.push_back(goal->distance(root, max, min));
+		currentDistance.push_back(goal->distance(root, max, min));
+	}
 	cout << "Error and distance set." << endl;
 }
 
@@ -304,6 +349,13 @@ void Duplex::simulated_annealing(){
 	}
 }
 
+/// functional optimization algorithm using Duplex
+/// the big difference between fopt and duplex is that in fopt, we are optimizing for an entire path, not just for one state
+void Duplex::functionalOptimization(){
+	
+}
+
+
 void Duplex::updateError(State* s, double* maxBound, double* minBound){
 	double d = goal->distance(s, maxBound, minBound);
 	double e = error[error.size() - 1];
@@ -358,14 +410,16 @@ double maximum(double a, double b, double max){
 string Duplex::drawParameterTree(){
 	string color = "blue";
 	stringstream cmdstr;
+	int x = settings->lookupInt("plot.x");
+	int y = settings->lookupInt("plot.y");
 	double xmin = 99, xmax = -99, ymin = 99, ymax = -99;
 	for (int i = 1; i<db->getSize(); i++){   // i starts at 1 because we ignore the root
 		State* s = db->getState(i);
 		State* p = db->getState(s->getParentID());
-		double iFromX = p->getParameter()[0];//p->getObjective()[0];
-		double iFromY = p->getParameter()[1];//p->getObjective()[1];
-		double iToX = s->getParameter()[0];//s->getObjective()[0];
-		double iToY = s->getParameter()[1];//s->getObjective()[1];
+		double iFromX = p->getParameter()[x];//p->getObjective()[0];
+		double iFromY = p->getParameter()[y];//p->getObjective()[1];
+		double iToX = s->getParameter()[x];//s->getObjective()[0];
+		double iToY = s->getParameter()[y];//s->getObjective()[1];
 		xmin = minimum(iFromX, iToX, xmin);
 		ymin = minimum(iFromY, iToY, ymin);
 		xmax = maximum(iFromX, iToX, xmax);
@@ -400,14 +454,16 @@ string Duplex::drawParameterTree(){
 string Duplex::drawObjectiveTree(){
 	string color = "red";
 	stringstream cmdstr;
+	int x = settings->lookupInt("plot.x");
+	int y = settings->lookupInt("plot.y");
 	double xmin = 99, xmax = -99, ymin = 99, ymax = -99;
 	for (int i = 1; i<db->getSize(); i++){   // i starts at 1 because we ignore the root
 		State* s = db->getState(i);
 		State* p = db->getState(s->getParentID());
-		double iFromX = p->getObjective()[0];//p->getObjective()[0];
-		double iFromY = p->getObjective()[1];//p->getObjective()[1];
-		double iToX = s->getObjective()[0];//s->getObjective()[0];
-		double iToY = s->getObjective()[1];//s->getObjective()[1];
+		double iFromX = p->getObjective()[x];//p->getObjective()[0];
+		double iFromY = p->getObjective()[y];//p->getObjective()[1];
+		double iToX = s->getObjective()[x];//s->getObjective()[0];
+		double iToY = s->getObjective()[y];//s->getObjective()[1];
 		xmin = minimum(iFromX, iToX, xmin);
 		ymin = minimum(iFromY, iToY, ymin);
 		xmax = maximum(iFromX, iToX, xmax);
@@ -466,8 +522,8 @@ void Duplex::save(boost::property_tree::ptree* ptree){
 	sensitivity->save(&sense);
 
     boost::property_tree::ptree& node = ptree->add("duplex.stat", "");
-
-    for(int i=0;i<iterationCap;i++){
+	
+	for (int i = 0; i<db->getSize(); i++){
         boost::property_tree::ptree& iter = node.add("iteration", "");
         iter.add("id", i);
         iter.add("error", error[i]);

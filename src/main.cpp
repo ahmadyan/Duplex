@@ -82,6 +82,8 @@ int main(int argc, char** argv){
 				duplex->optimize();
 			}else if (settings->check("mode", "simulated-annealing")){
 				duplex->simulated_annealing();
+			}else if (settings->check("mode", "fopt")){
+				duplex->functionalOptimization();
 			}else{
 				log << "Unknown optimization mode is selected. Duplex currently supports: [load, duplex, simulated-annealing]";
 			}
