@@ -13,9 +13,9 @@ def main():
     if (platform.system() == "Windows"):
         workingDirectory = "C:\\Users\\adel\\code\\Duplex\\bin"
         duplexCommand = "C:\\Users\\adel\\code\\Duplex\\DuplexVS\\DuplexVS.exe"
-        configfile = "C:\\Users\\adel\\code\\Duplex\\bin\\inverter.cfg"
-        matlabfile = "C:\\Users\\adel\\code\\Duplex\\bin\\duplex_figure.m"
-        duplexSavefile = "C:\\Users\\adel\\code\\Duplex\\bin\\opamp_result2.xml"
+        configfile = "C:\\Users\\adel\\code\\Duplex\\bin\\eggholder.cfg"
+        matlabfile = "C:\\Users\\adel\\code\\Duplex\\bin\\duplex_figure_eggholder_coordinated.m"
+        duplexSavefile = "C:\\Users\\adel\\code\\Duplex\\bin\\ceggholder.xml"
     else:
         workingDirectory = "/Users/adel/code/Duplex/bin/"
         duplexCommand = '/Users/adel/code/Duplex/xcode/Duplex.xcode/build/Debug/Duplex.xcode'
