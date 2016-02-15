@@ -136,7 +136,18 @@ int State::getObjectiveSize(){
 double State::distance(State* a, double* max, double* min){
 	double d = 0;
 	for (int i = 0; i<objectiveDimension; i++){
-		d += ((objectiveVector[i] - a->objectiveVector[i]) * (objectiveVector[i] - a->objectiveVector[i]) / (max[i] - min[i]));
+		d += ( ((objectiveVector[i] - a->objectiveVector[i]) * (objectiveVector[i] - a->objectiveVector[i])) / (max[i] - min[i]));
+	}
+	d = sqrt(d);
+	return d;
+}
+
+
+//compute the distance between two vectors u and v  state and given state a
+double State::distance(int size, double* v, double* u){
+	double d = 0;
+	for (int i = 0; i<size; i++){
+		d += (v[i] - u[i]) * (v[i] - u[i]);
 	}
 	d = sqrt(d);
 	return d;

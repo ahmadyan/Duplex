@@ -33,25 +33,22 @@ Duplex::Duplex(Settings* c){
 	}
 	if (settings->check("temperature", "fast")){
 		temperatureOption = Temperature::temperaturefast;
-	}
-	else if (settings->check("temperature", "boltz")){
+	}else if (settings->check("temperature", "boltz")){
 		temperatureOption = Temperature::temperatureboltz;
-	}
-	else if (settings->check("temperature", "exp")){
+	}else if (settings->check("temperature", "exp")){
 		temperatureOption = Temperature::temperatureexp;
-	}
-	else{
+	}else{
 		cout << "Temperature option not found in the config file. Possible options are [fast, boltz, exp].";
 		exit(2);
 	}
 
 	if (settings->check("annealing", "fast")){
 		annealingOption = Annealing::annealingfast;
-	} else if (settings->check("annealing", "boltz")){
+	}else if (settings->check("annealing", "boltz")){
 		annealingOption = Annealing::annealingboltz;
-	} else if (settings->check("annealing", "fast-random")){
+	}else if (settings->check("annealing", "fast-random")){
 		annealingOption = Annealing::annealingfastrandom;
-	} else if (settings->check("annealing", "boltz-random")){
+	}else if (settings->check("annealing", "boltz-random")){
 		annealingOption = Annealing::annealingboltzrandom;
 	}else{
 		cout << "Annealing option not found in the config file/ Possible options are [fast, boltz]";
@@ -122,27 +119,34 @@ void Duplex::initialize(){
 		parameterMax[i] = stod(parametersMaxStringVector[i]);;
 	}
 
+	//Setting up the root node
+	root = new State(parameterDimension, objectiveDimension);
+	root->setParameter(init);
+	root->setReward(reward, (double)parameterDimension);
+	root->setID(0);
+	root->setParentID(-1);
+	system->eval(root);
+	db->insert(root);
+	cout << "Root node set." << endl;
+	error.push_back(goal->distance(root, max, min));
+	currentDistance.push_back(goal->distance(root, max, min));
+
 	if (settings->check("mode", "fopt")){
 		double b = settings->lookupFloat("parameter.b");
 		double c0 = settings->lookupFloat("parameter.c0");
 		int pathSegments = settings->lookupInt("initialPathSegments");
-		root = new State(parameterDimension, objectiveDimension);
-		root->setParameter(init);
-		db->insert(root);
-		root->setID(0);
-		error.push_back(0);
-		currentDistance.push_back(0);
 
 		for (int i = 1; i < pathSegments-1; i++){
 			State* q = new State(parameterDimension, objectiveDimension);
 			double* p = new double[parameterDimension];
-			p[0] = i;	//time
-			for (int j = 1; j < parameterDimension; j++){
+			//p[0] = i;	//time
+			for (int j = 0; j < parameterDimension; j++){
 				p[j] = q->unifRand(parameterMin[j], parameterMax[j]);
 			}
 			q->setParameter(p);
 			q->setID(i);
-			q->setParentID(i - 1);
+			q->setParent(db->getState(i - 1));
+			system->eval(q);
 			db->insert(q);
 			error.push_back(0);
 			currentDistance.push_back(0);
@@ -151,29 +155,20 @@ void Duplex::initialize(){
 		//connect the last point to b
 		State* last = new State(parameterDimension, objectiveDimension);
 		double* p = new double[parameterDimension];
-		p[0] = pathSegments;
-		p[1] = b;
-		p[2] = 0;
+		//p[0] = pathSegments;
+		p[0] = b;
+		p[1] = 0;
 		last->setParameter(p);
 		last->setID(pathSegments - 1);
-		last->setParentID(pathSegments - 2);
+		last->setParent(db->getState(pathSegments - 2));
+		system->eval(last);
 		db->insert(last);
 		error.push_back(0);
 		currentDistance.push_back(0);
 
 		cout << "Initial curve is set." << endl;
-	}else{
-		root = new State(parameterDimension, objectiveDimension);
-		root->setParameter(init);
-		root->setReward(reward, (double)parameterDimension);
-		system->eval(root);
-
-		db->insert(root);
-		root->setID(0);
-		cout << "Root node set." << endl;
-		error.push_back(goal->distance(root, max, min));
-		currentDistance.push_back(goal->distance(root, max, min));
 	}
+
 	cout << "Error and distance set." << endl;
 }
 
@@ -310,6 +305,7 @@ State* Duplex::localStep(int i, State* qnear){
 	double* input = generateNewInput(qnear);
 	State* qnew = new State(parameterDimension, objectiveDimension);
 	qnew->setParameter(input);
+	qnew->setParent(qnear);
 	sensitivity->pushBackInputChange(nextCandidateParameter, qnew->getParameter()[nextCandidateParameter], stepLength);
 	return qnew;
 }

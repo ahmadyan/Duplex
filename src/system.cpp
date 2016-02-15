@@ -52,17 +52,39 @@ void System::eval(State* s, double t){
 		double* parameters = s->getParameter();
 		double* objectives = new double[objectiveSize];
 		for (int i = 0; i < objectiveSize; i++){
-			const expression::grammar<double, std::string::const_iterator> eg;
-			const double close_enough = std::numeric_limits<double>::epsilon();
-			std::string expression = functions[i];
-			for (int j = 0; j < parameterSize; j++){
-				boost::replace_all(expression, variables[j], to_string(parameters[j]));
+			if (functions[i].at(0) == '#'){
+				cout << s->getParentID() << endl;
+				if (s->getParentID() == -1){	
+					//no parent node implies root state
+					objectives[i] = 0;
+				}else{
+					if (functions[i] == "#L"){
+						// #L is hardcoded for lentgh of the trace
+						double fprev = s->getParent()->getObjective()[i];
+						double dL = s->distance(s->getParameterSize(), parameters, s->getParent()->getParameter());
+						objectives[i] = fprev + dL;
+					}
+					else if (functions[i] == "#A"){
+						//#A is hardcoded for the area of the curve
+						double fprev = s->getParent()->getObjective()[i];
+						double dx = abs(s->getParent()->getParameter()[0] - s->getParameter()[0]);
+						double y = abs(s->getParameter()[1]);
+						objectives[i] = fprev + y*dx;
+					}
+				}
+			}else{
+				const expression::grammar<double, std::string::const_iterator> eg;
+				const double close_enough = std::numeric_limits<double>::epsilon();
+				std::string expression = functions[i];
+				for (int j = 0; j < parameterSize; j++){
+					boost::replace_all(expression, variables[j], to_string(parameters[j]));
+				}
+				std::string::const_iterator iter = expression.begin();
+				std::string::const_iterator end = expression.end();
+				double result;
+				parse(iter, end, eg, result);
+				objectives[i] = result;
 			}
-			std::string::const_iterator iter = expression.begin();
-			std::string::const_iterator end = expression.end();
-			double result;
-			parse(iter, end, eg, result);
-			objectives[i] = result;
 		}
 		s->setObjective(objectives);
 	}

@@ -50,7 +50,7 @@ public:
     int getObjectiveSize();
     int getParameterSize();
 	double distance(State* a, double* max, double* min);
-
+	double distance(int size, double* v, double* u);
 	double* getRewardVector();
 	double  getRewardCDF();
 	void setReward(double*, double);
