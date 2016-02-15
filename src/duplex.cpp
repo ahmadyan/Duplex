@@ -403,7 +403,6 @@ double maximum(double a, double b, double max){
 	return m;
 }
 
-
 //
 //		Plotting methods for Duplex
 //
@@ -416,38 +415,20 @@ string Duplex::drawParameterTree(){
 	for (int i = 1; i<db->getSize(); i++){   // i starts at 1 because we ignore the root
 		State* s = db->getState(i);
 		State* p = db->getState(s->getParentID());
-		double iFromX = p->getParameter()[x];//p->getObjective()[0];
-		double iFromY = p->getParameter()[y];//p->getObjective()[1];
-		double iToX = s->getParameter()[x];//s->getObjective()[0];
-		double iToY = s->getParameter()[y];//s->getObjective()[1];
+		double iFromX = p->getParameter()[x];
+		double iFromY = p->getParameter()[y];
+		double iToX = s->getParameter()[x];
+		double iToY = s->getParameter()[y];
 		xmin = minimum(iFromX, iToX, xmin);
 		ymin = minimum(iFromY, iToY, ymin);
 		xmax = maximum(iFromX, iToX, xmax);
 		ymax = maximum(iFromY, iToY, ymax);
 		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 \n";
-
-		/*
-		iFromX = 15 + p->getObjective()[0];
-		iFromY = p->getObjective()[1] - 8;
-		iToX   = 15 + s->getObjective()[0];
-		iToY   = s->getObjective()[1] - 8;
-		xmin = minimum(iFromX, iToX, xmin);
-		ymin = minimum(iFromY, iToY, ymin);
-		xmax = maximum(iFromX, iToX, xmax);
-		ymax = maximum(iFromY, iToY, ymax);
-		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << "red" << "\" lw 2 \n";
-		*/
 	}
 
 	stringstream board;
 	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 with linespoints lt \"white\" pt 0.01";
-	//board << " title \"" << title << "\"  \n";
-	//board << "set xlabel \"$" << xlabel << "$\" \n";
-	//board << "set ylabel \"$" << ylabel << "$\" \n";
-	//board << "set zlabel \"$" << zlabel << "$\" \n";
 	cmdstr << board.str() << "\n " << cmdstr.str();
-
-	//cout << cmdstr.str() << endl;
 	return cmdstr.str();
 }
 
@@ -460,10 +441,10 @@ string Duplex::drawObjectiveTree(){
 	for (int i = 1; i<db->getSize(); i++){   // i starts at 1 because we ignore the root
 		State* s = db->getState(i);
 		State* p = db->getState(s->getParentID());
-		double iFromX = p->getObjective()[x];//p->getObjective()[0];
-		double iFromY = p->getObjective()[y];//p->getObjective()[1];
-		double iToX = s->getObjective()[x];//s->getObjective()[0];
-		double iToY = s->getObjective()[y];//s->getObjective()[1];
+		double iFromX = p->getObjective()[x];
+		double iFromY = p->getObjective()[y];
+		double iToX = s->getObjective()[x];
+		double iToY = s->getObjective()[y];
 		xmin = minimum(iFromX, iToX, xmin);
 		ymin = minimum(iFromY, iToY, ymin);
 		xmax = maximum(iFromX, iToX, xmax);
@@ -473,10 +454,6 @@ string Duplex::drawObjectiveTree(){
 
 	stringstream board;
 	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 with linespoints lt \"white\" pt 0.01";
-	//board << " title \"" << title << "\"  \n";
-	//board << "set xlabel \"$" << xlabel << "$\" \n";
-	//board << "set ylabel \"$" << ylabel << "$\" \n";
-	//board << "set zlabel \"$" << zlabel << "$\" \n";
 	cmdstr << board.str() << "\n " << cmdstr.str();
 	return cmdstr.str();
 }
@@ -517,10 +494,8 @@ void Duplex::save(boost::property_tree::ptree* ptree){
     ptree->add("duplex.version", 1);
     boost::property_tree::ptree& data = ptree->add("duplex.data", "");
     db->save(&data);
-
 	boost::property_tree::ptree& sense = ptree->add("duplex.sensitivity", "");
 	sensitivity->save(&sense);
-
     boost::property_tree::ptree& node = ptree->add("duplex.stat", "");
 	
 	for (int i = 0; i<db->getSize(); i++){
@@ -535,7 +510,6 @@ void Duplex::save(boost::property_tree::ptree* ptree){
 void Duplex::load(boost::property_tree::ptree* ptree){
     boost::property_tree::ptree& data = ptree->get_child("duplex.data");
     db->load(&data);
-    
     auto pnodes = ptree->get_child("duplex.stat");
     for(auto v: pnodes){
         if(v.first=="iteration"){
