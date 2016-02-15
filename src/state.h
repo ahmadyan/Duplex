@@ -16,6 +16,7 @@ enum class StateType {StateTypeNormal, StateTypeRoot, StateTypeObjective};
 class State{
     int id;
     int parentID;
+	State* parent;
     int parameterDimension;
     int objectiveDimension;
     double* parameterVector;
@@ -42,6 +43,8 @@ public:
     double* uniformRandomVector(int size, double* min, double* max);
     void setParentID(int);
     int getParentID();
+	void setParent(State*);
+	State* getParent();
     void setID(int);
     int getID();
     int getObjectiveSize();

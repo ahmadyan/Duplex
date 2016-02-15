@@ -105,6 +105,15 @@ void State::setParentID(int pid){
     parentID=pid;
 }
 
+void State::setParent(State* s){
+	parent = s;
+	parentID = s->getID();
+}
+
+State* State::getParent(){
+	return parent;
+}
+
 
 int State::getID(){
     return id;
