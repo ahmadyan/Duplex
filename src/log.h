@@ -12,6 +12,7 @@
 #include <chrono>
 #include <ctime>
 #include <string>
+#include <time.h>
 
 using namespace std;
 
@@ -46,8 +47,11 @@ public:
         auto now        = chrono::system_clock::now();
         auto now_time_t = chrono::system_clock::to_time_t( now );
 		struct tm now_tm;
-		localtime_s(&now_tm, &now_time_t);
-        
+#ifdef _WIN32
+		localtime_s(&now_tm, &now_time_t);      //localtime_s is the c++11, older compilers should be OK with localtime_r
+#else
+        localtime_r(&now_time_t, &now_tm);
+#endif
         if(newline) out << _log_header << "(" << now_tm.tm_hour << ":" << now_tm.tm_min << ":" << now_tm.tm_sec << "): " << data;
         else out << data;
         newline = false;
