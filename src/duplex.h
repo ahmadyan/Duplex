@@ -64,9 +64,11 @@ public:
     void optimize();
 	void simulated_annealing();
 	void functionalOptimization();
-	string draw();
-    string drawParameterTree();
-    string drawObjectiveTree();
+
+	//plotting methods
+	string draw(int);
+    string drawParameterTree(int, int, string);
+    string drawObjectiveTree(int, int, string);
 	string plotError();
     string plotDistance();
 

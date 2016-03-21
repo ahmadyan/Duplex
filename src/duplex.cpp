@@ -132,14 +132,16 @@ void Duplex::initialize(){
 	currentDistance.push_back(goal->distance(root, max, min));
 
 	if (settings->check("mode", "fopt")){
+		//generates an initial curve, starting at y(0)=0 and ending in y(n)=b
 		double b = settings->lookupFloat("parameter.b");
 		double c0 = settings->lookupFloat("parameter.c0");
 		int pathSegments = settings->lookupInt("initialPathSegments");
 
+		//randomly generate each segment in the path
 		for (int i = 1; i < pathSegments-1; i++){
 			State* q = new State(parameterDimension, objectiveDimension);
 			double* p = new double[parameterDimension];
-			//p[0] = i;	//time
+			//p[0] = i;	//time, ignore this, the states are no longer time-annotated in dido case
 			for (int j = 0; j < parameterDimension; j++){
 				p[j] = q->unifRand(parameterMin[j], parameterMax[j]);
 			}
@@ -402,11 +404,9 @@ double maximum(double a, double b, double max){
 //
 //		Plotting methods for Duplex
 //
-string Duplex::drawParameterTree(){
+string Duplex::drawParameterTree(int x, int y, string title){
 	string color = "blue";
 	stringstream cmdstr;
-	int x = settings->lookupInt("plot.x");
-	int y = settings->lookupInt("plot.y");
 	double xmin = 99, xmax = -99, ymin = 99, ymax = -99;
 	for (int i = 1; i<db->getSize(); i++){   // i starts at 1 because we ignore the root
 		State* s = db->getState(i);
@@ -423,16 +423,15 @@ string Duplex::drawParameterTree(){
 	}
 
 	stringstream board;
-	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 with linespoints lt \"white\" pt 0.01";
+	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 title '" << title << "' with linespoints lt \"white\" pt 0.01";
 	cmdstr << board.str() << "\n " << cmdstr.str();
 	return cmdstr.str();
 }
 
-string Duplex::drawObjectiveTree(){
+string Duplex::drawObjectiveTree(int x, int y, string title){
 	string color = "red";
 	stringstream cmdstr;
-	int x = settings->lookupInt("plot.x");
-	int y = settings->lookupInt("plot.y");
+	
 	double xmin = 99, xmax = -99, ymin = 99, ymax = -99;
 	for (int i = 1; i<db->getSize(); i++){   // i starts at 1 because we ignore the root
 		State* s = db->getState(i);
@@ -449,7 +448,7 @@ string Duplex::drawObjectiveTree(){
 	}
 
 	stringstream board;
-	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 with linespoints lt \"white\" pt 0.01";
+	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0  title '" << title << "' with linespoints lt \"white\" pt 0.01";
 	cmdstr << board.str() << "\n " << cmdstr.str();
 	return cmdstr.str();
 }
@@ -472,15 +471,21 @@ string Duplex::plotDistance(){
     return cmdstr.str();
 }
 
-string Duplex::draw(){
-	if (settings->check("plot.type", "error")){
+string Duplex::draw(int i){
+	vector<string> plots = settings->listVariables("plot", "uid-plot");
+	string type = settings->lookupString(("plot." + plots[i] + ".type").c_str());
+	if (type == "error"){
 		return plotError();
-	}else if (settings->check("plot.type", "distance")){
+	}else if (type == "distance"){
 		return plotDistance();
-	}else if (settings->check("plot.type", "tree.parameter")){
-		return drawParameterTree();
-	}else if (settings->check("plot.type", "tree.objective")){
-		return drawObjectiveTree();
+	}else if (type == "tree.parameter"){
+		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
+		int y = settings->lookupInt(("plot." + plots[i] + ".y").c_str());
+		return drawParameterTree(x,y, "param");
+	}else if (type == "tree.objective"){
+		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
+		int y = settings->lookupInt(("plot." + plots[i] + ".y").c_str());
+		return drawObjectiveTree(x,y, "objective");
     }else{
         return "";
     }
