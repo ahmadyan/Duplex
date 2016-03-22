@@ -8,6 +8,8 @@
 #pragma once
 #include <iostream>
 #include <vector>
+#include <queue>
+#include <algorithm>
 #include <boost/property_tree/ptree.hpp>
 #include "state.h"
 #include "kdtree.h"
@@ -19,6 +21,7 @@ class Search{
     int dim;
     vector<State*> db;
     struct kdtree *kd;
+	priority_queue<State*, vector<State*>, stateGreaterComparator > pq;
 public:
 	Search(Settings*);
 	~Search();
@@ -26,6 +29,7 @@ public:
     State* getState(int i);
     void setState(State* s, int i);
     void insert(State*);
+	State* getOptimum();
     State* nearestNode(State*);
     void range(State*);
     unsigned long getSize();

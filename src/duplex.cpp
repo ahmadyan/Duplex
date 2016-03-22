@@ -12,6 +12,7 @@
 #include <algorithm>
 #include <iostream>
 #include <iomanip>
+#include <limits>
 #include <sstream>
 using namespace std;
 
@@ -90,6 +91,7 @@ void Duplex::initialize(){
 		reward[i] = 1;
 	
 	//setting boundaries for the objectives
+	objectiveType = settings->listValues("objective", "uid-objective.goal.mode");
 	vector<string> objectiveGoalMinStringVector = settings->listValues("objective", "uid-objective.goal.min");
 	vector<string> objectiveGoalMaxStringVector = settings->listValues("objective", "uid-objective.goal.max");
 	vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
@@ -128,8 +130,9 @@ void Duplex::initialize(){
 	system->eval(root);
 	db->insert(root);
 	cout << "Root node set." << endl;
-	error.push_back(goal->distance(root, max, min));
-	currentDistance.push_back(goal->distance(root, max, min));
+	double distance = score(root, max, min);
+	error.push_back(distance);
+	currentDistance.push_back(distance);
 
 	if (settings->check("mode", "fopt")){
 		//generates an initial curve, starting at y(0)=0 and ending in y(n)=b
@@ -150,8 +153,9 @@ void Duplex::initialize(){
 			q->setParent(db->getState(i - 1));
 			system->eval(q);
 			db->insert(q);
-			error.push_back(0);
-			currentDistance.push_back(0);
+			distance = score(q, max, min);
+			error.push_back(distance);
+			currentDistance.push_back(distance);
 		}
 
 		//connect the last point to b
@@ -312,7 +316,6 @@ State* Duplex::localStep(int i, State* qnear){
 	return qnew;
 }
 
-
 void Duplex::optimize(){
     for(int i=1;i<iterationCap;i++){
 		cout << i << endl;
@@ -343,19 +346,80 @@ void Duplex::simulated_annealing(){
 			bestState = qsample;
 			bestEnergy = energy;
 		}
-		updateError(bestState, max, min);
+		updateError(score(bestState, max, min));
 	}
+}
+
+//skratchpad, should be merged with globalStep function
+State* Duplex::foptGlobalStep(){
+	State* qsample = new State(parameterDimension, objectiveDimension);
+	qsample->setParameter(qsample->uniformRandomVector(parameterDimension, goalRegionBoxMin, goalRegionBoxMax));
+	qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax));
+	//for (int i = 0; i < objectiveDimension; i++){
+	//	cout << qsample->getObjective()[i] << " ,";
+	//}cout << endl;
+	/*if (shrinkGoalRegionWithTemperateOption){
+		double* objective = new double[objectiveDimension];
+		for (int i = 0; i < objectiveDimension; i++){
+			delta = abs(goalRegionBoxMax[i] - goalRegionBoxMin[i]);
+			objective[i] = qsample->unifRand(opt[i] - temperature*delta, opt[i] + temperature*delta);
+		}
+		qsample->setObjective(objective);
+	}
+	else{
+		qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax));
+	}*/
+	return qsample;
+}
+
+double Duplex::score(State* state, double* maxBound, double* minBound){
+	double distance = 0;
+	if (settings->check("mode", "fopt")){
+		double* objectives = state->getObjective();
+		double* goals = goal->getObjective();
+		int objectiveSize = state->getObjectiveSize();
+		//measure objective
+		for (int i = 0; i < objectiveSize; i++){
+			double normalizedDistance = (objectives[i] - goals[i]) / (max[i] - min[i]);
+			normalizedDistance *= normalizedDistance;
+			if ((objectiveType[i] == "boundary-hard") && (objectives[i]>max[i])){
+				normalizedDistance = std::numeric_limits<int>::max();
+			}
+			if ((objectiveType[i] == "maximize") && (objectives[i]>max[i])){
+				normalizedDistance = 0;
+			}
+			distance += normalizedDistance;
+		}
+	}
+	else{
+		distance = goal->distance(state, maxBound, minBound);
+	}
+	state->score = distance;
+	return distance;
 }
 
 /// functional optimization algorithm using Duplex
 /// the big difference between fopt and duplex is that in fopt, we are optimizing for an entire path, not just for one state
 void Duplex::functionalOptimization(){
-	
+	for (int i = 0; i < iterationCap; i++){
+		cout << i << endl;
+		State* qsample = foptGlobalStep();              //generate a new bias sample
+		State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
+		State* qnew = localStep(i, qnear);
+		system->eval(qnew, 0);                  //simulate the circuit with the new input
+		
+
+		db->insert(qnew);                       //add a new node to the database
+		qnew->setID(i);
+		qnew->setParentID(qnear->getID());      //maintaing the tree data structure
+		//bias.push_back(qsample);
+		updateError(score(qnew, max, min));
+		//updateReward(qnear, qnew);
+		//updateSensitivity(qnear, qnew);
+	}
 }
 
-
-void Duplex::updateError(State* s, double* maxBound, double* minBound){
-	double d = goal->distance(s, maxBound, minBound);
+void Duplex::updateError(double d){
 	double e = error[error.size() - 1];
 	error.push_back(fmin(e, d));
     currentDistance.push_back(d);
@@ -376,7 +440,7 @@ void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
 	qnew->setID(i);
 	qnew->setParentID(qnear->getID());      //maintaing the tree data structure
 	bias.push_back(qsample);
-	updateError(qnew, max, min);
+	updateError(score(qnew, max, min));
 	updateReward(qnear, qnew);
 	updateSensitivity(qnear, qnew);
 }

@@ -7,6 +7,7 @@
 //
 #pragma once
 #include <boost/property_tree/ptree.hpp>
+
 #include "configuration.h"
 #include "system.h"
 #include "search.h"
@@ -19,7 +20,7 @@ class Duplex{
 	Settings* settings;
     Search* db;
 	Sensitivity* sensitivity;
-
+	
 	//System:
 	State* root;
 	State* goal;
@@ -52,7 +53,7 @@ class Duplex{
     double* goalRegionBoxMax;
 	double* parameterMin;
 	double* parameterMax;
-
+	vector<string> objectiveType;
 public:
 	Duplex(Settings*);
     ~Duplex();
@@ -75,12 +76,15 @@ public:
 	void update(int, State* qsample, State* qnear, State* qnew);		//update the database, biases, rewards, etc.
 	void updateSensitivity(State* qnear, State* qnew);
 	void updateReward(State* qnear, State* qnew);
-	void updateError(State* s, double* max, double* min);
+	void updateError(double);
+	double score(State*, double*, double*);
 
 	void clear();
 	double* generateNewInput(State* q);
 	State* localStep(int i, State*);
-	State* globalStep();
+	State* globalStep();			
+	State* foptGlobalStep();
+	
 	void computeTemperature(int i);
 	double computeStepLength();
 	int  computeNextCandidateParameter(State* qnear);

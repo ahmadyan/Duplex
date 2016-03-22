@@ -26,7 +26,6 @@ class State{
 	double rewardCDF;
 public:
 
-
     State(int, int);
     ~State();
     void setObjective(double v, int i);
@@ -57,4 +56,18 @@ public:
     vector<string> split(const string &s, char delim);
     void save(boost::property_tree::ptree*);
     void load(boost::property_tree::ptree*);
+
+	double score;
+};
+
+class stateGreaterComparator{
+public: bool operator()(const State* lhs, const State* rhs) const{
+	return lhs->score > rhs->score;
+}
+};
+
+class stateLesserComparator{
+public: bool operator()(const State* lhs, const State* rhs) const{
+	return lhs->score < rhs->score;
+}
 };
