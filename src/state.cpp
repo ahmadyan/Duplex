@@ -136,10 +136,34 @@ int State::getObjectiveSize(){
 double State::distance(State* a, double* max, double* min){
 	double d = 0;
 	for (int i = 0; i<objectiveDimension; i++){
-		d += ( ((objectiveVector[i] - a->objectiveVector[i]) * (objectiveVector[i] - a->objectiveVector[i])) / (max[i] - min[i]));
+        auto distance = abs(objectiveVector[i] - a->objectiveVector[i]);
+        auto normalizedDistance = distance / (max[i]-min[i]);
+        d += normalizedDistance * normalizedDistance ;
 	}
 	d = sqrt(d);
 	return d;
+}
+
+//compute the norm between current objective state and given state a
+double State::absoluteParameterDistance(State* a){
+    double d = 0;
+    for (int i = 0; i<parameterDimension; i++){
+        auto distance = abs(parameterVector[i] - a->parameterVector[i]);
+        d += distance * distance ;
+    }
+    d = sqrt(d);
+    return d;
+}
+
+double State::normalizedParameterDistance(State* a, double* max, double* min){
+    double d = 0;
+    for (int i = 0; i<parameterDimension; i++){
+        auto distance = abs(parameterVector[i] - a->parameterVector[i]);
+        auto normalizedDistance = distance / (max[i]-min[i]);
+        d += normalizedDistance * normalizedDistance ;
+    }
+    d = sqrt(d);
+    return d;
 }
 
 
@@ -166,6 +190,14 @@ void State::setReward(double* r, double s){
 	rewardCDF = s;
 }
 
+double State::getScore(){
+    return score;
+}
+
+void State::setScore(double s){
+    score=s;
+}
+
 void State::save(boost::property_tree::ptree* pt){
     stringstream param, obj, rew;
     for(int i=0;i<parameterDimension;i++) param << parameterVector[i] << " ";
@@ -177,6 +209,7 @@ void State::save(boost::property_tree::ptree* pt){
     pt->put("parameter", param.str());
     pt->put("objective", obj.str());
     pt->put("reward", rew.str());
+    pt->put("score", score);
     if(type == StateType::StateTypeRoot )
         pt->put("<xmlattr>.root", true);
 }
@@ -194,6 +227,7 @@ vector<string> State::split(const string &s, char delim){
 void State::load(boost::property_tree::ptree* pt){
     id = pt->get<int>("id");
     parentID = pt->get<int>("parent");
+    score = pt->get<int>("score");
     vector<string> params = split(pt->get<string>("parameter"), ' ');
     for(int i=0;i<params.size();i++){
         parameterVector[i] = stod(params[i]);
@@ -212,3 +246,5 @@ void State::load(boost::property_tree::ptree* pt){
     parameterDimension = (int)params.size();
     objectiveDimension = (int)objectives.size();
 }
+
+

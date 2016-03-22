@@ -53,7 +53,6 @@ void System::eval(State* s, double t){
 		double* objectives = new double[objectiveSize];
 		for (int i = 0; i < objectiveSize; i++){
 			if (functions[i].at(0) == '#'){
-				cout << s->getParentID() << endl;
 				if (s->getParentID() == -1){	
 					//no parent node implies root state
 					objectives[i] = 0;

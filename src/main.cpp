@@ -100,7 +100,7 @@ int main(int argc, char** argv){
 			for (int i = 0; i < plots.size(); i++){
 				Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));
 				graphic->execute(duplex->draw(i));
-				graphic->saveToPdf(settings->lookupString("output"));
+				//graphic->saveToPdf(settings->lookupString("output"));
 				delete graphic;
 			}
         }

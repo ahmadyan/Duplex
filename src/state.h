@@ -25,6 +25,8 @@ class State{
     StateType type;
 	double* reward;	//used for reinforcement learning
 	double rewardCDF;
+    double score;
+    
 public:
 
     State(int, int);
@@ -49,8 +51,13 @@ public:
     int getID();
     int getObjectiveSize();
     int getParameterSize();
+    
+    //distance methods
 	double distance(State* a, double* max, double* min);
 	double distance(int size, double* v, double* u);
+    double absoluteParameterDistance(State* a);
+    double normalizedParameterDistance(State* a, double* max, double* min);
+    
 	double* getRewardVector();
 	double  getRewardCDF();
 	void setReward(double*, double);
@@ -58,17 +65,19 @@ public:
     void save(boost::property_tree::ptree*);
     void load(boost::property_tree::ptree*);
 
-	double score;
+
+    double getScore();
+    void setScore(double);
 };
 
 class stateGreaterComparator{
-public: bool operator()(const State* lhs, const State* rhs) const{
-	return lhs->score > rhs->score;
+public: bool operator()(State* lhs, State* rhs) const{
+	return lhs->getScore() > rhs->getScore();
 }
 };
 
 class stateLesserComparator{
-public: bool operator()(const State* lhs, const State* rhs) const{
-	return lhs->score < rhs->score;
+public: bool operator()(State* lhs, State* rhs) const{
+	return lhs->getScore() < rhs->getScore();
 }
 };
