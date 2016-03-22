@@ -21,7 +21,7 @@ class Search{
     int dim;
     vector<State*> db;
     struct kdtree *kd;
-	priority_queue<State*, vector<State*>, stateGreaterComparator > pq;
+	priority_queue<State*, vector<State*>, stateLesserComparator > pq;
 public:
 	Search(Settings*);
 	~Search();

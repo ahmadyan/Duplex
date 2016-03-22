@@ -7,6 +7,7 @@
 //
 #pragma once
 #include <vector>
+#include <iostream>
 #include "configuration.h"
 #include <boost/property_tree/ptree.hpp>
 

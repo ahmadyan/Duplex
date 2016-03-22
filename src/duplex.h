@@ -72,6 +72,7 @@ public:
     string drawObjectiveTree(int, int, string);
 	string plotError();
     string plotDistance();
+	string drawTrace(int x, int y, string title);
 
 	void update(int, State* qsample, State* qnear, State* qnew);		//update the database, biases, rewards, etc.
 	void updateSensitivity(State* qnear, State* qnew);

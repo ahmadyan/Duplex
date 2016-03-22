@@ -15,8 +15,8 @@ Search::~Search(){
 
 void Search::insert(State* s){
     kd_insert(kd, s->getObjective(), s);
+	db.push_back(s);
 	pq.push(s);
-    db.push_back(s);
 }
 
 State* Search::getOptimum(){

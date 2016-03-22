@@ -128,11 +128,11 @@ void Duplex::initialize(){
 	root->setID(0);
 	root->setParentID(-1);
 	system->eval(root);
-	db->insert(root);
-	cout << "Root node set." << endl;
 	double distance = score(root, max, min);
 	error.push_back(distance);
 	currentDistance.push_back(distance);
+	db->insert(root);
+	cout << "Root node set." << endl;
 
 	if (settings->check("mode", "fopt")){
 		//generates an initial curve, starting at y(0)=0 and ending in y(n)=b
@@ -152,10 +152,11 @@ void Duplex::initialize(){
 			q->setID(i);
 			q->setParent(db->getState(i - 1));
 			system->eval(q);
-			db->insert(q);
 			distance = score(q, max, min);
 			error.push_back(distance);
 			currentDistance.push_back(distance);
+			db->insert(q);
+			
 		}
 
 		//connect the last point to b
@@ -409,13 +410,14 @@ void Duplex::functionalOptimization(){
 		system->eval(qnew, 0);                  //simulate the circuit with the new input
 		
 
-		db->insert(qnew);                       //add a new node to the database
+		
 		qnew->setID(i);
 		qnew->setParentID(qnear->getID());      //maintaing the tree data structure
 		//bias.push_back(qsample);
 		updateError(score(qnew, max, min));
 		//updateReward(qnear, qnew);
 		//updateSensitivity(qnear, qnew);
+		db->insert(qnew);                       //add a new node to the database
 	}
 }
 
@@ -436,13 +438,13 @@ void Duplex::updateSensitivity(State* qnear, State* qnew){
 }
 
 void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
-	db->insert(qnew);                       //add a new node to the database
 	qnew->setID(i);
 	qnew->setParentID(qnear->getID());      //maintaing the tree data structure
 	bias.push_back(qsample);
 	updateError(score(qnew, max, min));
 	updateReward(qnear, qnew);
 	updateSensitivity(qnear, qnew);
+	db->insert(qnew);                       //add a new node to the database
 }
 
 void Duplex::clear(){
@@ -535,22 +537,57 @@ string Duplex::plotDistance(){
     return cmdstr.str();
 }
 
+string Duplex::drawTrace(int x, int y, string title){
+	string color = "black";
+	stringstream cmdstr;
+
+	double xmin = 99, xmax = -99, ymin = 99, ymax = -99;
+	State* s = db->getOptimum();
+	while (s->getID() != 0){
+		State* p = db->getState(s->getParentID());
+		double iFromX = p->getParameter()[x];
+		double iFromY = p->getParameter()[y];
+		double iToX = s->getParameter()[x];
+		double iToY = s->getParameter()[y];
+		xmin = minimum(iFromX, iToX, xmin);
+		ymin = minimum(iFromY, iToY, ymin);
+		xmax = maximum(iFromX, iToX, xmax);
+		ymax = maximum(iFromY, iToY, ymax);
+		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 \n";
+		s = p;
+	}
+
+	stringstream board;
+	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0  title '" << title << "' with linespoints lt \"white\" pt 0.01";
+	cmdstr << board.str() << "\n " << cmdstr.str();
+	return cmdstr.str();
+}
+
+
 string Duplex::draw(int i){
 	vector<string> plots = settings->listVariables("plot", "uid-plot");
 	string type = settings->lookupString(("plot." + plots[i] + ".type").c_str());
 	if (type == "error"){
 		return plotError();
-	}else if (type == "distance"){
+	}
+	else if (type == "distance"){
 		return plotDistance();
-	}else if (type == "tree.parameter"){
+	}
+	else if (type == "tree.parameter"){
 		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
 		int y = settings->lookupInt(("plot." + plots[i] + ".y").c_str());
-		return drawParameterTree(x,y, "param");
-	}else if (type == "tree.objective"){
+		return drawParameterTree(x, y, "param");
+	}
+	else if (type == "tree.objective"){
 		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
 		int y = settings->lookupInt(("plot." + plots[i] + ".y").c_str());
-		return drawObjectiveTree(x,y, "objective");
-    }else{
+		return drawObjectiveTree(x, y, "objective");
+	}
+	else if (type == "trace"){
+		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
+		int y = settings->lookupInt(("plot." + plots[i] + ".y").c_str());
+		return drawTrace(x, y, "trace");
+	}else{
         return "";
     }
 }
