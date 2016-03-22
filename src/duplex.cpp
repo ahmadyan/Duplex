@@ -156,7 +156,6 @@ void Duplex::initialize(){
 			error.push_back(distance);
 			currentDistance.push_back(distance);
 			db->insert(q);
-			
 		}
 
 		//connect the last point to b
@@ -169,10 +168,10 @@ void Duplex::initialize(){
 		last->setID(pathSegments - 1);
 		last->setParent(db->getState(pathSegments - 2));
 		system->eval(last);
+        distance = score(last, max, min);
+        error.push_back(distance);
+        currentDistance.push_back(distance);
 		db->insert(last);
-		error.push_back(0);
-		currentDistance.push_back(0);
-
 		cout << "Initial curve is set." << endl;
 	}
 
@@ -359,7 +358,7 @@ State* Duplex::foptGlobalStep(){
 	//for (int i = 0; i < objectiveDimension; i++){
 	//	cout << qsample->getObjective()[i] << " ,";
 	//}cout << endl;
-	/*if (shrinkGoalRegionWithTemperateOption){
+	if (shrinkGoalRegionWithTemperateOption){
 		double* objective = new double[objectiveDimension];
 		for (int i = 0; i < objectiveDimension; i++){
 			delta = abs(goalRegionBoxMax[i] - goalRegionBoxMin[i]);
@@ -369,7 +368,7 @@ State* Duplex::foptGlobalStep(){
 	}
 	else{
 		qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax));
-	}*/
+	}
 	return qsample;
 }
 
@@ -383,7 +382,7 @@ double Duplex::score(State* state, double* maxBound, double* minBound){
 		for (int i = 0; i < objectiveSize; i++){
 			double normalizedDistance = (objectives[i] - goals[i]) / (max[i] - min[i]);
 			normalizedDistance *= normalizedDistance;
-			if ((objectiveType[i] == "boundary-hard") && (objectives[i]>max[i])){
+			if ((objectiveType[i] == "boundary-hard") && (objectives[i]>opt[i])){
 				normalizedDistance = std::numeric_limits<int>::max();
 			}
 			if ((objectiveType[i] == "maximize") && (objectives[i]>max[i])){
@@ -408,9 +407,6 @@ void Duplex::functionalOptimization(){
 		State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
 		State* qnew = localStep(i, qnear);
 		system->eval(qnew, 0);                  //simulate the circuit with the new input
-		
-
-		
 		qnew->setID(i);
 		qnew->setParentID(qnear->getID());      //maintaing the tree data structure
 		//bias.push_back(qsample);
@@ -543,6 +539,25 @@ string Duplex::drawTrace(int x, int y, string title){
 
 	double xmin = 99, xmax = -99, ymin = 99, ymax = -99;
 	State* s = db->getOptimum();
+    cout << "optimum state = " << s->getID() << ", " << s->getObjective()[0] << " , " << s->getObjective()[1] << ", " << s->getObjective()[2] << endl ;
+
+    //todo: clean this up
+    int maxarea=-1;
+    int index=-1;
+    for(int i=0;i<db->getSize();i++){
+        State* x = db->getState(i);
+        if(x->getObjective()[0]<50 && x->getObjective()[1]<100){
+            double z = x->getObjective()[2];
+            if(z>maxarea){
+                z=maxarea;
+                index=i;
+            }
+        }
+    }
+    cout << "MyOPT" << index << endl ;
+    
+    s = db->getState(index);
+    cout << "optimum state = " << s->getID() << ", " << s->getObjective()[0] << " , " << s->getObjective()[1] << ", " << s->getObjective()[2] << endl ;
 	while (s->getID() != 0){
 		State* p = db->getState(s->getParentID());
 		double iFromX = p->getParameter()[x];
