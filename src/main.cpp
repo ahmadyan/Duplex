@@ -20,6 +20,15 @@
 
 using namespace config4cpp;
 
+#if (_MSC_VER == 1900)	//Visual studio 2015
+// temporary code, visual studio 2015 refactored CRT libraries. Now, some codes (specifically config4cpp) 
+// will produce link libraries because they cannot find _iob_func (used in _sprintf).
+// one solution is to recompile them using visual studio 2015 with legacy_stdio_definitions.lib additional dependency. 
+// this is a temporary fix.
+FILE _iob[] = { *stdin, *stdout, *stderr };
+extern "C" FILE * __cdecl __iob_func(void){return _iob;}
+#endif
+
 namespace{
 	const size_t ERROR_IN_COMMAND_LINE = 1;
 	const size_t SUCCESS = 0;
