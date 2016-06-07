@@ -87,21 +87,25 @@ int main(int argc, char** argv){
             duplex->setObjective();							log << "Objective set. " ;
             duplex->initialize();							log << "Duplex initialization complete." ;
             log.tick();
+
 			if (settings->check("mode", "duplex")){
 				duplex->optimize();
 			}else if (settings->check("mode", "simulated-annealing")){
 				duplex->simulated_annealing();
 			}else if (settings->check("mode", "fopt")){
 				duplex->functionalOptimization();
+			}else if (settings->check("mode", "opt")){
+				duplex->optimize();
 			}else{
 				log << "Unknown optimization mode is selected. Duplex currently supports: [load, duplex, simulated-annealing]";
 			}
             log.tock("Duplex main optimizatio loop");
             //saving the results into an xml file
             duplex->save(&ptree);
-            ofstream savefile(settings->lookupString("savefile"));
-            write_xml(savefile, ptree);
-            savefile.close();
+            //ofstream savefile(settings->lookupString("savefile"));
+            //write_xml(savefile, ptree);
+            //savefile.close();
+			//cout << "I'm here ..." << endl;
         }
         
         if(settings->check("plot.enable", "true")){

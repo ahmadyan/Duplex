@@ -316,18 +316,22 @@ State* Duplex::localStep(int i, State* qnear){
 	return qnew;
 }
 
-void Duplex::optimize(){
-    for(int i=1;i<iterationCap;i++){
+void Duplex::randomTreeOptimizer(){
+	for (int i = 1; i<iterationCap; i++){
 		cout << i << endl;
 		State* qsample = globalStep();              //generate a new bias sample
-        State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
-		State* qnew = localStep(i, qnear); 
+		State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
+		State* qnew = localStep(i, qnear);
 		system->eval(qnew, 0);                  //simulate the circuit with the new input
 		update(i, qsample, qnear, qnew);
-    }
+	}
 
 	if (settings->check("sensitivity-analysis.enable", "true"))
 		sensitivity->generateSensitivityMatrix();
+}
+
+void Duplex::optimize(){
+	randomTreeOptimizer();
 }
 
 void Duplex::simulated_annealing(){
@@ -375,17 +379,15 @@ State* Duplex::foptGlobalStep(){
 // Evaluates each states and assign them a score.
 // States with lower score are better candidates, state with the minimum score (0) is the optimal solution.
 double Duplex::score(State* state, double* maxBound, double* minBound){
-    //todo: temporary, should somehow come from the config file
-    double b = settings->lookupFloat("parameter.b");
-    double c0 = settings->lookupFloat("parameter.c0");
-
-    double* boundary = new double[2];
-    boundary[0] = b;
-    boundary[1] = 0;
-
 	double distance = 0;
     // In functional optimization, we have to evaluat each objective seperately.
 	if (settings->check("mode", "fopt")){
+		double b = settings->lookupFloat("parameter.b");
+		double c0 = settings->lookupFloat("parameter.c0");
+		double* boundary = new double[2];
+		boundary[0] = b;
+		boundary[1] = 0;
+
 		double* objectives = state->getObjective();
 		double* goals = goal->getObjective();
 		int objectiveSize = state->getObjectiveSize();
@@ -415,11 +417,12 @@ double Duplex::score(State* state, double* maxBound, double* minBound){
 			}
 			distance += normalizedDistance;
 		}
+		delete boundary;    //todo: remove this
 	}else{
         //Most of the time, we can use Eucledean distance as the score. Closer to the goal, the better
 		distance = goal->distance(state, maxBound, minBound);
 	}
-    delete boundary;    //todo: remove this
+    
 	state->setScore(distance);
 	return distance;
 }
@@ -604,7 +607,6 @@ string Duplex::drawTrace(int x, int y, string title){
 	cmdstr << board.str() << "\n " << cmdstr.str();
 	return cmdstr.str();
 }
-
 
 string Duplex::draw(int i){
 	vector<string> plots = settings->listVariables("plot", "uid-plot");

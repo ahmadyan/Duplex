@@ -65,6 +65,7 @@ public:
     void optimize();
 	void simulated_annealing();
 	void functionalOptimization();
+	void randomTreeOptimizer();
 
 	//plotting methods
 	string draw(int);

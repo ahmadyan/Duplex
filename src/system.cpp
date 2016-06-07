@@ -30,8 +30,13 @@ System::System(Settings* s){
 		type = INTERNAL;
 		functions = config->listValues("objective", "uid-objective.function");
 		variables = config->listValues("parameter", "uid-parameter.name");
+
+		if (config->check("","")){
+
+		}
 	}
 }
+
 System::~System(){
 }
 
@@ -88,6 +93,3 @@ void System::eval(State* s, double t){
 		s->setObjective(objectives);
 	}
 }
-
-
-
