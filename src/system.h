@@ -30,7 +30,9 @@ class System{
 	int parameterSize;
 	int objectiveSize; 
 	vector<string> functions;
-	vector<string> variables;
+	vector<string> variables;    
+    vector<vector<string> > jacobian;
+    
 public:
 	System(Settings* config);
 	~System();

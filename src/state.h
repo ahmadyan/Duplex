@@ -26,7 +26,7 @@ class State{
 	double* reward;	//used for reinforcement learning
 	double rewardCDF;
     double score;
-    
+    vector<vector<double> > jacobian;
 public:
 
     State(int, int);
@@ -51,6 +51,8 @@ public:
     int getID();
     int getObjectiveSize();
     int getParameterSize();
+    vector<vector<double> > getJacobian();
+    void setJacobian(vector<vector<double> >);
     
     //distance methods
 	double distance(State* a, double* max, double* min);

@@ -14,6 +14,9 @@
 #include <iomanip>
 #include <limits>
 #include <sstream>
+#include "optimizer.h"
+#include "gradientDescent.h"
+
 using namespace std;
 
 Duplex::Duplex(Settings* c){
@@ -331,6 +334,8 @@ void Duplex::randomTreeOptimizer(){
 }
 
 void Duplex::optimize(){
+    Optimizer* optimizer = new GradientDescent();
+    optimizer->optimize();
 	randomTreeOptimizer();
 }
 

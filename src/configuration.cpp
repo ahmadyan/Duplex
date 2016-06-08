@@ -200,6 +200,14 @@ vector<string> Settings::listVariables(const char* name, const char* sub) const 
     return list;
 }
 
+string Settings::concatScope(string s0, string s1){
+    return s0 + "." + s1;
+}
+
+string Settings::concatScope(string s0, string s1, string s2){
+    return s0 + "." + s1 + "." + s2;
+}
+
 void Settings::test() const throw (SettingsException){
     Configuration * cfg = (Configuration *)m_cfg;
     config4cpp::StringVector result;

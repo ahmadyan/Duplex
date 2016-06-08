@@ -32,6 +32,8 @@ public:
     vector<string> listVariables(const char* name, const char*) const throw (SettingsException);
 	vector<string> listValues(const char* name, const char*) const throw (SettingsException);
     void test() const throw (SettingsException);
+    string concatScope(string, string, string);
+    string concatScope(string s0, string s1);
 private:
 	char* m_scope;
 	void* m_cfg;
