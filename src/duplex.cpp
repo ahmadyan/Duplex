@@ -319,24 +319,48 @@ State* Duplex::localStep(int i, State* qnear){
 	return qnew;
 }
 
-void Duplex::randomTreeOptimizer(){
-	for (int i = 1; i<iterationCap; i++){
-		cout << i << endl;
-		State* qsample = globalStep();              //generate a new bias sample
-		State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
-		State* qnew = localStep(i, qnear);
-		system->eval(qnew, 0);                  //simulate the circuit with the new input
-		update(i, qsample, qnear, qnew);
-	}
 
-	if (settings->check("sensitivity-analysis.enable", "true"))
-		sensitivity->generateSensitivityMatrix();
+
+//Optimizer types:
+// Duplex internally supports three types of optimizer
+//  1. Tree optimizer, which is based on random tree optimization algorithm
+//  2. Walk optimizer, a generic term for descent algorithms, such as gradient descent, Adam, RMSProp, etc.
+//  3. Heuristic methods, currently supporting only simulated annealing
+
+//todo: needs refactoring, should be moved to its own class
+// Generic walk-based optimizer methods, such as gradient descent, Adap, RMPProp, etc.
+void Duplex::walkOptimizer(){
+    double* costHistory = new double[iterationCap]();
+    Optimizer* gd = new GradientDescent();
+    
+    for(int i=0;i<iterationCap;i++){
+        cout << i << endl ;
+        State* prev = db->getState();
+        //State* next = localStep(i, prev);
+        State* next = gd->update(prev);
+        system->eval(next,0);
+        update(i, prev, next);
+    }
 }
 
+void Duplex::treeOptimizer(){
+    for (int i = 1; i<iterationCap; i++){
+        cout << i << endl;
+        State* qsample = globalStep();              //generate a new bias sample
+        State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
+        State* qnew = localStep(i, qnear);
+        system->eval(qnew, 0);                  //simulate the circuit with the new input
+        update(i, qsample, qnear, qnew);
+    }
+    
+    if (settings->check("sensitivity-analysis.enable", "true"))
+        sensitivity->generateSensitivityMatrix();
+}
+
+
 void Duplex::optimize(){
-    Optimizer* optimizer = new GradientDescent();
-    optimizer->optimize();
-	randomTreeOptimizer();
+    //treeOptimizer();
+    walkOptimizer();
 }
 
 void Duplex::simulated_annealing(){
@@ -469,13 +493,21 @@ void Duplex::updateSensitivity(State* qnear, State* qnew){
 	sensitivity->commit();
 }
 
+void Duplex::updateBias(State* q){
+    bias.push_back(q);
+}
+
 void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
+    update(i, qnear, qnew);
+    bias.push_back(qsample);
+}
+
+void Duplex::update(int i, State* qnear, State* qnew){
 	qnew->setID(i);
 	qnew->setParentID(qnear->getID());      //maintaing the tree data structure
-	bias.push_back(qsample);
 	updateError(score(qnew, max, min));
-	updateReward(qnear, qnew);
-	updateSensitivity(qnear, qnew);
+	//updateReward(qnear, qnew);
+	//updateSensitivity(qnear, qnew);
 	db->insert(qnew);                       //add a new node to the database
 }
 
@@ -500,8 +532,8 @@ double maximum(double a, double b, double max){
 }
 
 //
-//		Plotting methods for Duplex
-//
+//	Plotting methods for Duplex
+//  todo: needs refactoring, needs to go into their own class
 string Duplex::drawParameterTree(int x, int y, string title){
 	string color = "blue";
 	stringstream cmdstr;
@@ -517,13 +549,43 @@ string Duplex::drawParameterTree(int x, int y, string title){
 		ymin = minimum(iFromY, iToY, ymin);
 		xmax = maximum(iFromX, iToX, xmax);
 		ymax = maximum(iFromY, iToY, ymax);
-		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 \n";
+		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 front \n";
 	}
 
+    
+
 	stringstream board;
-	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 title '" << title << "' with linespoints lt \"white\" pt 0.01";
-	cmdstr << board.str() << "\n " << cmdstr.str();
-	return cmdstr.str();
+    bool contour=true;
+    if(contour){
+        board
+        << "reset\n"
+        
+        << "f(x,y)="<< system->getFunction(0) << "\n"
+        << "set xrange [" << xmin << ":" << xmax <<"]\n"
+        << "set yrange [" << ymin << ":" << ymax <<"]\n"
+        << "set isosample 250, 250\n"
+        << "set table 'test.dat'\n"
+        << "splot f(x,y)\n"
+        << "unset table\n"
+        
+        << "set contour base\n"
+        << "set cntrparam level incremental -3, 0.5, 3\n"
+        << "unset surface\n"
+        << "set table 'cont.dat'\n"
+        << "splot f(x,y)\n"
+        << "unset table\n"
+        
+        << "reset\n"
+        << "set xrange [" << xmin << ":" << xmax <<"]\n"
+        << "set yrange [" << ymin << ":" << ymax <<"]\n"
+        << "unset key\n"
+        << "set palette rgbformulae 33,13,10\n"
+        << "p 'test.dat' with image, 'cont.dat' with linespoints lt \"white\" pt 0.01\n";
+    }else{
+        board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 title '" << title << "' with linespoints lt \"white\" pt 0.01\n";
+    }
+    board << cmdstr.str();
+    return board.str();
 }
 
 string Duplex::drawObjectiveTree(int x, int y, string title){

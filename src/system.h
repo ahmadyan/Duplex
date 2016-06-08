@@ -38,4 +38,5 @@ public:
 	~System();
     void eval(State*, double t);
     void eval(State*);
+    string getFunction(int i);
 };

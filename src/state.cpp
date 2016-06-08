@@ -247,9 +247,14 @@ void State::load(boost::property_tree::ptree* pt){
     objectiveDimension = (int)objectives.size();
 }
 
+double State::getDerivative(int i, int j){
+    return jacobian[i][j];
+}
+
 vector<vector<double> > State::getJacobian(){
     return jacobian;
 }
+
 void State::setJacobian(vector<vector<double> > j){
     jacobian=j;
 }

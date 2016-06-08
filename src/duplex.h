@@ -61,11 +61,12 @@ public:
 	void setSystem(System*);
 	void initialize();
     void setObjective();
-	
+    
+    void walkOptimizer();
     void optimize();
 	void simulated_annealing();
 	void functionalOptimization();
-	void randomTreeOptimizer();
+	void treeOptimizer();
 
 	//plotting methods
 	string draw(int);
@@ -79,6 +80,9 @@ public:
 	void updateSensitivity(State* qnear, State* qnew);
 	void updateReward(State* qnear, State* qnew);
 	void updateError(double);
+    void updateBias(State* q);
+    void update(int i, State* qnear, State* qnew);
+    
 	double score(State*, double*, double*);
 
 	void clear();

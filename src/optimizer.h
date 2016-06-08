@@ -1,4 +1,5 @@
 #pragma once
+#include "state.h"
 
 class Optimizer{
 protected:
@@ -6,17 +7,6 @@ protected:
 public:
     Optimizer();
     ~Optimizer();
-    
     virtual bool hasGradientInformation() = 0;
-    virtual void optimize() = 0;
-    
-    void clipNorm();
-    void klDivergence();
-    void getState();
-    void setState();
-    void getGradient();
-    void getUpdates();
-    void setWeights();
-    void getWeights();
-    
+    virtual State* update(State*)=0;
 };

@@ -53,6 +53,7 @@ public:
     int getParameterSize();
     vector<vector<double> > getJacobian();
     void setJacobian(vector<vector<double> >);
+    double getDerivative(int i, int j);
     
     //distance methods
 	double distance(State* a, double* max, double* min);
@@ -66,7 +67,7 @@ public:
     vector<string> split(const string &s, char delim);
     void save(boost::property_tree::ptree*);
     void load(boost::property_tree::ptree*);
-
+    
 
     double getScore();
     void setScore(double);

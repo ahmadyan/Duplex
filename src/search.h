@@ -27,6 +27,7 @@ public:
 	~Search();
     //State operator[] (const int i);
     State* getState(int i);
+    State* getState();
     void setState(State* s, int i);
     void insert(State*);
 	State* getOptimum();

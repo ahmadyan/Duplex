@@ -36,6 +36,11 @@ State* Search::getState(int i){
     return db[i];
 }
 
+// returns the last state that was inserted to data-base
+State* Search::getState(){
+    return db[db.size()-1];
+}
+
 void Search::setState(State* s, int i){
     db[i]=s;
 }

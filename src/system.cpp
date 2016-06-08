@@ -126,3 +126,7 @@ void System::eval(State* s, double t){
 		s->setObjective(objectives);
 	}
 }
+
+string System::getFunction(int i){
+    return functions[i];
+}

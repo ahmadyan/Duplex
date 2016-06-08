@@ -8,5 +8,5 @@ public:
     GradientDescent();
     ~GradientDescent();
     bool hasGradientInformation();
-    void optimize();
+    State* update(State*);
 };
