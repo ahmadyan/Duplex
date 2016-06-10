@@ -11,7 +11,7 @@
 #include "configuration.h"
 #include "system.h"
 #include "search.h"
-#include "sensitivity.h"
+#include "stat.h"
 
 enum class Temperature { temperatureexp, temperaturefast, temperatureboltz };
 enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annealingboltzrandom};
@@ -19,7 +19,7 @@ enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annea
 class Duplex{
 	Settings* settings;
     Search* db;
-	Sensitivity* sensitivity;
+    Stat* stat;
 	
 	//System:
 	State* root;
@@ -42,10 +42,9 @@ class Duplex{
 	bool reinforcementLearningOption;
 	bool shrinkGoalRegionWithTemperateOption;
 	int nextCandidateParameter;
-	//Duplex outputs:
-    vector<double> currentDistance;
-	vector<double> error; //keeps the minimum distance from any node in the tree toward the optimum point (Hopefully converges to 0)
-	vector<State*> bias; 
+	
+    //Duplex outputs:
+    
 	double minAward;
 	double maxAward;
 	double delta;
@@ -72,17 +71,9 @@ public:
 	string draw(int);
     string drawParameterTree(int, int, string);
     string drawObjectiveTree(int, int, string);
-	string plotError();
-    string plotDistance();
 	string drawTrace(int x, int y, string title);
-
-	void update(int, State* qsample, State* qnear, State* qnew);		//update the database, biases, rewards, etc.
-	void updateSensitivity(State* qnear, State* qnew);
-	void updateReward(State* qnear, State* qnew);
-	void updateError(double);
-    void updateBias(State* q);
-    void update(int i, State* qnear, State* qnew);
     
+    void insert(int i, State* qnear, State* qnew);
 	double score(State*, double*, double*);
 
 	void clear();

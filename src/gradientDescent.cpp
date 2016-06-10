@@ -13,7 +13,7 @@ bool GradientDescent::hasGradientInformation(){
 }
 
 State* GradientDescent::update(State* u){
-    double gamma=0.01;
+    double gamma=0.05;
     auto pSize = u->getParameterSize();
     auto objSize = u->getObjectiveSize();
     double* prev = u->getParameter();

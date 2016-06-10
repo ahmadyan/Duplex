@@ -60,7 +60,7 @@ Duplex::Duplex(Settings* c){
 	}
     
     db = new Search(settings);
-	sensitivity = new Sensitivity(parameterDimension, objectiveDimension, (double)settings->lookupFloat("sensitivity-analysis.relativeSensitivityThreshold"));
+    stat = new Stat(settings, max, min, opt);
 }
 
 Duplex::~Duplex(){
@@ -88,8 +88,7 @@ void Duplex::initialize(){
 	cout << "Duplex initialization started. It make take a while to analyze the root." << endl;
 	double* init = getInitialState();															
 	double* reward = new double[parameterDimension];											
-								
-
+    
 	for (int i = 0; i < parameterDimension; i++)												
 		reward[i] = 1;
 	
@@ -114,7 +113,6 @@ void Duplex::initialize(){
 	}
 	cout << "Goals are set." << endl;
 
-
 	vector<string> parametersMinStringVector = settings->listValues("parameter", "uid-parameter.range.min");
 	vector<string> parametersMaxStringVector = settings->listValues("parameter", "uid-parameter.range.max");
 	parameterMin = new double[parameterDimension];
@@ -132,8 +130,7 @@ void Duplex::initialize(){
 	root->setParentID(-1);
 	system->eval(root);
 	double distance = score(root, max, min);
-	error.push_back(distance);
-	currentDistance.push_back(distance);
+    stat->updateError(distance);
 	db->insert(root);
 	cout << "Root node set." << endl;
 
@@ -156,8 +153,7 @@ void Duplex::initialize(){
 			q->setParent(db->getState(i - 1));
 			system->eval(q);
 			distance = score(q, max, min);
-			error.push_back(distance);
-			currentDistance.push_back(distance);
+            stat->updateError(distance);
 			db->insert(q);
 		}
 
@@ -172,9 +168,8 @@ void Duplex::initialize(){
 		last->setParent(db->getState(pathSegments - 2));
 		system->eval(last);
         distance = score(last, max, min);
-        error.push_back(distance);
-        currentDistance.push_back(distance);
-		db->insert(last);
+        stat->updateError(distance);
+        db->insert(last);
 		cout << "Initial curve is set." << endl;
 	}
 
@@ -220,6 +215,58 @@ State* Duplex::globalStep(){
     return qsample;
 }
 
+
+// Evaluates each states and assign them a score.
+// States with lower score are better candidates, state with the minimum score (0) is the optimal solution.
+double Duplex::score(State* state, double* maxBound, double* minBound){
+    double distance = 0;
+    // In functional optimization, we have to evaluat each objective seperately.
+    if (settings->check("mode", "fopt")){
+        double b = settings->lookupFloat("parameter.b");
+        double c0 = settings->lookupFloat("parameter.c0");
+        double* boundary = new double[2];
+        boundary[0] = b;
+        boundary[1] = 0;
+        
+        double* objectives = state->getObjective();
+        double* goals = goal->getObjective();
+        int objectiveSize = state->getObjectiveSize();
+        //measure objective
+        //currently we support the following types of objectives
+        //1. boundary: equivalent to the boundary conditions in BVPs. The closer we get to the boundary value, the better
+        //2. boundary-strict: similar to boundary, but if we are crossing the bounary value the sameples is not usefull anymore.
+        //                  for example, for the length of the curve we use bounadry-hard objectives, so the length is strictly less than boundary
+        //3. maximize
+        //4. minimize
+        for (int i = 0; i < objectiveSize; i++){
+            auto potentialdistance = state->distance(2, state->getParameter(), boundary);
+            auto potentialsum = (state->getParameter()[1] * (b-state->getParameter()[0]) ) / 2.0 ;
+            double normalizedDistance = (objectives[i] - goals[i]) / (max[i] - min[i]);
+            normalizedDistance *= normalizedDistance;
+            if ((objectiveType[i] == "boundary-strict")
+                && (objectives[i]>opt[i])                   //if the length of the curve is bigger than the strict boundary, discard this trace
+                && (objectives[i]+potentialdistance>opt[i]) //evaluating the potential of this sample: if we even take the direct route to the boundary
+                //condition and still the length is more than the bondary, discard this sample
+                ){
+                normalizedDistance = std::numeric_limits<int>::max();
+            }
+            if ((objectiveType[i] == "maximize")
+                && (objectives[i]>max[i])
+                && (objectives[i] + potentialsum > max[i])){
+                normalizedDistance = 0;
+            }
+            distance += normalizedDistance;
+        }
+        delete[] boundary;    //todo: remove this
+    }else{
+        //Most of the time, we can use Eucledean distance as the score. Closer to the goal, the better
+        distance = goal->distance(state, maxBound, minBound);
+    }
+    
+    state->setScore(distance);
+    return distance;
+}
+
 //slightly changes the input
 double* Duplex::generateNewInput(State* q){
     int pSize = q->getParameterSize();
@@ -235,28 +282,6 @@ double* Duplex::generateNewInput(State* q){
 	//if (input[nextCandidateParameter] > parameterMax[nextCandidateParameter]) input[nextCandidateParameter] = parameterMax[nextCandidateParameter];
     return input;
 }
-
-void Duplex::updateReward(State* qnear, State* qnew){
-	double distance = goal->distance(qnew, max, min);
-	double pdistance = goal->distance(qnear, max, min);
-	double* reward = new double[parameterDimension];
-	double* preward = qnear->getRewardVector();
-	for (int i = 0; i < parameterDimension; i++){
-		reward[i] = preward[i];
-	}
-
-	double award = (distance - pdistance) / delta;
-	if (award < minAward) award = minAward;
-	if (award > maxAward) award = maxAward;
-	reward[nextCandidateParameter] = +1;
-	if (reward[nextCandidateParameter] < minAward) reward[nextCandidateParameter] = minAward;
-	if (reward[nextCandidateParameter] > maxAward) reward[nextCandidateParameter] = maxAward;
-
-	double sum = reward[nextCandidateParameter] - preward[nextCandidateParameter];
-
-	qnew->setReward(reward, qnear->getRewardCDF() + sum); 
-}
-
 int Duplex::computeNextCandidateParameter(State* qnear){
 	if (reinforcementLearningOption){
 		double random = qnear->getRewardCDF() * ((double)rand() / (RAND_MAX));
@@ -315,7 +340,8 @@ State* Duplex::localStep(int i, State* qnear){
 	State* qnew = new State(parameterDimension, objectiveDimension);
 	qnew->setParameter(input);
 	qnew->setParent(qnear);
-	sensitivity->pushBackInputChange(nextCandidateParameter, qnew->getParameter()[nextCandidateParameter], stepLength);
+    
+	stat->sensitivity->pushBackInputChange(nextCandidateParameter, qnew->getParameter()[nextCandidateParameter], stepLength);
 	return qnew;
 }
 
@@ -339,7 +365,7 @@ void Duplex::walkOptimizer(){
         //State* next = localStep(i, prev);
         State* next = gd->update(prev);
         system->eval(next,0);
-        update(i, prev, next);
+        insert(i, prev, next);
     }
 }
 
@@ -350,11 +376,11 @@ void Duplex::treeOptimizer(){
         State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
         State* qnew = localStep(i, qnear);
         system->eval(qnew, 0);                  //simulate the circuit with the new input
-        update(i, qsample, qnear, qnew);
+        insert(i, qnear, qnew);
     }
     
     if (settings->check("sensitivity-analysis.enable", "true"))
-        sensitivity->generateSensitivityMatrix();
+        stat->sensitivity->generateSensitivityMatrix();
 }
 
 
@@ -379,7 +405,7 @@ void Duplex::simulated_annealing(){
 			bestState = qsample;
 			bestEnergy = energy;
 		}
-		updateError(score(bestState, max, min));
+		stat->updateError(score(bestState, max, min));
 	}
 }
 
@@ -405,55 +431,10 @@ State* Duplex::foptGlobalStep(){
 	return qsample;
 }
 
-// Evaluates each states and assign them a score.
-// States with lower score are better candidates, state with the minimum score (0) is the optimal solution.
-double Duplex::score(State* state, double* maxBound, double* minBound){
-	double distance = 0;
-    // In functional optimization, we have to evaluat each objective seperately.
-	if (settings->check("mode", "fopt")){
-		double b = settings->lookupFloat("parameter.b");
-		double c0 = settings->lookupFloat("parameter.c0");
-		double* boundary = new double[2];
-		boundary[0] = b;
-		boundary[1] = 0;
-
-		double* objectives = state->getObjective();
-		double* goals = goal->getObjective();
-		int objectiveSize = state->getObjectiveSize();
-		//measure objective
-        //currently we support the following types of objectives
-        //1. boundary: equivalent to the boundary conditions in BVPs. The closer we get to the boundary value, the better
-        //2. boundary-strict: similar to boundary, but if we are crossing the bounary value the sameples is not usefull anymore.
-        //                  for example, for the length of the curve we use bounadry-hard objectives, so the length is strictly less than boundary
-        //3. maximize
-        //4. minimize
-		for (int i = 0; i < objectiveSize; i++){
-            auto potentialdistance = state->distance(2, state->getParameter(), boundary);
-            auto potentialsum = (state->getParameter()[1] * (b-state->getParameter()[0]) ) / 2.0 ;
-			double normalizedDistance = (objectives[i] - goals[i]) / (max[i] - min[i]);
-			normalizedDistance *= normalizedDistance;
-			if ((objectiveType[i] == "boundary-strict")
-                && (objectives[i]>opt[i])                   //if the length of the curve is bigger than the strict boundary, discard this trace
-                && (objectives[i]+potentialdistance>opt[i]) //evaluating the potential of this sample: if we even take the direct route to the boundary
-                                                            //condition and still the length is more than the bondary, discard this sample
-                ){
-				normalizedDistance = std::numeric_limits<int>::max();
-			}
-			if ((objectiveType[i] == "maximize")
-                && (objectives[i]>max[i])
-                && (objectives[i] + potentialsum > max[i])){
-				normalizedDistance = 0;
-			}
-			distance += normalizedDistance;
-		}
-		delete boundary;    //todo: remove this
-	}else{
-        //Most of the time, we can use Eucledean distance as the score. Closer to the goal, the better
-		distance = goal->distance(state, maxBound, minBound);
-	}
-    
-	state->setScore(distance);
-	return distance;
+void Duplex::insert(int i, State* qnear, State* qnew){
+    qnew->setID(i);
+    qnew->setParentID(qnear->getID());      //maintaing the tree data structure
+    db->insert(qnew);                       //add a new node to the database
 }
 
 /// functional optimization algorithm using Duplex
@@ -465,56 +446,15 @@ void Duplex::functionalOptimization(){
 		State* qnear = db->nearestNode(qsample);        //Find closest node to the objective
 		State* qnew = localStep(i, qnear);
 		system->eval(qnew, 0);                  //simulate the circuit with the new input
-		qnew->setID(i);
-        
-		qnew->setParentID(qnear->getID());      //maintaing the tree data structure
 		//bias.push_back(qsample);
-		updateError(score(qnew, max, min));
+		//updateError(score(qnew, max, min));
 		//updateReward(qnear, qnew);
 		//updateSensitivity(qnear, qnew);
-        qnew->setParent(qnear);
-		db->insert(qnew);                       //add a new node to the database
+        insert(i, qnew, qnear);
 	}
-}
-
-void Duplex::updateError(double d){
-	double e = error[error.size() - 1];
-	error.push_back(fmin(e, d));
-    currentDistance.push_back(d);
-}
-
-void Duplex::updateSensitivity(State* qnear, State* qnew){
-	double* obj = qnew->getObjective();
-	double* obj_near = qnear->getObjective();
-	for (int i = 0; i < objectiveDimension; i++){
-		double delta = abs(obj[i] - obj_near[i]);
-			sensitivity->pushBackOutputChange(i, obj[i], delta);
-	}
-	sensitivity->commit();
-}
-
-void Duplex::updateBias(State* q){
-    bias.push_back(q);
-}
-
-void Duplex::update(int i, State* qsample, State* qnear, State* qnew){
-    update(i, qnear, qnew);
-    bias.push_back(qsample);
-}
-
-void Duplex::update(int i, State* qnear, State* qnew){
-	qnew->setID(i);
-	qnew->setParentID(qnear->getID());      //maintaing the tree data structure
-	updateError(score(qnew, max, min));
-	//updateReward(qnear, qnew);
-	//updateSensitivity(qnear, qnew);
-	db->insert(qnew);                       //add a new node to the database
 }
 
 void Duplex::clear(){
-	for (int i = 0; i<bias.size(); i++){
-		delete bias[i];
-	}
 }
 
 double minimum(double a, double b, double min){
@@ -613,24 +553,6 @@ string Duplex::drawObjectiveTree(int x, int y, string title){
 	return cmdstr.str();
 }
 
-string Duplex::plotError(){
-	stringstream cmdstr;
-	cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << 1.1*error[0] << "] 0 with linespoints lt \"white\" pt 0.01" << endl;
-	for (int i = 1; i < error.size(); i++){
-		cmdstr << " set arrow from " << i - 1 << "," << error[i - 1] << " to " << i << "," << error[i] << " nohead  lc rgb \"red\" lw 2 \n";
-	}
-	return cmdstr.str();
-}
-
-string Duplex::plotDistance(){
-    stringstream cmdstr;
-    cmdstr << "plot [" << 0 << ":" << currentDistance.size() << "][" << 0 << ":" << 2.0*currentDistance[0] << "] 0 with linespoints lt \"white\" pt 0.01" << endl;
-    for (int i = 1; i < currentDistance.size(); i++){
-        cmdstr << " set arrow from " << i - 1 << "," << currentDistance[i - 1] << " to " << i << "," << currentDistance[i] << " nohead  lc rgb \"red\" lw 2 \n";
-    }
-    return cmdstr.str();
-}
-
 string Duplex::drawTrace(int x, int y, string title){
 	string color = "black";
 	stringstream cmdstr;
@@ -679,10 +601,10 @@ string Duplex::draw(int i){
 	vector<string> plots = settings->listVariables("plot", "uid-plot");
 	string type = settings->lookupString(("plot." + plots[i] + ".type").c_str());
 	if (type == "error"){
-		return plotError();
+		return stat->plotError();
 	}
 	else if (type == "distance"){
-		return plotDistance();
+		return stat->plotDistance();
 	}
 	else if (type == "tree.parameter"){
 		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
@@ -708,14 +630,14 @@ void Duplex::save(boost::property_tree::ptree* ptree){
     boost::property_tree::ptree& data = ptree->add("duplex.data", "");
     db->save(&data);
 	boost::property_tree::ptree& sense = ptree->add("duplex.sensitivity", "");
-	sensitivity->save(&sense);
+	stat->sensitivity->save(&sense);
     boost::property_tree::ptree& node = ptree->add("duplex.stat", "");
 	
 	for (int i = 0; i<db->getSize(); i++){
         boost::property_tree::ptree& iter = node.add("iteration", "");
         iter.add("id", i);
-        iter.add("error", error[i]);
-        iter.add("distance", currentDistance[i]);
+        iter.add("error", stat->getError(i));
+        iter.add("distance", stat->getDistance(i));
         iter.put("<xmlattr>.id", i);
     }
 }
@@ -727,8 +649,8 @@ void Duplex::load(boost::property_tree::ptree* ptree){
     for(auto v: pnodes){
         if(v.first=="iteration"){
             cout << v.second.get<int>("id") << endl;
-            error.push_back(v.second.get<double>("error"));
-            currentDistance.push_back(v.second.get<double>("distance"));
+            stat->error_push_back(v.second.get<double>("error"));
+            stat->distance_push_back(v.second.get<double>("distance"));
         }
     }
 }
