@@ -41,7 +41,6 @@ System::System(Settings* s){
             auto functionVariablesNames = config->listVariables("objective", "uid-objective");
             for(auto fvariableName: functionVariablesNames){
                 auto derivativeVariablesNames = config->listVariables(config->concatScope("objective", fvariableName).c_str(), "uid-grad.derivative");
-                cout << derivativeVariablesNames.size() << endl ;
                 vector<string> derivatives;
                 for(auto dVariableName:derivativeVariablesNames){
                     string derivate = config->lookupString(config->concatScope("objective", fvariableName, dVariableName).c_str());

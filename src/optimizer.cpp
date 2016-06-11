@@ -1,7 +1,7 @@
 #include "optimizer.h"
 
-Optimizer::Optimizer(){
-    
+Optimizer::Optimizer(Settings* s){
+    settings=s;
 }
 
 Optimizer::~Optimizer(){

@@ -340,7 +340,6 @@ State* Duplex::localStep(int i, State* qnear){
 	State* qnew = new State(parameterDimension, objectiveDimension);
 	qnew->setParameter(input);
 	qnew->setParent(qnear);
-    
 	stat->sensitivity->pushBackInputChange(nextCandidateParameter, qnew->getParameter()[nextCandidateParameter], stepLength);
 	return qnew;
 }
@@ -357,13 +356,17 @@ State* Duplex::localStep(int i, State* qnear){
 // Generic walk-based optimizer methods, such as gradient descent, Adap, RMPProp, etc.
 void Duplex::walkOptimizer(){
     double* costHistory = new double[iterationCap]();
-    Optimizer* gd = new GradientDescent();
+    Optimizer* optimizer;
+    if(settings->check("optimization.algorithm", "gd")){
+        optimizer = new GradientDescent(settings);
+    }else{
+        optimizer = new GradientDescent(settings);
+    }
     
     for(int i=0;i<iterationCap;i++){
-        cout << i << endl ;
         State* prev = db->getState();
         //State* next = localStep(i, prev);
-        State* next = gd->update(prev);
+        State* next = optimizer->update(prev);
         system->eval(next,0);
         insert(i, prev, next);
     }
@@ -471,7 +474,35 @@ double maximum(double a, double b, double max){
 	return m;
 }
 
-//
+string Duplex::drawContourPlot(string function, double xmin, double xmax, double ymin, double ymax){
+    stringstream contour;
+    contour
+    << "reset\n"
+    
+    << "f(x,y)="<< function << "\n"
+    << "set xrange [" << xmin << ":" << xmax <<"]\n"
+    << "set yrange [" << ymin << ":" << ymax <<"]\n"
+    << "set isosample 250, 250\n"
+    << "set table 'test.dat'\n"
+    << "splot f(x,y)\n"
+    << "unset table\n"
+    
+    << "set contour base\n"
+    << "set cntrparam level incremental -3, 0.5, 3\n"
+    << "unset surface\n"
+    << "set table 'cont.dat'\n"
+    << "splot f(x,y)\n"
+    << "unset table\n"
+    
+    << "reset\n"
+    << "set xrange [" << xmin << ":" << xmax <<"]\n"
+    << "set yrange [" << ymin << ":" << ymax <<"]\n"
+    << "unset key\n"
+    << "set palette rgbformulae 33,13,10\n"
+    << "p 'test.dat' with image, 'cont.dat' with linespoints lt \"white\" pt 0.01\n";
+    return contour.str();
+}
+
 //	Plotting methods for Duplex
 //  todo: needs refactoring, needs to go into their own class
 string Duplex::drawParameterTree(int x, int y, string title){
@@ -491,36 +522,13 @@ string Duplex::drawParameterTree(int x, int y, string title){
 		ymax = maximum(iFromY, iToY, ymax);
 		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 front \n";
 	}
-
     
-
+    //xmin=-1;xmax=1;ymin=-1;ymax=1;
+    
 	stringstream board;
     bool contour=true;
     if(contour){
-        board
-        << "reset\n"
-        
-        << "f(x,y)="<< system->getFunction(0) << "\n"
-        << "set xrange [" << xmin << ":" << xmax <<"]\n"
-        << "set yrange [" << ymin << ":" << ymax <<"]\n"
-        << "set isosample 250, 250\n"
-        << "set table 'test.dat'\n"
-        << "splot f(x,y)\n"
-        << "unset table\n"
-        
-        << "set contour base\n"
-        << "set cntrparam level incremental -3, 0.5, 3\n"
-        << "unset surface\n"
-        << "set table 'cont.dat'\n"
-        << "splot f(x,y)\n"
-        << "unset table\n"
-        
-        << "reset\n"
-        << "set xrange [" << xmin << ":" << xmax <<"]\n"
-        << "set yrange [" << ymin << ":" << ymax <<"]\n"
-        << "unset key\n"
-        << "set palette rgbformulae 33,13,10\n"
-        << "p 'test.dat' with image, 'cont.dat' with linespoints lt \"white\" pt 0.01\n";
+        board << drawContourPlot(system->getFunction(0), xmin, xmax, ymin, ymax);
     }else{
         board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 title '" << title << "' with linespoints lt \"white\" pt 0.01\n";
     }
@@ -546,7 +554,7 @@ string Duplex::drawObjectiveTree(int x, int y, string title){
 		ymax = maximum(iFromY, iToY, ymax);
 		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 \n";
 	}
-
+    
 	stringstream board;
 	board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0  title '" << title << "' with linespoints lt \"white\" pt 0.01";
 	cmdstr << board.str() << "\n " << cmdstr.str();

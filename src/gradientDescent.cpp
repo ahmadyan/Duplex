@@ -1,11 +1,10 @@
 #include "gradientDescent.h"
 
-GradientDescent::GradientDescent(){
-    
+GradientDescent::GradientDescent(Settings* s):Optimizer(s){
+    learning_rate=settings->lookupFloat("optimization.learning_rate");
 }
 
 GradientDescent::~GradientDescent(){
-    
 }
 
 bool GradientDescent::hasGradientInformation(){
@@ -13,7 +12,6 @@ bool GradientDescent::hasGradientInformation(){
 }
 
 State* GradientDescent::update(State* u){
-    double gamma=0.05;
     auto pSize = u->getParameterSize();
     auto objSize = u->getObjectiveSize();
     double* prev = u->getParameter();
@@ -21,11 +19,10 @@ State* GradientDescent::update(State* u){
     double* input = new double[pSize]();
     //buggy, how to model multi-objective functions here?
     for(int i=0;i<u->getParameterSize();i++){
-        input[i]= prev[i] - gamma*u->getDerivative(0, i);
+        input[i]= prev[i] - learning_rate*u->getDerivative(0, i);       //descent rule
         //todo: implement clipping code
         if(input[i]<-1) input[i]=-1;
         if(input[i]>1) input[i]=1;
-        cout << i << "->" << input[i] << " " << prev[i] << endl ;
     }
     v->setParameter(input);
     return v;

@@ -4,8 +4,9 @@
 using namespace std;
 
 class GradientDescent : public Optimizer{
+    double learning_rate;
 public:
-    GradientDescent();
+    GradientDescent(Settings* s);
     ~GradientDescent();
     bool hasGradientInformation();
     State* update(State*);

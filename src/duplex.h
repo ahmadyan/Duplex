@@ -72,6 +72,7 @@ public:
     string drawParameterTree(int, int, string);
     string drawObjectiveTree(int, int, string);
 	string drawTrace(int x, int y, string title);
+    string drawContourPlot(string function, double xmin, double xmax, double ymin, double ymax);
     
     void insert(int i, State* qnear, State* qnew);
 	double score(State*, double*, double*);
