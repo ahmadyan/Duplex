@@ -56,6 +56,14 @@ void Stat::update(int i, State* goal, State* qsample, State* qnear, State* qnew,
     bias.push_back(qsample);
 }
 
+void Stat::updateConvergence(State* q){
+    auto d=1.0;
+    if(convergence.size()>0){
+        d = q->distance(q->getParent(), max, min);
+    }
+    convergence.push_back(d);
+}
+
 void Stat::updateReward(State* goal, State* qnear, State* qnew){
     auto parameterDimension = goal->getParameterSize();
     double distance = goal->distance(qnew, max, min);
@@ -76,6 +84,15 @@ void Stat::updateReward(State* goal, State* qnear, State* qnew){
     double sum = reward[nextCandidateParameter] - preward[nextCandidateParameter];
     
     qnew->setReward(reward, qnear->getRewardCDF() + sum);
+}
+
+double Stat::getDeltaConvergence(){
+    auto size=convergence.size();
+    if(size<2){
+        return 1.0;
+    }else{
+        return abs(convergence[size-1]-convergence[size-2]);
+    }
 }
 
 double Stat::getError(int i){

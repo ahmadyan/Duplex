@@ -60,7 +60,6 @@ Duplex::Duplex(Settings* c){
 	}
     
     db = new Search(settings);
-    stat = new Stat(settings, max, min, opt);
 }
 
 Duplex::~Duplex(){
@@ -122,6 +121,9 @@ void Duplex::initialize(){
 		parameterMax[i] = stod(parametersMaxStringVector[i]);;
 	}
 
+    stat = new Stat(settings, max, min, opt);
+    cout << "Statistic class initialized." << endl;
+    
 	//Setting up the root node
 	root = new State(parameterDimension, objectiveDimension);
 	root->setParameter(init);
@@ -277,11 +279,13 @@ double* Duplex::generateNewInput(State* q){
 		if (input[i] < parameterMin[i]) input[i] = parameterMin[i];
 		if (input[i] > parameterMax[i]) input[i] = parameterMax[i];
 	}
+    
 	//input[nextCandidateParameter] += stepLength;
 	//if (input[nextCandidateParameter] < parameterMin[nextCandidateParameter]) input[nextCandidateParameter] = parameterMin[nextCandidateParameter];
 	//if (input[nextCandidateParameter] > parameterMax[nextCandidateParameter]) input[nextCandidateParameter] = parameterMax[nextCandidateParameter];
     return input;
 }
+
 int Duplex::computeNextCandidateParameter(State* qnear){
 	if (reinforcementLearningOption){
 		double random = qnear->getRewardCDF() * ((double)rand() / (RAND_MAX));
@@ -355,7 +359,7 @@ State* Duplex::localStep(int i, State* qnear){
 //todo: needs refactoring, should be moved to its own class
 // Generic walk-based optimizer methods, such as gradient descent, Adap, RMPProp, etc.
 void Duplex::walkOptimizer(){
-    double* costHistory = new double[iterationCap]();
+    auto epsilon = settings->lookupFloat("optimization.epsilon");
     Optimizer* optimizer;
     if(settings->check("optimization.algorithm", "gd")){
         optimizer = new GradientDescent(settings);
@@ -363,13 +367,17 @@ void Duplex::walkOptimizer(){
         optimizer = new GradientDescent(settings);
     }
     
-    for(int i=0;i<iterationCap;i++){
+    auto iterations=1;
+    while(stat->getDeltaConvergence()>epsilon && (iterations<iterationCap)){
         State* prev = db->getState();
-        //State* next = localStep(i, prev);
         State* next = optimizer->update(prev);
         system->eval(next,0);
-        insert(i, prev, next);
+        insert(iterations, prev, next);
+        stat->updateConvergence(next);
+        iterations++;
     }
+    cout << "Optimizer finished, #iteration= " << iterations << endl ;
+
 }
 
 void Duplex::treeOptimizer(){
@@ -436,7 +444,7 @@ State* Duplex::foptGlobalStep(){
 
 void Duplex::insert(int i, State* qnear, State* qnew){
     qnew->setID(i);
-    qnew->setParentID(qnear->getID());      //maintaing the tree data structure
+    qnew->setParent(qnear);
     db->insert(qnew);                       //add a new node to the database
 }
 
@@ -523,7 +531,7 @@ string Duplex::drawParameterTree(int x, int y, string title){
 		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 front \n";
 	}
     
-    //xmin=-1;xmax=1;ymin=-1;ymax=1;
+    xmin=-1;xmax=1;ymin=-1;ymax=1;
     
 	stringstream board;
     bool contour=true;

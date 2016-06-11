@@ -23,7 +23,7 @@ State* GradientDescent::update(State* u){
     double* input = new double[pSize]();
     //buggy, how to model multi-objective functions here?
     for(int i=0;i<u->getParameterSize();i++){
-        input[i]= prev[i] - learning_rate*u->getDerivative(0, i);       //descent rule
+        input[i]= prev[i] - lr*u->getDerivative(0, i);       //descent rule
         //todo: implement clipping code
         if(input[i]<-1) input[i]=-1;
         if(input[i]>1) input[i]=1;

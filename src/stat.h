@@ -22,6 +22,7 @@ class Stat{
     vector<double> error; //keeps the minimum distance from any node in the tree toward the optimum point (Hopefully converges to 0)
     
     vector<State*> bias;
+    vector<double> convergence; 
     
     
 public:
@@ -36,10 +37,12 @@ public:
     void updateReward(State*, State* qnear, State* qnew);
     void updateError(double);
     void updateBias(State* q);
+    void updateConvergence(State* q);
     
     string plotError();
     string plotDistance();
     
+    double getDeltaConvergence();
     double getError(int);
     double getDistance(int);
     void error_push_back(double v);
