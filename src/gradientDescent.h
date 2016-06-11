@@ -5,6 +5,7 @@ using namespace std;
 
 class GradientDescent : public Optimizer{
     double learning_rate;
+    double decay;
 public:
     GradientDescent(Settings* s);
     ~GradientDescent();

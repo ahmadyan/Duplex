@@ -85,7 +85,7 @@ int main(int argc, char** argv){
         }else{
             duplex->setSystem(system);						log << "System set." ;
             duplex->setObjective();							log << "Objective set. " ;
-            duplex->initialize();							log << "Duplex initialization complete." ;
+            duplex->initialize();							log << "Duplex initialization complete." << endl ;
             log.tick();
 
 			if (settings->check("mode", "duplex")){

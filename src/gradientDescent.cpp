@@ -2,6 +2,8 @@
 
 GradientDescent::GradientDescent(Settings* s):Optimizer(s){
     learning_rate=settings->lookupFloat("optimization.learning_rate");
+    decay = settings->lookupFloat("optimization.decay");
+    cout << "Initializing Gradient Descent optimizer" << endl ;
 }
 
 GradientDescent::~GradientDescent(){
@@ -15,6 +17,8 @@ State* GradientDescent::update(State* u){
     auto pSize = u->getParameterSize();
     auto objSize = u->getObjectiveSize();
     double* prev = u->getParameter();
+    auto iterations = u->getID();
+    auto lr = learning_rate * (1.0 / (1.0 + decay * iterations));
     State* v = new State(pSize, objSize);
     double* input = new double[pSize]();
     //buggy, how to model multi-objective functions here?
