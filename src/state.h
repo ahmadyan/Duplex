@@ -54,6 +54,7 @@ public:
     vector<vector<double> > getJacobian();
     void setJacobian(vector<vector<double> >);
     double getDerivative(int i, int j);
+    vector<double> getDerivativeVector(int i);
     
     //distance methods
 	double distance(State* a, double* max, double* min);

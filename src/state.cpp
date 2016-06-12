@@ -251,6 +251,10 @@ double State::getDerivative(int i, int j){
     return jacobian[i][j];
 }
 
+vector<double> State::getDerivativeVector(int i){
+    return jacobian[i];
+}
+
 vector<vector<double> > State::getJacobian(){
     return jacobian;
 }
