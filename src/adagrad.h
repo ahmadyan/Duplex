@@ -11,10 +11,11 @@ class Adagrad : public Optimizer{
     
     // an epsilon to avoid division by zero (1e-4 to 1e-8)
     double fudgeFactor;
-    
+    bool init;
     // keeps track of per-parameter sum of squared gradients.
     // Normalizes the update step, element-wise
     double* cache;
+    double autocorr;
     
 public:
     Adagrad(Settings* s);
