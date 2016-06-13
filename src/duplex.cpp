@@ -17,7 +17,6 @@
 
 #include "optimizer.h"
 #include "gradientDescent.h"
-#include "rmsprop.h"
 #include "adagrad.h"
 
 using namespace std;
@@ -366,8 +365,6 @@ void Duplex::walkOptimizer(){
     Optimizer* optimizer;
     if(settings->check("optimization.algorithm", "gd")){
         optimizer = new GradientDescent(settings);
-    }else if(settings->check("optimization.algorithm", "rmsprop")){
-        optimizer  = new RMSProp(settings);
     }else if(settings->check("optimization.algorithm", "adagrad")){
         optimizer  = new Adagrad(settings);
     }else{

@@ -3,7 +3,7 @@
 #include <iostream>
 using namespace std;
 
-// The Adagrad optimization algorithm
+// The Adagrad optimization algorithm, with support for RMSProp auto-correlation
 class Adagrad : public Optimizer{
     double learning_rate_base;
     int parameterDimension;
@@ -15,6 +15,7 @@ class Adagrad : public Optimizer{
     // keeps track of per-parameter sum of squared gradients.
     // Normalizes the update step, element-wise
     double* cache;
+    // autocorr is the decay rate in the RMSProp algorithm.
     double autocorr;
     
 public:
