@@ -69,10 +69,10 @@ public:
 
 	//plotting methods
 	string draw(int);
-    string drawParameterTree(int, int, string);
+    string drawParameterTree(int x, int y, int z, string sizingPreference, string plotType, string title);
     string drawObjectiveTree(int, int, string);
 	string drawTrace(int x, int y, string title);
-    string drawContourPlot(string function, double xmin, double xmax, double ymin, double ymax);
+    string drawCanvas(string function, double xmin, double xmax, double ymin, double ymax, string, string);
     
     void insert(int i, State* qnear, State* qnew);
 	double score(State*, double*, double*);

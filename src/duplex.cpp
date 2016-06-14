@@ -486,38 +486,48 @@ double maximum(double a, double b, double max){
 	return m;
 }
 
-string Duplex::drawContourPlot(string function, double xmin, double xmax, double ymin, double ymax){
-    stringstream contour;
-    contour
-    << "reset\n"
-    
-    << "f(x,y)="<< function << "\n"
-    << "set xrange [" << xmin << ":" << xmax <<"]\n"
-    << "set yrange [" << ymin << ":" << ymax <<"]\n"
-    << "set isosample 250, 250\n"
-    << "set table 'test.dat'\n"
-    << "splot f(x,y)\n"
-    << "unset table\n"
-    
-    << "set contour base\n"
-    << "set cntrparam level incremental -3, 0.5, 3\n"
-    << "unset surface\n"
-    << "set table 'cont.dat'\n"
-    << "splot f(x,y)\n"
-    << "unset table\n"
-    
-    << "reset\n"
-    << "set xrange [" << xmin << ":" << xmax <<"]\n"
-    << "set yrange [" << ymin << ":" << ymax <<"]\n"
-    << "unset key\n"
-    << "set palette rgbformulae 33,13,10\n"
-    << "p 'test.dat' with image, 'cont.dat' with linespoints lt \"white\" pt 0.01\n";
-    return contour.str();
+string Duplex::drawCanvas(string function, double xmin, double xmax, double ymin, double ymax, string plotType, string title){
+    stringstream canvas;
+    if(plotType=="default"){
+        canvas << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 title '" << title << "' with linespoints lt \"white\" pt 0.01\n";
+    }else{
+        canvas
+        << "reset\n"
+        
+        << "f(x,y)="<< function << "\n"
+        << "set xrange [" << xmin << ":" << xmax <<"]\n"
+        << "set yrange [" << ymin << ":" << ymax <<"]\n"
+        << "set isosample 250, 250\n"
+        << "set table 'test.dat'\n"
+        << "splot f(x,y)\n"
+        << "unset table\n"
+        
+        << "set contour base\n"
+        << "set cntrparam level incremental -3, 0.5, 3\n"
+        << "unset surface\n"
+        << "set table 'cont.dat'\n"
+        << "splot f(x,y)\n"
+        << "unset table\n"
+        
+        << "reset\n"
+        << "set xrange [" << xmin << ":" << xmax <<"]\n"
+        << "set yrange [" << ymin << ":" << ymax <<"]\n"
+        << "unset key\n"
+        << "set palette rgbformulae 33,13,10\n";
+        
+        if(plotType=="contour"){
+            canvas << "p 'test.dat' with image, 'cont.dat' with linespoints lt \"white\" pt 0.01\n";
+        }else{
+            //surf plot, the actual default!
+            canvas << "p 'test.dat' with image, 'cont.dat' with  lt \"white\" pt 0.01\n";
+        }
+    }
+    return canvas.str();
 }
 
 //	Plotting methods for Duplex
 //  todo: needs refactoring, needs to go into their own class
-string Duplex::drawParameterTree(int x, int y, string title){
+string Duplex::drawParameterTree(int x, int y, int z, string sizingPreference, string plotType, string title){
 	string color = "blue";
 	stringstream cmdstr;
 	double xmin = 99, xmax = -99, ymin = 99, ymax = -99;
@@ -528,22 +538,23 @@ string Duplex::drawParameterTree(int x, int y, string title){
 		double iFromY = p->getParameter()[y];
 		double iToX = s->getParameter()[x];
 		double iToY = s->getParameter()[y];
+        auto iFromZ = p->getObjective()[0];
+        auto iToZ = s->getObjective()[0];
+
 		xmin = minimum(iFromX, iToX, xmin);
 		ymin = minimum(iFromY, iToY, ymin);
 		xmax = maximum(iFromX, iToX, xmax);
 		ymax = maximum(iFromY, iToY, ymax);
-		cmdstr << " set arrow from " << iFromX << "," << iFromY << " to " << iToX << "," << iToY << " nohead  lc rgb \"" << color << "\" lw 2 front \n";
+
+        cmdstr << " set arrow from " << iFromX << "," << iFromY << "," << iFromZ << " to " << iToX << "," << iToY << "," << iToZ << " nohead  lc rgb \"" << color << "\" lw 2 front \n";
 	}
     
-    xmin=-1;xmax=1;ymin=-1;ymax=1;
+    if(sizingPreference=="default"){
+        xmin=-1;xmax=1;ymin=-1;ymax=1;
+    }
     
 	stringstream board;
-    bool contour=true;
-    if(contour){
-        board << drawContourPlot(system->getFunction(0), xmin, xmax, ymin, ymax);
-    }else{
-        board << "plot [" << xmin << ":" << xmax << "][" << ymin << ":" << ymax << "] 0 title '" << title << "' with linespoints lt \"white\" pt 0.01\n";
-    }
+    board << drawCanvas(system->getFunction(0), xmin, xmax, ymin, ymax, plotType, title);
     board << cmdstr.str();
     return board.str();
 }
@@ -627,9 +638,17 @@ string Duplex::draw(int i){
 		return stat->plotDistance();
 	}
 	else if (type == "tree.parameter"){
-		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
-		int y = settings->lookupInt(("plot." + plots[i] + ".y").c_str());
-		return drawParameterTree(x, y, "param");
+		auto x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
+		auto y = settings->lookupInt(("plot." + plots[i] + ".y").c_str());
+        auto z = settings->lookupInt(("plot." + plots[i] + ".z").c_str());
+        auto plotPreference = settings->lookupString(("plot." + plots[i] + ".plot").c_str());
+        auto sizingPreference = settings->lookupString(("plot." + plots[i] + ".size").c_str());
+        if((x>parameterDimension-1) || (y>parameterDimension-1) || (z>objectiveDimension-1)){
+            cout << "error: tree.parameter plotting error, configuration file contains an invalid parameter x,y,z " << endl ;
+            return "";
+        }else{
+            return drawParameterTree(x, y, z, sizingPreference, plotPreference, "param");
+        }
 	}
 	else if (type == "tree.objective"){
 		int x = settings->lookupInt(("plot." + plots[i] + ".x").c_str());
