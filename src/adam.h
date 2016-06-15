@@ -16,12 +16,19 @@ class Adam : public Optimizer{
     int iterations;
     double* moment;
     double* velocity;
+    double* u;
     double decay_beta1;
     double decay_beta2;
     bool bias_correction;
+    
+    double* prev;
+    vector<double> dx;    
+    bool adamax;
 public:
     Adam(Settings* s);
     ~Adam();
     bool hasGradientInformation();
     State* update(State*);
+    void update_adam(double*);
+    void update_adamax(double*);
 };

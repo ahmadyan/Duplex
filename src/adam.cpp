@@ -10,13 +10,17 @@ Adam::Adam(Settings* s):Optimizer(s){
     bias_correction=settings->check("optimization.bias_correction", "true");
     moment = new double[parameterDimension]();
     velocity = new double[parameterDimension]();
+    u = new double[parameterDimension]();
     decay_beta1=exponential_decay_rates_beta1;
     decay_beta2=exponential_decay_rates_beta2;
+    adamax = settings->check("optimization.algorithm", "adamax");
     cout << "Initializing Adam optimizer complete"
         << ", learning rate = " << learning_rate_base
         << ", exponential_decay_rates_beta1 = " << exponential_decay_rates_beta1
         << ", exponential_decay_rates_beta2 = " << exponential_decay_rates_beta2
         << ", fudge factor = " << fudgeFactor
+        << ", bias correction= " << bias_correction
+        << ", adamax= " << adamax
         << endl;
     
 }
@@ -27,19 +31,9 @@ bool Adam::hasGradientInformation(){
     return true;
 }
 
-
-State* Adam::update(State* u){
-    iterations++;
-    auto prev = u->getParameter();
-    auto v = new State(parameterDimension, objectiveDimension);
-    auto input = new double[parameterDimension]();
+void Adam::update_adam(double* input){
     //lr_t = self.lr * K.sqrt(1. - K.pow(self.beta_2, t)) / (1. - K.pow(self.beta_1, t))
     auto learningRate = learning_rate_base * sqrt(1 - decay_beta2) / (1 - decay_beta1);
-    decay_beta1 *= exponential_decay_rates_beta1;
-    decay_beta2 *= exponential_decay_rates_beta2;
-    
-    //Get gradients w.r.t. stochastic objective
-    auto dx = u->getDerivativeVector(0);
     
     //Update biased first and second moment estimate
     //m = beta1*m + (1-beta1)*dx
@@ -58,6 +52,36 @@ State* Adam::update(State* u){
             v = velocity[i]/(1-decay_beta2);
         }
         input[i] = prev[i] - learningRate * m / (sqrt(v)+fudgeFactor);
+    }
+}
+
+void Adam::update_adamax(double* input){
+    auto learningRate = learning_rate_base / (1-decay_beta1);
+    //m_t = (self.beta_1 * m) + (1. - self.beta_1) * g
+    //u_t = K.maximum(self.beta_2 * u, K.abs(g))
+    for(int i=0;i<parameterDimension;i++){
+        moment[i] = exponential_decay_rates_beta1*moment[i] + (1-exponential_decay_rates_beta1)*dx[i];
+        //velocity is the variable u in the paper, Update the exponentially weighted infinity norm
+        velocity[i] = max(exponential_decay_rates_beta2* velocity[i], abs(dx[i]));
+    }
+    for(int i=0;i<parameterDimension;i++){
+        input[i] = prev[i] - learningRate * moment[i] / (velocity[i]+fudgeFactor);
+    }
+}
+
+State* Adam::update(State* u){
+    iterations++;
+    prev = u->getParameter();
+    auto v = new State(parameterDimension, objectiveDimension);
+    auto input = new double[parameterDimension]();
+    decay_beta1 *= exponential_decay_rates_beta1;
+    decay_beta2 *= exponential_decay_rates_beta2;
+    //Get gradients w.r.t. stochastic objective
+    dx = u->getDerivativeVector(0);
+    if(adamax){
+        update_adamax(input);
+    }else{
+        update_adam(input);
     }
     clipParameters(input);
     v->setParameter(input);

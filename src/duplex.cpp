@@ -368,7 +368,7 @@ void Duplex::walkOptimizer(){
         optimizer = new GradientDescent(settings);
     }else if(settings->check("optimization.algorithm", "adagrad")){
         optimizer  = new Adagrad(settings);
-    }else if(settings->check("optimization.algorithm", "adam")){
+    }else if(settings->check("optimization.algorithm", "adam") || settings->check("optimization.algorithm", "adamax")){
         optimizer = new Adam(settings);
     }else{
         optimizer = new GradientDescent(settings);
