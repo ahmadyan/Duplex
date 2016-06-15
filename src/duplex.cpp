@@ -18,6 +18,7 @@
 #include "optimizer.h"
 #include "gradientDescent.h"
 #include "adagrad.h"
+#include "adam.h"
 
 using namespace std;
 
@@ -367,6 +368,8 @@ void Duplex::walkOptimizer(){
         optimizer = new GradientDescent(settings);
     }else if(settings->check("optimization.algorithm", "adagrad")){
         optimizer  = new Adagrad(settings);
+    }else if(settings->check("optimization.algorithm", "adam")){
+        optimizer = new Adam(settings);
     }else{
         optimizer = new GradientDescent(settings);
     }
@@ -517,10 +520,7 @@ string Duplex::drawCanvas(string function, double xmin, double xmax, double ymin
         
         if(plotType=="contour"){
             canvas << "p 'test.dat' with image, 'cont.dat' with linespoints lt \"white\" pt 0.01\n";
-        }else{
-            //surf plot, the actual default!
-            canvas << "p 'test.dat' with image, 'cont.dat' with  lt \"white\" pt 0.01\n";
-        }
+        } //the actual default is the surf plot
     }
     return canvas.str();
 }

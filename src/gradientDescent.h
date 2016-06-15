@@ -11,9 +11,8 @@ class GradientDescent : public Optimizer{
     double velocity;            // the velocity paramter for momentum update
     double momentum;            // dampens the velocity during momentum update
     double previous_velocity;   // previous value of velocity, used in Nestrov momentum equations.
-    
     bool nestrov;               // flag that enables the Nestrov equations
-    
+
 public:
     GradientDescent(Settings* s);
     ~GradientDescent();

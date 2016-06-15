@@ -6,9 +6,6 @@ using namespace std;
 // The Adagrad optimization algorithm, with support for RMSProp auto-correlation
 class Adagrad : public Optimizer{
     double learning_rate_base;
-    int parameterDimension;
-    int objectiveDimension;
-    
     // an epsilon to avoid division by zero (1e-4 to 1e-8)
     double fudgeFactor;
     bool init;

@@ -20,13 +20,11 @@ bool GradientDescent::hasGradientInformation(){
 }
 
 State* GradientDescent::update(State* u){
-    auto pSize = u->getParameterSize();
-    auto objSize = u->getObjectiveSize();
     auto prev = u->getParameter();
     auto iterations = u->getID();
     
-    auto v = new State(pSize, objSize);
-    auto input = new double[pSize]();
+    auto v = new State(parameterDimension, objectiveDimension);
+    auto input = new double[parameterDimension]();
     
     // decayed learning rate:
     auto learning_rate = learning_rate_base * (1.0 / (1.0 + decay * iterations));
@@ -45,9 +43,8 @@ State* GradientDescent::update(State* u){
             // Descent rule for the Vanilla Gradient Descent (with momentum, but without Nestrov).
             input[i] = prev[i] + velocity;
         }
-        if(input[i]<-1) input[i]=-1;
-        if(input[i]>1) input[i]=1;
     }
+    clipParameters(input);
     v->setParameter(input);
     return v;
 }
