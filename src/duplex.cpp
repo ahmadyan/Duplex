@@ -19,6 +19,7 @@
 #include "gradientDescent.h"
 #include "adagrad.h"
 #include "adam.h"
+#include "adadelta.h"
 
 using namespace std;
 
@@ -240,7 +241,7 @@ double Duplex::score(State* state, double* maxBound, double* minBound){
         //currently we support the following types of objectives
         //1. boundary: equivalent to the boundary conditions in BVPs. The closer we get to the boundary value, the better
         //2. boundary-strict: similar to boundary, but if we are crossing the bounary value the sameples is not usefull anymore.
-        //                  for example, for the length of the curve we use bounadry-hard objectives, so the length is strictly less than boundary
+        //   for example, for the length of the curve we use bounadry-hard objectives, so the length is strictly less than boundary
         //3. maximize
         //4. minimize
         for (int i = 0; i < objectiveSize; i++){
@@ -370,6 +371,8 @@ void Duplex::walkOptimizer(){
         optimizer  = new Adagrad(settings);
     }else if(settings->check("optimization.algorithm", "adam") || settings->check("optimization.algorithm", "adamax")){
         optimizer = new Adam(settings);
+    }else if(settings->check("optimization.algorithm", "adadelta")){
+        optimizer  = new Adadelta(settings);
     }else{
         optimizer = new GradientDescent(settings);
     }
