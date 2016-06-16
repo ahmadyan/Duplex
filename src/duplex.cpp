@@ -20,6 +20,7 @@
 #include "adagrad.h"
 #include "adam.h"
 #include "adadelta.h"
+#include "nadam.h"
 
 using namespace std;
 
@@ -369,6 +370,8 @@ void Duplex::walkOptimizer(){
         optimizer = new GradientDescent(settings);
     }else if(settings->check("optimization.algorithm", "adagrad")){
         optimizer  = new Adagrad(settings);
+    }else if(settings->check("optimization.algorithm", "nadam")){
+        optimizer  = new Nadam(settings);
     }else if(settings->check("optimization.algorithm", "adam") || settings->check("optimization.algorithm", "adamax")){
         optimizer = new Adam(settings);
     }else if(settings->check("optimization.algorithm", "adadelta")){

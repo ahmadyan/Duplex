@@ -5,8 +5,8 @@ Adam::Adam(Settings* s):Optimizer(s){
     
     learning_rate_base = settings->lookupFloat("optimization.learning_rate");
     fudgeFactor = settings->lookupFloat("optimization.fudge_factor");
-    exponential_decay_rates_beta1=settings->lookupFloat("optimization.exponential_decay_rates_beta1");;
-    exponential_decay_rates_beta2=settings->lookupFloat("optimization.exponential_decay_rates_beta2");;
+    exponential_decay_rates_beta1=settings->lookupFloat("optimization.exponential_decay_rates_beta1");
+    exponential_decay_rates_beta2=settings->lookupFloat("optimization.exponential_decay_rates_beta2");
     bias_correction=settings->check("optimization.bias_correction", "true");
     moment = new double[parameterDimension]();
     velocity = new double[parameterDimension]();
