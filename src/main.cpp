@@ -33,6 +33,25 @@ namespace{
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
+enum class mode {load, duplex, fopt, opt, sa, clustering, invalid};
+mode getMode(Settings* settings){
+    auto m=mode::invalid;
+    if (settings->check("mode", "load")){
+        m=mode::load;
+    }else if (settings->check("mode", "duplex")){
+        m=mode::duplex;
+    }else if (settings->check("mode", "fopt")){
+        m=mode::fopt;
+    }else if (settings->check("mode", "opt")){
+        m=mode::opt;
+    }else if (settings->check("mode", "simulated-annealing")){
+        m=mode::sa;
+    }else if (settings->check("mode", "clustering")){
+        m=mode::clustering;
+    }
+    return m;
+}
+
 int main(int argc, char** argv){
 	Log log;
     log << "Duplex optimization tool." << endl ;
@@ -74,38 +93,67 @@ int main(int argc, char** argv){
             verbose = settings->lookupBoolean("verbose");
 		}
         log << "Parsing config file complete." << endl ;
+        
+        // Duplex main code
         System* system = new System(settings);
         Duplex* duplex = new Duplex(settings);				log << "Duplex core created." << endl ;
         boost::property_tree::ptree ptree;  //used to load/save the data
-        if(settings->check("mode", "load")){
-            read_xml(settings->lookupString("savefile"), ptree);               // Load the XML file into the property tree.
-            duplex->load(&ptree);
-        }else{
-            duplex->setSystem(system);						log << "System set." ;
-            duplex->setObjective();							log << "Objective set. " ;
-            duplex->initialize();							log << "Duplex initialization complete." << endl ;
-            log.tick();
-
-			if (settings->check("mode", "duplex")){
-				duplex->optimize();
-			}else if (settings->check("mode", "simulated-annealing")){
-				duplex->simulated_annealing();
-			}else if (settings->check("mode", "fopt")){
-				duplex->functionalOptimization();
-			}else if (settings->check("mode", "opt")){
-				duplex->optimize();
-			}else{
-				log << "Unknown optimization mode is selected. Duplex currently supports: [load, duplex, simulated-annealing]";
-			}
-            log.tock("Duplex main optimizatio loop");
-            //saving the results into an xml file
-            duplex->save(&ptree);
-            //ofstream savefile(settings->lookupString("savefile"));
-            //write_xml(savefile, ptree);
-            //savefile.close();
-			//cout << "I'm here ..." << endl;
-        }
         
+        //determining which algorithm to execute
+        auto m = getMode(settings);
+        duplex->setSystem(system);						log << "System set." ;
+        duplex->setObjective();							log << "Objective set. " ;
+        duplex->initialize();							log << "Duplex initialization complete." << endl ;
+        log.tick();
+
+        switch(m){
+            // -----------------------------------------------------
+            case mode::load:
+                // Load the XML file into the property tree.
+                read_xml(settings->lookupString("savefile"), ptree);
+                duplex->load(&ptree);
+                break;
+            // -----------------------------------------------------
+            case mode::duplex:
+                duplex->optimize();
+                break;
+                
+            // -----------------------------------------------------
+            case mode::fopt:
+                duplex->functionalOptimization();
+                break;
+            
+            // -----------------------------------------------------
+            case mode::opt:
+                duplex->optimize();
+                break;
+            
+            // -----------------------------------------------------
+            case mode::sa:
+                duplex->simulated_annealing();
+                break;
+            
+            // -----------------------------------------------------
+            case mode::clustering:
+                break;
+            
+            // -----------------------------------------------------
+            case mode::invalid:
+                log << "Unknown optimization mode is selected.";
+                break;
+                
+            // -----------------------------------------------------
+        }
+        log.tock("Duplex main optimizatio loop");
+        
+        //saving the results into an xml file
+        duplex->save(&ptree);
+        //ofstream savefile(settings->lookupString("savefile"));
+        //write_xml(savefile, ptree);
+        //savefile.close();
+        
+        
+        // Plotting the results
         if(settings->check("plot.enable", "true")){
 			vector<string> plots = settings->listVariables("plot", "uid-plot");
 			for (int i = 0; i < plots.size(); i++){
