@@ -15,6 +15,7 @@ public:
     string toString(double*);
     void importData(string, int);
     void exportData(string filename);
+    void shuffleData();
     int getSize();
     int getDimension();
     double* getData(int);

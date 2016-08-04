@@ -135,7 +135,7 @@ int main(int argc, char** argv){
             
             // -----------------------------------------------------
             case mode::clustering:
-                duplex->kmean();
+                duplex->clustering();
                 break;
             
             // -----------------------------------------------------

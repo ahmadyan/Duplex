@@ -85,7 +85,8 @@ public:
 	State* globalStep();			
 	State* foptGlobalStep();
     void kmean();
-	
+    void clustering();
+    
 	void computeTemperature(int i);
 	double computeStepLength();
 	int  computeNextCandidateParameter(State* qnear);

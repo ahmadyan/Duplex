@@ -39,7 +39,6 @@ void Data::importData(string filename, int size){
     cout << "Imported " << payload.size() << " samples." << endl ;
 }
 
-
 void Data::exportData(string filename){
     auto size = getSize();
     ofstream savefile;
@@ -50,6 +49,9 @@ void Data::exportData(string filename){
     savefile.close();
 }
 
+void Data::shuffleData(){
+    random_shuffle(payload.begin(), payload.end());
+}
 
 Data::~Data(){
 }
@@ -77,7 +79,6 @@ double* Data::getData(int i){
 int Data::getDimension(){
     return dimension;
 }
-
 
 string Data::plotScatter(){
     stringstream cmdstr;

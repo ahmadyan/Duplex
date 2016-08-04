@@ -479,6 +479,13 @@ void Duplex::functionalOptimization(){
 	}
 }
 
+void Duplex::clustering(){
+    samples = new Data(settings);
+    samples->shuffleData();
+    kmean();
+    samples->exportData("tmp");
+}
+
 void Duplex::kmean(){
     cout << "Executing standard kmean clustering algorithm" << endl ;
     // need two database: 1 for holding u1...uk, other one for the actual data samples
@@ -487,8 +494,13 @@ void Duplex::kmean(){
     int k = settings->lookupInt("clustering.clusters");
     int d = settings->lookupInt("data.dimension");
     
-    samples = new Data(settings);
-    
+    //initializing centers
+    vector<double*> centers;
+    for(int i=0;i<k;i++){
+        double* c = new double[d];
+        double* s = samples->getData(i);
+        centers.push_back(c);
+    }
     //parameter size = k*d
     //objective size = uknown
     
@@ -497,9 +509,6 @@ void Duplex::kmean(){
     //while(conv)
     //  for i=1:m --> assign nodes to clusters
     //  for i=1:k --> update clusters
-    
-    
-    samples->exportData("tmp");
     
 }
 
