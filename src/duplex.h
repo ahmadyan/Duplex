@@ -12,6 +12,7 @@
 #include "system.h"
 #include "search.h"
 #include "stat.h"
+#include "data.h"
 
 enum class Temperature { temperatureexp, temperaturefast, temperatureboltz };
 enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annealingboltzrandom};
@@ -19,6 +20,7 @@ enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annea
 class Duplex{
 	Settings* settings;
     Search* db;
+    Data* samples;
     Stat* stat;
 	
 	//System:
@@ -82,6 +84,7 @@ public:
 	State* localStep(int i, State*);
 	State* globalStep();			
 	State* foptGlobalStep();
+    void kmean();
 	
 	void computeTemperature(int i);
 	double computeStepLength();

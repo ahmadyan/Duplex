@@ -14,6 +14,7 @@
 #include <iomanip>
 #include <limits>
 #include <sstream>
+#include <fstream>
 
 #include "optimizer.h"
 #include "gradientDescent.h"
@@ -64,7 +65,7 @@ Duplex::Duplex(Settings* c){
 		exit(2);
 	}
     
-    db = new Search(settings);
+    db = new Search(settings, objectiveDimension);
 }
 
 Duplex::~Duplex(){
@@ -478,6 +479,30 @@ void Duplex::functionalOptimization(){
 	}
 }
 
+void Duplex::kmean(){
+    cout << "Executing standard kmean clustering algorithm" << endl ;
+    // need two database: 1 for holding u1...uk, other one for the actual data samples
+    // need plotting mechanism for scatter plot of data
+    auto m = settings->lookupInt("data.size");
+    int k = settings->lookupInt("clustering.clusters");
+    int d = settings->lookupInt("data.dimension");
+    
+    samples = new Data(settings);
+    
+    //parameter size = k*d
+    //objective size = uknown
+    
+    //generate data
+    //initialize k cluster
+    //while(conv)
+    //  for i=1:m --> assign nodes to clusters
+    //  for i=1:k --> update clusters
+    
+    
+    samples->exportData("tmp");
+    
+}
+
 void Duplex::clear(){
 }
 
@@ -639,7 +664,9 @@ string Duplex::draw(int i){
 	string type = settings->lookupString(("plot." + plots[i] + ".type").c_str());
 	if (type == "error"){
 		return stat->plotError();
-	}
+    }else if (type == "data"){
+        return samples->plotScatter();
+    }
 	else if (type == "distance"){
 		return stat->plotDistance();
 	}
