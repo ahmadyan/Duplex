@@ -85,4 +85,3 @@ string Data::plotScatter(){
     cmdstr << "plot 'tmp' with points" << endl;
     return cmdstr.str();
 }
-

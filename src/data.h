@@ -8,6 +8,7 @@ protected:
     string format;
     string sourceFileName;
     vector<double*> payload;
+    vector<int> tags;
     
 public:
     Data(Settings* setting);

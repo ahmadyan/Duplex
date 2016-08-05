@@ -55,6 +55,11 @@ class Duplex{
 	double* parameterMin;
 	double* parameterMax;
 	vector<string> objectiveType;
+    
+    //clustering
+    vector<double*> centers;
+    vector<int> tags;
+    
 public:
 	Duplex(Settings*);
     ~Duplex();
@@ -86,6 +91,7 @@ public:
 	State* foptGlobalStep();
     void kmean();
     void clustering();
+    string drawClusters();
     
 	void computeTemperature(int i);
 	double computeStepLength();

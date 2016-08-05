@@ -147,3 +147,5 @@ bin/yield_samples.m
 bin/duplex_figure_eggholder_coordinated.m
 bin/duplex_figure_opamp.m
 bin/duplex_figure_eggholder.m
+
+*.gnuplot
