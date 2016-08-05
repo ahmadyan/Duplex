@@ -12,6 +12,7 @@
 #include "duplex.h"
 #include "system.h"
 #include "graphics.h"
+#include "clustering.h"
 #include <config4cpp/Configuration.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -97,6 +98,7 @@ int main(int argc, char** argv){
         // Duplex main code
         System* system = new System(settings);
         Duplex* duplex = new Duplex(settings);				log << "Duplex core created." << endl ;
+        Clustering* clustering;
         boost::property_tree::ptree ptree;  //used to load/save the data
         
         //determining which algorithm to execute
@@ -135,7 +137,8 @@ int main(int argc, char** argv){
             
             // -----------------------------------------------------
             case mode::clustering:
-                duplex->clustering();
+                clustering = new Clustering(settings);
+                clustering->kmean();
                 break;
             
             // -----------------------------------------------------
@@ -159,7 +162,8 @@ int main(int argc, char** argv){
 			vector<string> plots = settings->listVariables("plot", "uid-plot");
 			for (int i = 0; i < plots.size(); i++){
 				Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));
-				graphic->execute(duplex->draw(i));
+                graphic->execute(clustering->drawClusters());
+				//graphic->execute(duplex->draw(i));
 				//graphic->saveToPdf(settings->lookupString("output"));
 				delete graphic;
 			}

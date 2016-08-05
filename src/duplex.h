@@ -20,7 +20,6 @@ enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annea
 class Duplex{
 	Settings* settings;
     Search* db;
-    Data* samples;
     Stat* stat;
 	
 	//System:
@@ -56,9 +55,7 @@ class Duplex{
 	double* parameterMax;
 	vector<string> objectiveType;
     
-    //clustering
-    vector<double*> centers;
-    vector<int> tags;
+    
     
 public:
 	Duplex(Settings*);
@@ -89,9 +86,6 @@ public:
 	State* localStep(int i, State*);
 	State* globalStep();			
 	State* foptGlobalStep();
-    void kmean();
-    void clustering();
-    string drawClusters();
     
 	void computeTemperature(int i);
 	double computeStepLength();
