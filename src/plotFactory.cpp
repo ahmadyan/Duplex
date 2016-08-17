@@ -93,7 +93,8 @@ string PlotFactory::drawParameterTree(int x, int y, int z, string sizingPreferen
     return board.str();
 }
 
-string Duplex::drawObjectiveTree(int x, int y, string title){
+string PlotFactory::drawObjectiveTree(int x, int y, string title){
+    auto db = duplex->getDB();
     string color = "red";
     stringstream cmdstr;
     
@@ -214,7 +215,7 @@ string PlotFactory::scatterPlot(){
     return cmdstr.str();
 }
 
-string PlotFactory::getPlot(){
+string PlotFactory::getPlot(int plotID){
     vector<string> plots = settings->listVariables("plot", "uid-plot");
     string type = settings->lookupString(("plot." + plots[plotID] + ".type").c_str());
     if (type == "error"){
@@ -230,7 +231,7 @@ string PlotFactory::getPlot(){
         auto z = settings->lookupInt(("plot." + plots[plotID] + ".z").c_str());
         auto plotPreference = settings->lookupString(("plot." + plots[plotID] + ".plot").c_str());
         auto sizingPreference = settings->lookupString(("plot." + plots[plotID] + ".size").c_str());
-        return ""; //drawParameterTree(x, y, z, sizingPreference, plotPreference, "param");
+        return drawParameterTree(x, y, z, sizingPreference, plotPreference, "param");
         /*
         if((x>parameterDimension-1) || (y>parameterDimension-1) || (z>objectiveDimension-1)){
             cout << "error: tree.parameter plotting error, configuration file contains an invalid parameter x,y,z " << endl ;
@@ -242,7 +243,7 @@ string PlotFactory::getPlot(){
     else if (type == "tree.objective"){
         int x = settings->lookupInt(("plot." + plots[plotID] + ".x").c_str());
         int y = settings->lookupInt(("plot." + plots[plotID] + ".y").c_str());
-        return ""; // drawObjectiveTree(x, y, "objective");
+        return drawObjectiveTree(x, y, "objective");
     }
     else if (type == "trace"){
         int x = settings->lookupInt(("plot." + plots[plotID] + ".x").c_str());

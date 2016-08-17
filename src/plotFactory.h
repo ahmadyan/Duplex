@@ -9,7 +9,6 @@ using namespace std;
 
 class PlotFactory{
     Settings* settings;
-    int plotID;
     string plotStr;
     Clustering* clustering;
     Duplex* duplex;
@@ -18,7 +17,7 @@ class PlotFactory{
 public:
     PlotFactory(Settings* s, Stat*, Duplex*, Clustering*);
     ~PlotFactory();
-    string getPlot();
+    string getPlot(int);
     string plotError();
     string plotDistance();
     string drawTrace(int x, int y, string title);

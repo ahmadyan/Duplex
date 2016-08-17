@@ -165,7 +165,7 @@ int main(int argc, char** argv){
 			vector<string> plots = settings->listVariables("plot", "uid-plot");
 			for (int i = 0; i < plots.size(); i++){
 				Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));
-                string plotStr = pf->getPlot();
+                string plotStr = pf->getPlot(i);
                 graphic->execute(plotStr);
 				//graphic->execute(duplex->draw(i));
 				//graphic->saveToPdf(settings->lookupString("output"));

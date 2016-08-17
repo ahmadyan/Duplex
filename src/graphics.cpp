@@ -71,10 +71,9 @@ void Graphics::saveToPdf(string path){
 void Graphics::execute(string str){
     fprintf(gnuplotPipe, str.c_str());
     fflush(gnuplotPipe);
-    //cout << str << endl ;
-    //string buffer = "replot\n";
-    //fprintf(gnuplotPipe, buffer.c_str());
-    //fflush(gnuplotPipe);
+    string buffer = "replot\n";
+    fprintf(gnuplotPipe, buffer.c_str());
+    fflush(gnuplotPipe);
     /*string filename = "duplex.gnuplot";
     ofstream plotfile;
     plotfile.open(filename);
