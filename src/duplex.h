@@ -20,8 +20,8 @@ enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annea
 class Duplex{
 	Settings* settings;
     Search* db;
-    Stat* stat;
-	
+	Stat* stat;
+    
 	//System:
 	State* root;
 	State* goal;
@@ -55,8 +55,6 @@ class Duplex{
 	double* parameterMax;
 	vector<string> objectiveType;
     
-    
-    
 public:
 	Duplex(Settings*);
     ~Duplex();
@@ -80,8 +78,6 @@ public:
     
     void insert(int i, State* qnear, State* qnew);
 	double score(State*, double*, double*);
-
-	void clear();
 	double* generateNewInput(State* q);
 	State* localStep(int i, State*);
 	State* globalStep();			
@@ -90,7 +86,10 @@ public:
 	void computeTemperature(int i);
 	double computeStepLength();
 	int  computeNextCandidateParameter(State* qnear);
-	
+	Search* getDB();
+    System* getSystem();
     void save(boost::property_tree::ptree* ptree);
     void load(boost::property_tree::ptree* ptree);
+    void setStat(Stat*);
+    Stat* getStat();
 };

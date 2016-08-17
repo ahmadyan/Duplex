@@ -39,13 +39,12 @@ public:
     void updateBias(State* q);
     void updateConvergence(State* q);
     
-    string plotError();
-    string plotDistance();
-    
     double getDeltaConvergence();
     double getError(int);
     double getDistance(int);
     void error_push_back(double v);
     void distance_push_back(double v);
     void push_back(double);
+    vector<double> getError();
+    vector<double> getCurrentDistance();
 };

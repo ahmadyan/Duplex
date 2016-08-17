@@ -13,6 +13,7 @@
 #include "system.h"
 #include "graphics.h"
 #include "clustering.h"
+#include "plotfactory.h"
 #include <config4cpp/Configuration.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -99,6 +100,7 @@ int main(int argc, char** argv){
         System* system = new System(settings);
         Duplex* duplex = new Duplex(settings);				log << "Duplex core created." << endl ;
         Clustering* clustering;
+        
         boost::property_tree::ptree ptree;  //used to load/save the data
         
         //determining which algorithm to execute
@@ -107,7 +109,7 @@ int main(int argc, char** argv){
         duplex->setObjective();							log << "Objective set. " ;
         duplex->initialize();							log << "Duplex initialization complete." << endl ;
         log.tick();
-
+        Stat* stat = duplex->getStat();
         switch(m){
             // -----------------------------------------------------
             case mode::load:
@@ -159,10 +161,12 @@ int main(int argc, char** argv){
         
         // Plotting the results
         if(settings->check("plot.enable", "true")){
+            PlotFactory* pf = new PlotFactory(settings, stat, duplex, clustering);
 			vector<string> plots = settings->listVariables("plot", "uid-plot");
 			for (int i = 0; i < plots.size(); i++){
 				Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));
-                graphic->execute(clustering->drawClusters());
+                string plotStr = pf->getPlot();
+                graphic->execute(plotStr);
 				//graphic->execute(duplex->draw(i));
 				//graphic->saveToPdf(settings->lookupString("output"));
 				delete graphic;

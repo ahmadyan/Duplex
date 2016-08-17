@@ -95,30 +95,10 @@ void Clustering::kmean(){
     //objective size = uknown
 }
 
-string Clustering::drawClusters(){
-    stringstream cmdstr;
-    int k=3;
-    cmdstr << "plot ";
-    for(int i=0;i<k;i++){
-        cmdstr << "'-' w p ls " << i+1;
-        if(i!=k-1) cmdstr << ", ";
-        
-    }
-    cmdstr << endl;
-    auto d = samples->getDimension();
-    auto m = samples->getSize();
-    for(int i=0;i<k;i++){
-        for(int j=0;j<m;j++){
-            if(tags[j]==i){
-                auto s = samples->getData(j);
-                for(int k=0;k<d;k++){
-                    cmdstr << s[k] << " ";
-                }
-                cmdstr << endl ;
-                
-            }
-        }
-        cmdstr << "e" << endl;
-    }
-    return cmdstr.str();
+Data* Clustering::getData(){
+    return samples;
+}
+
+vector<int> Clustering::getTags(){
+    return tags;
 }

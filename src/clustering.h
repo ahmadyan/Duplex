@@ -15,6 +15,7 @@ public:
     ~Clustering();
     void kmean();
     void clustering();
-    string drawClusters();
     double distance(int dim, double* src, double* dst);
+    Data* getData();
+    vector<int> getTags();
 };
