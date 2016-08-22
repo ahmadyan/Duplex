@@ -10,6 +10,17 @@ class Clustering{
     vector<double*> centers;
     vector<int> tags;
     Data* samples;
+    int sampleSize;
+    int k;
+    int sampleDimension;
+    vector<double*> sumDistanceInCluster;
+    vector<int> totalSamplesInCluster;
+    
+    double pdelta;
+    double delta;
+    bool notConverged;
+    int counter;
+    int maxCounter;
 public:
     Clustering(Settings* s);
     ~Clustering();
@@ -18,4 +29,11 @@ public:
     double distance(int dim, double* src, double* dst);
     Data* getData();
     vector<int> getTags();
+    
+    //kmean prototypes
+    void kmeanAssignClusters();
+    void kmeanInitialize();
+    void kmeanUpdateCenters();
+    void kmeanCheckConvergence();
+    void kmeanClassic();
 };
