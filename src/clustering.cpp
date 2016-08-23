@@ -190,7 +190,7 @@ void Clustering::kmeanUpdateCenters(){
 void Clustering::kmeanCheckConvergence(){
     // checking for convergence
     auto ddelta = abs(pdelta - delta);
-    if(ddelta < 0.5 || counter++>maxCounter){
+    if(ddelta < 0.0001 || counter++>maxCounter){
         notConverged=false;
         if(counter==maxCounter){
             cout << "Kmean not converged after " << maxCounter << "  iterations." << endl ;
@@ -201,13 +201,22 @@ void Clustering::kmeanCheckConvergence(){
     }
 }
 
+vector<double> Clustering::kmeanClusterEnergy(){
+    vector<double> energy(k, 0);
+    for(int i=0;i<sampleSize;i++){
+        auto d = abs(distance(samples->getData(i), centers[tags[i]]));
+        energy[tags[i]] += d*d;
+    }
+    return energy;
+}
+
 //double Clustering::distance(int dim, double* src, double* dst)
 // computes the distortion of samples at every iteration of kmean algorithm
 double Clustering::kmeanCostFunction(){
     double j=0;
-    for(int i=0;i<sampleSize;i++){
-        auto d = abs(distance(samples->getData(i), centers[tags[i]]));
-        j += d*d;
+    auto energy = kmeanClusterEnergy();
+    for(int i=0;i<energy.size();i++){
+        j += energy[i];
     }
     j /= (1.0*sampleSize);
     return j;

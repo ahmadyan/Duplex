@@ -34,6 +34,7 @@ public:
     vector<int> getTags();
     vector<double> getCostHistory();
     double kmeanCostFunction();
+    vector<double> kmeanClusterEnergy();
     
     //kmean prototypes
     void kmeanAssignClusters();
