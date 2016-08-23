@@ -26,7 +26,7 @@ void Data::importData(string filename, int size){
     string line;
     if(source.is_open()){
         while(getline(source,line)){
-            double* sample = new double[dimension]();
+            vector<double> sample = vector<double>(dimension, 0);
             tokenizer<char_separator<char>> tokens(line, sep);
             int i=0;
             for(auto it=tokens.begin(); it!=tokens.end(); it++, i++){
@@ -64,6 +64,14 @@ string Data::toString(double* s){
     return str.str();
 }
 
+string Data::toString(vector<double> s){
+    std::ostringstream str;
+    for(int i=0;i<dimension;i++){
+        str << s[i] << " ";
+    }
+    return str.str();
+}
+
 string Data::toString(int i){
     return toString(getData(i));
 }
@@ -72,7 +80,7 @@ int Data::getSize(){
     return (int)(payload.size());
 }
 
-double* Data::getData(int i){
+vector<double> Data::getData(int i){
     return payload[i];
 }
 

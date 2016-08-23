@@ -140,7 +140,7 @@ int main(int argc, char** argv){
             // -----------------------------------------------------
             case mode::clustering:
                 clustering = new Clustering(settings);
-                clustering->kmean();
+                clustering->train("kmeanClassic");
                 break;
             
             // -----------------------------------------------------

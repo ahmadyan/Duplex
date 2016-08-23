@@ -7,19 +7,20 @@ protected:
     int dimension;
     string format;
     string sourceFileName;
-    vector<double*> payload;
+    vector<vector<double> > payload;
     vector<int> tags;
     
 public:
     Data(Settings* setting);
     string toString(int);
     string toString(double*);
+    string toString(vector<double> s);
     void importData(string, int);
     void exportData(string filename);
     void shuffleData();
     int getSize();
     int getDimension();
-    double* getData(int);
+    vector<double> getData(int);
     ~Data();
     string plotScatter();
 };

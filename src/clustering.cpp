@@ -11,7 +11,9 @@ Clustering::Clustering(Settings* s){
     sampleDimension = samples->getDimension();
 }
 
-Clustering::~Clustering(){}
+Clustering::~Clustering(){
+}
+
 double Clustering::distance(int dim, double* src, double* dst){
     double d=0;
     for(int i=0;i<dim;i++){
@@ -20,12 +22,36 @@ double Clustering::distance(int dim, double* src, double* dst){
     return sqrt(d);
 }
 
+double Clustering::distance(vector<double> src, vector<double> dst){
+    double d=0;
+    for(int i=0;i<src.size();i++){
+        d += (src[i]-dst[i])*(src[i]-dst[i]);
+    }
+    return sqrt(d);
+}
+
+double Clustering::distance(vector<double> src, double* dst){
+    double d=0;
+    for(int i=0;i<src.size();i++){
+        d += (src[i]-dst[i])*(src[i]-dst[i]);
+    }
+    return sqrt(d);
+}
+
+Data* Clustering::getData(){
+    return samples;
+}
+
+vector<int> Clustering::getTags(){
+    return tags;
+}
+
+vector<double> Clustering::getCostHistory(){
+    return costHistory;
+}
+
 void Clustering::kmean(){
     cout << "Executing standard kmean clustering algorithm" << endl ;
-    sampleSize = samples->getSize();
-    k = settings->lookupInt("clustering.clusters");
-    sampleDimension = samples->getDimension();
-    
     vector<double*> sumDistanceInCluster;
     vector<int> totalSamplesInCluster(k, 0);
     for(int i=0;i<k;i++){
@@ -33,10 +59,8 @@ void Clustering::kmean(){
     }
     //initializing centers
     for(int i=0;i<k;i++){
-        double* c = new double[sampleDimension];
-        //double* s = samples->getData(rand()%samples->getSize());
-        double* s = samples->getData(i);
-        copy(s, s+sampleDimension, c);    //memcpy(c, s, sizeof(double)*d);
+        auto s = samples->getData(i);
+        vector<double> c(s);
         centers.push_back(c);
     }
     tags = vector<int>(sampleSize, -1);
@@ -51,7 +75,7 @@ void Clustering::kmean(){
         for(int i=0;i<sampleSize;i++){
             double min_distance=numeric_limits<double>::max();
             for(int j=0;j<k;j++){
-                auto dist = distance(sampleDimension, samples->getData(i), centers[j]);
+                auto dist = distance(samples->getData(i), centers[j]);
                 if(dist<min_distance){
                     min_distance=dist;
                     tags[i]=j;
@@ -69,7 +93,7 @@ void Clustering::kmean(){
             auto s = samples->getData(i);
             totalSamplesInCluster[ tags[i] ]++;
             for(int j=0;j<sampleDimension;j++){
-                sumDistanceInCluster[tags[i]][j] += s[i];
+                sumDistanceInCluster[tags[i]][j] += s[j];
             }
         }
         
@@ -93,25 +117,16 @@ void Clustering::kmean(){
                 
             }
         }
+        costHistory.push_back(kmeanCostFunction());
     }
+    
+    cout << "Kmean distortion:" << endl ;
+    for(int i=0;i<costHistory.size();i++){
+        cout << costHistory[i] << "," ;
+    }cout << endl ;
+
     //parameter size = k*d
     //objective size = uknown
-}
-
-
-
-void Clustering::kmeanAssignClusters(){
-    // Attribute the closest cluster to each data point
-    for(int i=0;i<sampleSize;i++){
-        double min_distance=numeric_limits<double>::max();
-        for(int j=0;j<k;j++){
-            auto dist = distance(sampleDimension, samples->getData(i), centers[j]);
-            if(dist<min_distance){
-                min_distance=dist;
-                tags[i]=j;
-            }
-        }
-    }
 }
 
 void Clustering::kmeanInitialize(){
@@ -120,21 +135,32 @@ void Clustering::kmeanInitialize(){
     for(int i=0;i<k;i++){
         sumDistanceInCluster.push_back(new double[sampleDimension]());
     }
+    
     //initializing centers
     for(int i=0;i<k;i++){
-        double* c = new double[sampleDimension];
-        //double* s = samples->getData(rand()%samples->getSize());
-        double* s = samples->getData(i);
-        copy(s, s+sampleDimension, c);    //memcpy(c, s, sizeof(double)*d);
-        centers.push_back(c);
+        centers.push_back( vector<double>(samples->getData(rand()%samples->getSize())));
     }
-    tags = vector<int>(sampleSize, -1);
     
+    tags = vector<int>(sampleSize, -1);
     pdelta = 0.0;
     delta = 0.0;
     notConverged = true;
     counter=0;
     maxCounter=100;
+}
+
+void Clustering::kmeanAssignClusters(){
+    // Attribute the closest cluster to each data point
+    for(int i=0;i<sampleSize;i++){
+        double min_distance=numeric_limits<double>::max();
+        for(int j=0;j<k;j++){
+            auto dist = distance(samples->getData(i), centers[j]);
+            if(dist<min_distance){
+                min_distance=dist;
+                tags[i]=j;
+            }
+        }
+    }
 }
 
 void Clustering::kmeanUpdateCenters(){
@@ -143,18 +169,13 @@ void Clustering::kmeanUpdateCenters(){
     for(int i=0;i<k;i++){
         fill(sumDistanceInCluster[i], sumDistanceInCluster[i]+sampleDimension, 0);
     }
-    
     for(int i=0;i<sampleSize;i++){
         auto s = samples->getData(i);
         totalSamplesInCluster[ tags[i] ]++;
         for(int j=0;j<sampleDimension;j++){
-            sumDistanceInCluster[tags[i]][j] += s[i];
+            sumDistanceInCluster[tags[i]][j] += s[j];
         }
     }
-}
-
-void Clustering::kmeanCheckConvergence(){
-    // checking for convergence
     pdelta = delta;
     delta = 0;
     for(int i=0;i<k;i++){
@@ -164,6 +185,10 @@ void Clustering::kmeanCheckConvergence(){
             centers[i][j] = val;
         }
     }
+}
+
+void Clustering::kmeanCheckConvergence(){
+    // checking for convergence
     auto ddelta = abs(pdelta - delta);
     if(ddelta < 0.5 || counter++>maxCounter){
         notConverged=false;
@@ -176,6 +201,18 @@ void Clustering::kmeanCheckConvergence(){
     }
 }
 
+//double Clustering::distance(int dim, double* src, double* dst)
+// computes the distortion of samples at every iteration of kmean algorithm
+double Clustering::kmeanCostFunction(){
+    double j=0;
+    for(int i=0;i<sampleSize;i++){
+        auto d = abs(distance(samples->getData(i), centers[tags[i]]));
+        j += d*d;
+    }
+    j /= (1.0*sampleSize);
+    return j;
+}
+
 void Clustering::kmeanClassic(){
     cout << "Executing standard kmean clustering algorithm" << endl ;
     kmeanInitialize();
@@ -183,13 +220,18 @@ void Clustering::kmeanClassic(){
         kmeanAssignClusters();
         kmeanUpdateCenters();
         kmeanCheckConvergence();
+        costHistory.push_back(kmeanCostFunction());
     }
+    cout << "Kmean distortion:" ;
+    for(int i=0;i<costHistory.size();i++){
+        cout << costHistory[i] << "," ;
+    }cout << endl ;
 }
 
-Data* Clustering::getData(){
-    return samples;
-}
-
-vector<int> Clustering::getTags(){
-    return tags;
+void Clustering::train(string alg){
+    if(alg=="kmean"){
+        kmean();
+    }else if(alg=="kmeanClassic"){
+        kmeanClassic();
+    }
 }

@@ -7,7 +7,7 @@ using namespace std;
 // The Adagrad optimization algorithm, with support for RMSProp auto-correlation
 class Clustering{
     Settings* settings;
-    vector<double*> centers;
+    vector<vector<double> > centers;
     vector<int> tags;
     Data* samples;
     int sampleSize;
@@ -15,6 +15,7 @@ class Clustering{
     int sampleDimension;
     vector<double*> sumDistanceInCluster;
     vector<int> totalSamplesInCluster;
+    vector<double> costHistory;
     
     double pdelta;
     double delta;
@@ -27,8 +28,12 @@ public:
     void kmean();
     void clustering();
     double distance(int dim, double* src, double* dst);
+    double distance(vector<double> src, vector<double> dst);
+    double distance(vector<double> src, double* dst);
     Data* getData();
     vector<int> getTags();
+    vector<double> getCostHistory();
+    double kmeanCostFunction();
     
     //kmean prototypes
     void kmeanAssignClusters();
@@ -36,4 +41,5 @@ public:
     void kmeanUpdateCenters();
     void kmeanCheckConvergence();
     void kmeanClassic();
+    void train(string);
 };
