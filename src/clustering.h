@@ -1,10 +1,10 @@
 #pragma once
+#include <iostream>
 #include "configuration.h"
 #include "data.h"
-#include <iostream>
+#include "dstate.h"
 using namespace std;
 
-// The Adagrad optimization algorithm, with support for RMSProp auto-correlation
 class Clustering{
     Settings* settings;
     vector<vector<double> > centers;
@@ -21,7 +21,10 @@ class Clustering{
     double delta;
     bool notConverged;
     int counter;
-    int maxCounter;
+    int iterations;
+    
+    vector<DState*> states;
+    
 public:
     Clustering(Settings* s);
     ~Clustering();
@@ -42,5 +45,13 @@ public:
     void kmeanUpdateCenters();
     void kmeanCheckConvergence();
     void kmeanClassic();
+    void kmeanDuplex();
+    
+    // kmean+duplex prototypes
+    DState* initialize();
+    DState* globalStep();
+    DState* localStep(DState* qnear);
+    void evaluate(DState* qnew);
+    double cost(DState* q);
     void train(string);
 };
