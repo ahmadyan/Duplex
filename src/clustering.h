@@ -1,5 +1,6 @@
 #pragma once
 #include <iostream>
+#include <queue>
 #include "configuration.h"
 #include "data.h"
 #include "dstate.h"
@@ -13,8 +14,6 @@ class Clustering{
     int sampleSize;
     int k;
     int sampleDimension;
-    vector<double*> sumDistanceInCluster;
-    vector<int> totalSamplesInCluster;
     vector<double> costHistory;
     
     double pdelta;
@@ -22,8 +21,9 @@ class Clustering{
     bool notConverged;
     int counter;
     int iterations;
-    
+    vector<DState*> buffer;
     vector<DState*> states;
+    priority_queue<DState*, vector<DState*>, dstateLesserComparator > pq;
     
 public:
     Clustering(Settings* s);
@@ -42,7 +42,7 @@ public:
     //kmean prototypes
     void kmeanAssignClusters();
     void kmeanInitialize();
-    void kmeanUpdateCenters();
+    void kmeanUpdateCenters(DState* q);
     void kmeanCheckConvergence();
     void kmeanClassic();
     void kmeanDuplex();
@@ -51,6 +51,7 @@ public:
     DState* initialize();
     DState* globalStep();
     DState* localStep(DState* qnear);
+    void insert(DState* new_elem);
     void evaluate(DState* qnew);
     double cost(DState* q);
     void train(string);

@@ -18,3 +18,16 @@ public:
     void setParameter(vector<vector<double> >);
     vector<vector<double> > getParameter();
 };
+
+
+class dstateGreaterComparator{
+public: bool operator()(const DState* lhs, const DState* rhs) const{
+    return lhs->totalCost > rhs->totalCost;
+}
+};
+
+class dstateLesserComparator{
+public: bool operator()(const DState* lhs, const DState* rhs) const{
+    return lhs->totalCost < rhs->totalCost;
+}
+};

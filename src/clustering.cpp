@@ -131,12 +131,6 @@ void Clustering::kmean(){
 }
 
 void Clustering::kmeanInitialize(){
-    sumDistanceInCluster = vector<double*>();
-    totalSamplesInCluster = vector<int>(k, 0);
-    for(int i=0;i<k;i++){
-        sumDistanceInCluster.push_back(new double[sampleDimension]());
-    }
-    
     //initializing centers
     for(int i=0;i<k;i++){
         centers.push_back( vector<double>(samples->getData(rand()%samples->getSize())));
@@ -149,31 +143,23 @@ void Clustering::kmeanInitialize(){
     counter=0;
 }
 
-void Clustering::kmeanAssignClusters(){
-    // Attribute the closest cluster to each data point
-    for(int i=0;i<sampleSize;i++){
-        double min_distance=numeric_limits<double>::max();
-        for(int j=0;j<k;j++){
-            auto dist = distance(samples->getData(i), centers[j]);
-            if(dist<min_distance){
-                min_distance=dist;
-                tags[i]=j;
-            }
-        }
-    }
-}
-
-void Clustering::kmeanUpdateCenters(){
+void Clustering::kmeanUpdateCenters(DState* q){
     // Set the position of each cluster to the mean of all data points belonging to that cluster
-    fill(totalSamplesInCluster.begin(), totalSamplesInCluster.end(), 0);
+    vector<double*> sumDistanceInCluster = vector<double*>();
     for(int i=0;i<k;i++){
-        fill(sumDistanceInCluster[i], sumDistanceInCluster[i]+sampleDimension, 0);
+        sumDistanceInCluster.push_back(new double[sampleDimension]());
     }
+    
+    vector<int> totalSamplesInCluster = vector<int>(k, 0);
+    //fill(totalSamplesInCluster.begin(), totalSamplesInCluster.end(), 0);
+    //for(int i=0;i<k;i++){
+    //    fill(sumDistanceInCluster[i], sumDistanceInCluster[i]+sampleDimension, 0);
+    //}
     for(int i=0;i<sampleSize;i++){
         auto s = samples->getData(i);
-        totalSamplesInCluster[ tags[i] ]++;
+        totalSamplesInCluster[ q->tags[i] ]++;
         for(int j=0;j<sampleDimension;j++){
-            sumDistanceInCluster[tags[i]][j] += s[j];
+            sumDistanceInCluster[q->tags[i]][j] += s[j];
         }
     }
     pdelta = delta;
@@ -181,8 +167,8 @@ void Clustering::kmeanUpdateCenters(){
     for(int i=0;i<k;i++){
         for(int j=0;j<sampleDimension;j++){
             auto val = sumDistanceInCluster[i][j] / totalSamplesInCluster[i];
-            delta += abs(centers[i][j] - val);
-            centers[i][j] = val;
+            delta += abs(q->centers[i][j] - val);
+            q->centers[i][j] = val;
         }
     }
 }
@@ -226,17 +212,21 @@ double Clustering::kmeanCostFunction(){
 
 void Clustering::kmeanClassic(){
     cout << "Executing standard kmean clustering algorithm" << endl ;
-    kmeanInitialize();
-    while(notConverged){
-        kmeanAssignClusters();
-        kmeanUpdateCenters();
-        kmeanCheckConvergence();
-        costHistory.push_back(kmeanCostFunction());
+    DState* q = initialize();
+    //while(notConverged){
+    for(int i=0;i<10;i++){
+        evaluate(q);
+        kmeanUpdateCenters(q);
+        //kmeanCheckConvergence();
+        //costHistory.push_back(kmeanCostFunction());
     }
-    cout << "Kmean distortion:" ;
-    for(int i=0;i<costHistory.size();i++){
-        cout << costHistory[i] << "," ;
-    }cout << endl ;
+    //cout << "Kmean distortion:" ;
+    //for(int i=0;i<costHistory.size();i++){
+    //    cout << costHistory[i] << "," ;
+    //}cout << endl ;
+    centers=q->centers;
+    tags = q->tags;
+
 }
 
 DState* Clustering::initialize(){
@@ -251,8 +241,35 @@ DState* Clustering::initialize(){
     return s;
 }
 
+
+template <class T, class S, class C>
+S& Container(priority_queue<T, S, C>& q) {
+    struct Queue : private priority_queue<T, S, C> {
+        static S& Container(priority_queue<T, S, C>& q) {
+            return q.*&Queue::c;
+        }
+    };
+    return Queue::Container(q);
+}
+
+void Clustering::insert(DState* new_elem){
+    states.push_back(new_elem);
+    int buffersize=10;
+    if(pq.size()<buffersize){
+        pq.push(new_elem);
+    }else{
+        auto min = pq.top();
+        if(new_elem->cost >min->cost){
+            pq.pop();
+            pq.push(new_elem);
+        }
+    }
+    buffer = Container(pq);
+}
+
 DState* Clustering::globalStep(){
-    return states[rand()%states.size()];
+    //return states[rand()%states.size()];
+    return buffer[rand()%buffer.size()];
 }
 
 DState* Clustering::localStep(DState* qnear){
@@ -277,15 +294,15 @@ double Clustering::cost(DState* q){
     return q->totalCost;
 }
 
-void Clustering::evaluate(DState* qnew){
+void Clustering::evaluate(DState* q){
     // Attribute the closest cluster to each data point
     for(int i=0;i<sampleSize;i++){
         double min_distance=numeric_limits<double>::max();
         for(int j=0;j<k;j++){
-            auto dist = distance(samples->getData(i), qnew->centers[j]);
+            auto dist = distance(samples->getData(i), q->centers[j]);
             if(dist<min_distance){
                 min_distance=dist;
-                qnew->tags[i]=j;
+                q->tags[i]=j;
             }
         }
     }
@@ -293,14 +310,14 @@ void Clustering::evaluate(DState* qnew){
 
 void Clustering::kmeanDuplex(){
     auto root = initialize();
-    states.push_back(root);
+    insert(root);
     for(int iter=0;iter<iterations;iter++){
         auto qprev = globalStep();
         auto qnew  = localStep(qprev);
         evaluate(qnew);
         auto energy = cost(qnew);
         cout << energy << endl ;
-        states.push_back(qnew);
+        insert(qnew);
     }
     
     
