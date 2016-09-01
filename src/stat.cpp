@@ -111,21 +111,10 @@ void Stat::distance_push_back(double v){
     currentDistance.push_back(v);
 }
 
-string Stat::plotError(){
-    stringstream cmdstr;
-    cmdstr << "plot [" << 0 << ":" << error.size() << "][" << 0 << ":" << 1.1*error[0] << "] 0 with linespoints lt \"white\" pt 0.01" << endl;
-    for (int i = 1; i < error.size(); i++){
-        cmdstr << " set arrow from " << i - 1 << "," << error[i - 1] << " to " << i << "," << error[i] << " nohead  lc rgb \"red\" lw 2 \n";
-    }
-    return cmdstr.str();
+vector<double> Stat::getError(){
+    return error;
 }
 
-string Stat::plotDistance(){
-    stringstream cmdstr;
-    cmdstr << "plot [" << 0 << ":" << currentDistance.size() << "][" << 0 << ":" << 2.0*currentDistance[0] << "] 0 with linespoints lt \"white\" pt 0.01" << endl;
-    for (int i = 1; i < currentDistance.size(); i++){
-        cmdstr << " set arrow from " << i - 1 << "," << currentDistance[i - 1] << " to " << i << "," << currentDistance[i] << " nohead  lc rgb \"red\" lw 2 \n";
-    }
-    return cmdstr.str();
+vector<double> Stat::getCurrentDistance(){
+    return currentDistance;
 }
-

@@ -1,4 +1,5 @@
 #include "graphics.h"
+#include <fstream>
 using namespace std;
 
 #if defined(WIN32) || defined(_WIN32) || defined(__WIN32__) || defined(__TOS_WIN__)
@@ -70,8 +71,13 @@ void Graphics::saveToPdf(string path){
 void Graphics::execute(string str){
     fprintf(gnuplotPipe, str.c_str());
     fflush(gnuplotPipe);
-    //cout << str << endl ;
     string buffer = "replot\n";
     fprintf(gnuplotPipe, buffer.c_str());
     fflush(gnuplotPipe);
+    /*string filename = "duplex.gnuplot";
+    ofstream plotfile;
+    plotfile.open(filename);
+    plotfile << str;
+    plotfile.close();
+    system("gnuplot duplex.gnuplot -persist");*/
 }

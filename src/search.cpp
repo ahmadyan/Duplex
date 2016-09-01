@@ -3,9 +3,9 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 #include <boost/foreach.hpp>
-Search::Search(Settings* c){
+Search::Search(Settings* c, int d){
     config=c;
-    dim=config->lookupInt("objective.size");    //dim is the search dimension
+    dim=d; 
     kd = kd_create(dim);
 }
 

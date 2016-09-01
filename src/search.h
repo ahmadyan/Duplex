@@ -23,7 +23,7 @@ class Search{
     struct kdtree *kd;
 	priority_queue<State*, vector<State*>, stateGreaterComparator > pq;
 public:
-	Search(Settings*);
+	Search(Settings*, int);
 	~Search();
     //State operator[] (const int i);
     State* getState(int i);
