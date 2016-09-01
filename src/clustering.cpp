@@ -275,6 +275,16 @@ DState* Clustering::globalStep(){
 DState* Clustering::localStep(DState* qnear){
     DState* qnew = new DState(qnear);
     qnew->centers[rand()%k] = vector<double>(samples->getData(rand()%samples->getSize()));
+    /*vector<double> newcenter = vector<double>(sampleDimension,0);
+    for(int i=0;i<10;i++){
+        int randomSampleIndex = rand()%samples->getSize();
+        auto randomSample = samples->getData(randomSampleIndex);
+        for(int j=0;j<sampleDimension;j++){
+            newcenter[j] += randomSample[j];
+        }
+    }
+    for(int i=0;i<sampleDimension;i++) newcenter[i] /= 10.0;
+    qnew->centers[rand()%k] = newcenter;*/
     return qnew;
 }
 
