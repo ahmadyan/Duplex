@@ -18,6 +18,8 @@
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
+#include "nonconvexoptimizer.h"
+
 using namespace config4cpp;
 
 #if (_MSC_VER == 1900)	//Visual studio 2015
@@ -97,16 +99,13 @@ int main(int argc, char** argv){
         log << "Parsing config file complete." << endl ;
         
         // Duplex main code
-        System* system = new System(settings);
-        Duplex* duplex = new Duplex(settings);				log << "Duplex core created." << endl ;
+        Duplex* duplex = new NonconvexOptimizer(settings);				log << "Duplex core created." << endl ;
         Clustering* clustering;
         
         boost::property_tree::ptree ptree;  //used to load/save the data
         
         //determining which algorithm to execute
         auto m = getMode(settings);
-        duplex->setSystem(system);						log << "System set." ;
-        duplex->setObjective();							log << "Objective set. " ;
         duplex->initialize();							log << "Duplex initialization complete." << endl ;
         log.tick();
         Stat* stat = duplex->getStat();
@@ -119,29 +118,29 @@ int main(int argc, char** argv){
                 break;
             // -----------------------------------------------------
             case mode::duplex:
-                duplex->optimize();
+                duplex->train();
                 break;
                 
             // -----------------------------------------------------
             case mode::fopt:
-                duplex->functionalOptimization();
+                //duplex->functionalOptimization();
                 break;
             
             // -----------------------------------------------------
             case mode::opt:
-                duplex->optimize();
+                duplex->train();
                 break;
             
             // -----------------------------------------------------
             case mode::sa:
-                duplex->simulated_annealing();
+                //duplex->simulated_annealing();
                 break;
             
             // -----------------------------------------------------
             case mode::clustering:
                 clustering = new Clustering(settings);
-                
                 clustering->train(settings->lookupString("clustering.mode"));
+                delete clustering;
                 break;
             
             // -----------------------------------------------------
@@ -176,7 +175,6 @@ int main(int argc, char** argv){
         
         //clean-up
         delete duplex;
-		delete system;
 		delete settings;
 	}catch (SettingsException se){
 		std::cerr << "CONFIG ERROR: " << se.what() << std::endl << std::endl;

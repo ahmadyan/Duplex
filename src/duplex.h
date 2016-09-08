@@ -1,11 +1,5 @@
-//
-//  duplex.h
-//  duplex
-//
-//  Created by Adel Ahmadyan on 4/23/15.
-//  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
-//
 #pragma once
+#include <iostream>
 #include <boost/property_tree/ptree.hpp>
 
 #include "configuration.h"
@@ -14,82 +8,72 @@
 #include "stat.h"
 #include "data.h"
 
+using namespace std;
+
 enum class Temperature { temperatureexp, temperaturefast, temperatureboltz };
 enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annealingboltzrandom};
 
 class Duplex{
-	Settings* settings;
+    
+protected:
+    Settings* settings;
     Search* db;
-	Stat* stat;
+    Stat* stat;
+    System* system;
     
-	//System:
-	State* root;
-	State* goal;
-	System* system;
-	double* max;
-	double* min;
-	double* opt;
-	int parameterDimension;
-	int objectiveDimension;
-	
-	//Duplex options
-	int iterationCap;
-	Temperature temperatureOption;
-	Annealing annealingOption;
-	double t0;			//initial temperature
-	double temperature; //current temperature 
-	double stepLength;
-	double initialStepLength;
-	bool reinforcementLearningOption;
-	bool shrinkGoalRegionWithTemperateOption;
-	int nextCandidateParameter;
-	
+    
+    //System:
+    State* goal;
+    double* max;
+    double* min;
+    double* opt;
+    int parameterDimension;
+    int objectiveDimension;
+    
+    //Duplex options
+    int iterationCap;
+    Temperature temperatureOption;
+    Annealing annealingOption;
+    double t0;			//initial temperature
+    double temperature; //current temperature
+    double stepLength;
+    double initialStepLength;
+    bool reinforcementLearningOption;
+    bool shrinkGoalRegionWithTemperateOption;
+    int nextCandidateParameter;
+    
     //Duplex outputs:
-    
-	double minAward;
-	double maxAward;
-	double delta;
+    double minAward;
+    double maxAward;
+    double delta;
     double* goalRegionBoxMin;
     double* goalRegionBoxMax;
-	double* parameterMin;
-	double* parameterMax;
-	vector<string> objectiveType;
-    
+    double* parameterMin;
+    double* parameterMax;
+    vector<string> objectiveType;
 public:
-	Duplex(Settings*);
+    Duplex(Settings* s);
     ~Duplex();
-	double* getInitialState();
-	void setSystem(System*);
-	void initialize();
-    void setObjective();
-    
-    void walkOptimizer();
-    void optimize();
-	void simulated_annealing();
-	void functionalOptimization();
-	void treeOptimizer();
 
-	//plotting methods
-	string draw(int);
-    string drawParameterTree(int x, int y, int z, string sizingPreference, string plotType, string title);
-    string drawObjectiveTree(int, int, string);
-	string drawTrace(int x, int y, string title);
-    string drawCanvas(string function, double xmin, double xmax, double ymin, double ymax, string, string);
+    //initialization methods
     
+    // methods handling input data
+    
+    // methods for optimizing the function
+    virtual State* initialize()=0;
     void insert(int i, State* qnear, State* qnew);
-	double score(State*, double*, double*);
-	double* generateNewInput(State* q);
-	State* localStep(int i, State*);
-	State* globalStep();			
-	State* foptGlobalStep();
+    virtual State* globalStep()=0;
+    virtual State* localStep(int, State*)=0;
+    virtual double evaluate(State*)=0;
+    virtual bool isConverged(int)=0;
+    void optimize();
+    void train();
     
-	void computeTemperature(int i);
-	double computeStepLength();
-	int  computeNextCandidateParameter(State* qnear);
-	Search* getDB();
-    System* getSystem();
+    // aux methods, loading, saving, etc.
     void save(boost::property_tree::ptree* ptree);
     void load(boost::property_tree::ptree* ptree);
+    Search* getDB();
+    System* getSystem();
     void setStat(Stat*);
     Stat* getStat();
 };
