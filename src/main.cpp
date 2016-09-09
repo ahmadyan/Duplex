@@ -19,6 +19,7 @@
 #include <boost/property_tree/xml_parser.hpp>
 
 #include "nonconvexoptimizer.h"
+#include "descentOptimizer.h"
 
 using namespace config4cpp;
 
@@ -98,17 +99,15 @@ int main(int argc, char** argv){
 		}
         log << "Parsing config file complete." << endl ;
         
-        // Duplex main code
-        Duplex* duplex = new NonconvexOptimizer(settings);				log << "Duplex core created." << endl ;
+        Duplex* duplex;
         Clustering* clustering;
-        
         boost::property_tree::ptree ptree;  //used to load/save the data
         
         //determining which algorithm to execute
         auto m = getMode(settings);
-        duplex->initialize();							log << "Duplex initialization complete." << endl ;
+        
         log.tick();
-        Stat* stat = duplex->getStat();
+        
         switch(m){
             // -----------------------------------------------------
             case mode::load:
@@ -118,6 +117,7 @@ int main(int argc, char** argv){
                 break;
             // -----------------------------------------------------
             case mode::duplex:
+                duplex = new NonconvexOptimizer(settings);
                 duplex->train();
                 break;
                 
@@ -128,6 +128,7 @@ int main(int argc, char** argv){
             
             // -----------------------------------------------------
             case mode::opt:
+                duplex = new DescentOptimizer(settings);
                 duplex->train();
                 break;
             
@@ -140,7 +141,6 @@ int main(int argc, char** argv){
             case mode::clustering:
                 clustering = new Clustering(settings);
                 clustering->train(settings->lookupString("clustering.mode"));
-                delete clustering;
                 break;
             
             // -----------------------------------------------------
@@ -153,14 +153,14 @@ int main(int argc, char** argv){
         log.tock("Duplex main optimizatio loop");
         
         //saving the results into an xml file
-        duplex->save(&ptree);
+        //duplex->save(&ptree);
         //ofstream savefile(settings->lookupString("savefile"));
         //write_xml(savefile, ptree);
         //savefile.close();
         
-        
         // Plotting the results
         if(settings->check("plot.enable", "true")){
+            Stat* stat ;//= duplex->getStat();
             PlotFactory* pf = new PlotFactory(settings, stat, duplex, clustering);
 			vector<string> plots = settings->listVariables("plot", "uid-plot");
 			for (int i = 0; i < plots.size(); i++){
@@ -174,8 +174,10 @@ int main(int argc, char** argv){
         }
         
         //clean-up
-        delete duplex;
-		delete settings;
+        if(clustering) delete clustering;
+        if(duplex) delete duplex;
+		if(settings) delete settings;
+        
 	}catch (SettingsException se){
 		std::cerr << "CONFIG ERROR: " << se.what() << std::endl << std::endl;
 		cin.get();

@@ -9,7 +9,6 @@ public:
     NonconvexOptimizer(Settings* s);
     ~NonconvexOptimizer();
     
-    double score(State* state, double* maxBound, double* minBound);
     double* getInitialState();
     void setObjective();
     
@@ -18,7 +17,7 @@ public:
     State* globalStep();
     State* localStep(int, State*);
     double evaluate(State*);
-    bool isConverged(int);
+    bool isConverged(int, State*);
     
     void computeTemperature(int i);
     int computeNextCandidateParameter(State* qnear);

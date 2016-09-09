@@ -108,6 +108,8 @@ void System::eval(State* s, double t){
 				}
 			}else{
                 objectives[i] = evaluteExpression(functions[i], variables, parameters);
+                cout << parameters[0] <<  " " << parameters[1] << endl ;
+                cout << objectives[i] << endl ;
                 if(jacobian.size()>0){
                     vector<vector<double> > jacobianValues;
                     for(int i=0;i<jacobian.size();i++){
