@@ -1,6 +1,7 @@
 #include "functionalOptimizer.h"
+#include <cmath>
 
-FunctionalOptimizer::FunctionalOptimizer(Settings* s){
+FunctionalOptimizer::FunctionalOptimizer(Settings* s):Duplex(s){
 }
 
 FunctionalOptimizer::~FunctionalOptimizer(){
@@ -23,7 +24,6 @@ double* FunctionalOptimizer::getInitialState(){
     return init;
 }
 
-
 void FunctionalOptimizer::setObjective(){
     goal = new State(parameterDimension, objectiveDimension);
     vector<string> objectives = settings->listVariables("objective", "uid-objective");
@@ -33,7 +33,7 @@ void FunctionalOptimizer::setObjective(){
     }
 }
 
-State* FunctionalOptimizer::initialize(){
+void FunctionalOptimizer::initialize(){
     setObjective();
     cout << "Duplex initialization started. It make take a while to analyze the root." << endl;
     double* init = getInitialState();
@@ -84,18 +84,51 @@ State* FunctionalOptimizer::initialize(){
     system->eval(root);
     double distance = score(root, max, min);
     stat->updateError(distance);
-    //db->insert(root);
+    insert(0, root, root);
     cout << "Root node set." << endl;
-    return root;
-}
-
-void FunctionalOptimizer::insert(State* s){
-    db->insert(s);
+    
+    //generates an initial curve, starting at y(0)=0 and ending in y(n)=b
+    double b = settings->lookupFloat("parameter.b");
+    double c0 = settings->lookupFloat("parameter.c0");
+    int pathSegments = settings->lookupInt("initialPathSegments");
+    
+    //randomly generate each segment in the path
+    for (int i = 1; i < pathSegments-1; i++){
+        State* q = new State(parameterDimension, objectiveDimension);
+        double* p = new double[parameterDimension];
+        //p[0] = i;	//time, ignore this, the states are no longer time-annotated in dido case
+        for (int j = 0; j < parameterDimension; j++){
+            p[j] = q->unifRand(parameterMin[j], parameterMax[j]);
+        }
+        q->setParameter(p);
+        q->setID(i);
+        q->setParent(db->getState(i - 1));
+        system->eval(q);
+        distance = score(q, max, min);
+        stat->updateError(distance);
+        db->insert(q);
+    }
+    
+    //connect the last point to b
+    State* last = new State(parameterDimension, objectiveDimension);
+    double* p = new double[parameterDimension];
+    //p[0] = pathSegments;
+    p[0] = b;
+    p[1] = 0;
+    last->setParameter(p);
+    last->setID(pathSegments - 1);
+    last->setParent(db->getState(pathSegments - 2));
+    system->eval(last);
+    distance = score(last, max, min);
+    stat->updateError(distance);
+    db->insert(last);
+    cout << "Initial curve is set." << endl;
 }
 
 State* FunctionalOptimizer::globalStep(){
     State* qsample = new State(parameterDimension, objectiveDimension);
     qsample->setParameter(qsample->uniformRandomVector(parameterDimension, goalRegionBoxMin, goalRegionBoxMax));
+    qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax));
     if (shrinkGoalRegionWithTemperateOption){
         double* objective = new double[objectiveDimension];
         for (int i = 0; i < objectiveDimension; i++){
@@ -103,10 +136,11 @@ State* FunctionalOptimizer::globalStep(){
             objective[i] = qsample->unifRand(opt[i] - temperature*delta, opt[i] + temperature*delta);
         }
         qsample->setObjective(objective);
-    }else{
+    }
+    else{
         qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax));
     }
-    return db->nearestNode(qsample);
+    return qsample;
 }
 
 int FunctionalOptimizer::computeNextCandidateParameter(State* qnear){

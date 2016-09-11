@@ -152,7 +152,8 @@ bool Settings::check(const char * name, const char* value) const throw (Settings
 		else return false;
 	}
 	catch (const ConfigurationException & ex) {
-		throw SettingsException(ex.c_str());
+        return false;
+		//throw SettingsException(ex.c_str());
 	}
 }
 

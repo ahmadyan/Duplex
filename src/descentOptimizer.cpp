@@ -41,7 +41,7 @@ double* DescentOptimizer::getInitialState(){
     return init;
 }
 
-State* DescentOptimizer::initialize(){
+void DescentOptimizer::initialize(){
     cout << "Duplex initialization started. It make take a while to analyze the root." << endl;
     double* init = getInitialState();
     max = new double[objectiveDimension];
@@ -59,7 +59,7 @@ State* DescentOptimizer::initialize(){
     root->setID(0);
     root->setParentID(-1);
     system->eval(root);
-    return root;
+    insert(0, root, root);
 }
 
 State* DescentOptimizer::globalStep(){

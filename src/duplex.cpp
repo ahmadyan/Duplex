@@ -56,9 +56,8 @@ void Duplex::insert(int i, State* qnear, State* qnew){
 
 void Duplex::optimize(){
     cout << "Executing duplex optimization ..." << endl ;
-    auto root = initialize();
-    insert(0, root, root);
-    int iteration=0;
+    initialize();
+    int iteration=(int)(db->getSize());
     State* qnew;
     do{
         auto qprev = globalStep();
@@ -70,6 +69,7 @@ void Duplex::optimize(){
 }
 
 void Duplex::train(){
+    cout << "Training the model ..." << endl ;
     optimize();
 }
 

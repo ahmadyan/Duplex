@@ -56,7 +56,7 @@ public:
     ~Duplex();
 
     // methods for optimizing the function, most of these methods should also be implemented in the inherited classes too
-    virtual State* initialize()=0;
+    virtual void initialize()=0;
     void insert(int i, State* qnear, State* qnew);
     virtual State* globalStep()=0;
     virtual State* localStep(int, State*)=0;

@@ -7,7 +7,6 @@ NonconvexOptimizer::NonconvexOptimizer(Settings* s):Duplex(s){
 NonconvexOptimizer::~NonconvexOptimizer(){
 }
 
-
 double* NonconvexOptimizer::getInitialState(){
     double* init = new double[parameterDimension];
     bool initialStateAssignmentIsRandom = settings->check("initial_state_assignment", "random");
@@ -25,7 +24,6 @@ double* NonconvexOptimizer::getInitialState(){
     return init;
 }
 
-
 void NonconvexOptimizer::setObjective(){
     goal = new State(parameterDimension, objectiveDimension);
     vector<string> objectives = settings->listVariables("objective", "uid-objective");
@@ -35,7 +33,7 @@ void NonconvexOptimizer::setObjective(){
     }
 }
 
-State* NonconvexOptimizer::initialize(){
+void NonconvexOptimizer::initialize(){
     setObjective();
     cout << "Duplex initialization started. It make take a while to analyze the root." << endl;
     double* init = getInitialState();
@@ -86,15 +84,24 @@ State* NonconvexOptimizer::initialize(){
     system->eval(root);
     double distance = score(root, max, min);
     stat->updateError(distance);
-    //db->insert(root);
+    db->insert(root);
     cout << "Root node set." << endl;
-    return root;
 }
 
-void NonconvexOptimizer::insert(State* s){
-    db->insert(s);
-}
-
+// There are three approaches for taking the global step
+// 1. only generate samples in the goal region. This is very depth oriented and forces duplex
+// to directly converge toward the goal region.	however duplex can get stuck in local minimas
+// along the  path, which forces us to make the goal region bigger, thus makes duplex behaves
+// more like RRT in the extreme case where goal region is the entire state space, duplex is RRT.
+// 2. Similar to (1), we start by covering a big region of the state space at the begining, but
+// we shrink the goal region as the algorithm progresses. In duplex, the size of the goal region
+// is directly related to the temperature. In the end, all our samples will be around the goal state.
+//	3. fitness: this is usefull in cases where we don't have a clear definition of the goal region.
+// In that case, instead of generating a goal sample and picking the closest node, we pick the
+// best fitted node among the nodes in the random tree. In order to to that, we keep a priority-queue
+// of the X numbers of best observed nodes so far and pick randomly among them. This is the same
+// as survival of the fittest concept in genetic algorithms. However, toward the end of the algorithm,
+// duplex becomes very depth-oriented.
 State* NonconvexOptimizer::globalStep(){
     State* qsample = new State(parameterDimension, objectiveDimension);
     qsample->setParameter(qsample->uniformRandomVector(parameterDimension, goalRegionBoxMin, goalRegionBoxMax));

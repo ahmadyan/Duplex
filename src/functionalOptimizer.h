@@ -4,7 +4,7 @@
 
 using namespace std;
 
-class FunctionalOptimizer{
+class FunctionalOptimizer : public Duplex{
 public:
     FunctionalOptimizer(Settings* s);
     ~FunctionalOptimizer();
@@ -12,8 +12,7 @@ public:
     double* getInitialState();
     void setObjective();
     
-    State* initialize();
-    void insert(State* s);
+    void initialize();
     State* globalStep();
     State* localStep(int, State*);
     double evaluate(State*);

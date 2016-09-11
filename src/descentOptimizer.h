@@ -14,8 +14,7 @@ public:
 
     double* getInitialState();
     void setObjective();
-    
-    State* initialize();
+    void initialize();
     State* globalStep();
     State* localStep(int, State*);
     double evaluate(State*);

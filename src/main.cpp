@@ -20,6 +20,7 @@
 
 #include "nonconvexoptimizer.h"
 #include "descentOptimizer.h"
+#include "functionalOptimizer.h"
 
 using namespace config4cpp;
 
@@ -123,7 +124,10 @@ int main(int argc, char** argv){
                 
             // -----------------------------------------------------
             case mode::fopt:
-                //duplex->functionalOptimization();
+                duplex = new FunctionalOptimizer(settings);
+                cout << "constructor complete, now training" << endl ;
+
+                duplex->train();
                 break;
             
             // -----------------------------------------------------
