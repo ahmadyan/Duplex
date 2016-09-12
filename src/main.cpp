@@ -103,8 +103,8 @@ int main(int argc, char** argv){
 		}
         log << "Parsing config file complete." << endl ;
         
-        Duplex* duplex;
-        Clustering* clustering;
+		Duplex* duplex = NULL;
+		Clustering* clustering = NULL;
         boost::property_tree::ptree ptree;  //used to load/save the data
         
         //determining which algorithm to execute
@@ -116,6 +116,7 @@ int main(int argc, char** argv){
             // -----------------------------------------------------
             case mode::load:
                 // Load the XML file into the property tree.
+				duplex = new NonconvexOptimizer(settings);
                 read_xml(settings->lookupString("savefile"), ptree);
                 duplex->load(&ptree);
                 break;
@@ -139,6 +140,7 @@ int main(int argc, char** argv){
             
             // -----------------------------------------------------
             case mode::sa:
+				duplex = new NonconvexOptimizer(settings);
                 //duplex->simulated_annealing();
                 break;
             
@@ -156,9 +158,7 @@ int main(int argc, char** argv){
             // -----------------------------------------------------
             case mode::invalid:
                 log << "Unknown optimization mode is selected.";
-                break;
-                
-            // -----------------------------------------------------
+				return 0;
         }
         log.tock("Duplex main optimizatio loop");
         
@@ -170,8 +170,7 @@ int main(int argc, char** argv){
         
         // Plotting the results
         if(settings->check("plot.enable", "true")){
-            Stat* stat ;//= duplex->getStat();
-            PlotFactory* pf = new PlotFactory(settings, stat, duplex, clustering);
+            PlotFactory* pf = new PlotFactory(settings, duplex, clustering);
 			vector<string> plots = settings->listVariables("plot", "uid-plot");
 			for (int i = 0; i < plots.size(); i++){
 				Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));

@@ -50,6 +50,7 @@ void Hspice::generateNetlist(vector<string> parameterName, vector<string> parame
 
 void Hspice::runSimulation(string simulationLogFilename){
 	string hspiceCommand = "hspice " + netlistFile + " > " + simulationLogFilename;
+	cout << hspiceCommand << endl; 
 	system(hspiceCommand.c_str());
 }
 

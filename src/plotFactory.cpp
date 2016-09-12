@@ -1,8 +1,8 @@
 #include "plotFactory.h"
 
-PlotFactory::PlotFactory(Settings* s, Stat* _stat, Duplex* _duplex, Clustering* _clustering){
+PlotFactory::PlotFactory(Settings* s, Duplex* _duplex, Clustering* _clustering){
     settings=s;
-    stat=_stat;
+	if (duplex) stat = _duplex->getStat();
     duplex=_duplex;
     clustering=_clustering;
 }

@@ -15,7 +15,7 @@ class PlotFactory{
     Stat* stat;
     
 public:
-    PlotFactory(Settings* s, Stat*, Duplex*, Clustering*);
+    PlotFactory(Settings* s, Duplex*, Clustering*);
     ~PlotFactory();
     string getPlot(int);
     string plotError();
