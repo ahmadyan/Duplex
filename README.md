@@ -1,9 +1,12 @@
 Duplex Optimization
 ===================
 
-Duplex is a heuristic optimization engine for nonlinear, dynamic and functional optimization.
+Duplex is a high-performance optimization algorithm for nonconvex, nonlinear, and functional optimization problems.
 The following core capabilities are included:
-  * Duplex can optimize nonlinear non-convex functions.
+* Duplex can optimize nonlinear non-convex functions.
+* Duplex implements variety of gradient-descent based optimizations internally, such as Momentum, AdaDelta, Adamax, 
+* Duplex supports unsupervised learning algoriths for clustering. 
+* If the gradient information are not available (for circuit optimization), duplex uses reinforcement learning to predict the landscape of energy function.
 
 Installation
 ------------
@@ -20,8 +23,6 @@ Run --> ./Duplex.xcode --config /Users/adel/code/Duplex/bin/runtime.cfg
 Need to set the environment variable DUPLEX_SIM_ID
 
 
-
 Todo list:
 ----------  
   * Use JIT compiler to evaluate inline expressions faster
-  * add time-annotation and functional optimization

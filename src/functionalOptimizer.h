@@ -22,4 +22,5 @@ public:
     int computeNextCandidateParameter(State* qnear);
     double* generateNewInput(State* q);
     double computeStepLength();
+    double score(State* state, double* maxBound, double* minBound);
 };

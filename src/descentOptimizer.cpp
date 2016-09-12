@@ -9,14 +9,19 @@
 DescentOptimizer::DescentOptimizer(Settings* s):Duplex(s){
     if(settings->check("optimization.algorithm", "gd")){
         optimizer = new GradientDescent(settings);
+        engine = "descent-optimizer-gradient-descent";
     }else if(settings->check("optimization.algorithm", "adagrad")){
         optimizer  = new Adagrad(settings);
+        engine = "descent-optimizer-adagrad";
     }else if(settings->check("optimization.algorithm", "nadam")){
         optimizer  = new Nadam(settings);
+        engine = "descent-optimizer-nadam";
     }else if(settings->check("optimization.algorithm", "adam") || settings->check("optimization.algorithm", "adamax")){
         optimizer = new Adam(settings);
+        engine = "descent-optimizer-adam/adamax";
     }else if(settings->check("optimization.algorithm", "adadelta")){
         optimizer  = new Adadelta(settings);
+        engine = "descent-optimizer-adadelta";
     }else{
         optimizer = new GradientDescent(settings);
     }

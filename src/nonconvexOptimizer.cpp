@@ -2,6 +2,7 @@
 #include <cmath>
 
 NonconvexOptimizer::NonconvexOptimizer(Settings* s):Duplex(s){
+    engine = "nonconvex-optimizer-duplex";
 }
 
 NonconvexOptimizer::~NonconvexOptimizer(){

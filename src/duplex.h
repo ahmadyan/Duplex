@@ -10,17 +10,16 @@
 
 using namespace std;
 
-enum class Temperature { temperatureexp, temperaturefast, temperatureboltz };
+enum class Temperature { temperatureexp, temperaturefast, temperatureboltz};
 enum class Annealing { annealingfast, annealingboltz, annealingfastrandom, annealingboltzrandom};
 
-class Duplex{
-    
+class Duplex{    
 protected:
     Settings* settings;
     Search* db;
     Stat* stat;
     System* system;
-    
+    string engine;
     
     //System:
     State* goal;
@@ -57,13 +56,14 @@ public:
 
     // methods for optimizing the function, most of these methods should also be implemented in the inherited classes too
     virtual void initialize()=0;
-    void insert(int i, State* qnear, State* qnew);
+    virtual void insert(int i, State* qnear, State* qnew);
     virtual State* globalStep()=0;
     virtual State* localStep(int, State*)=0;
     virtual double evaluate(State*)=0;
     virtual bool isConverged(int, State*)=0;
-    void optimize();
-    void train();
+    virtual void optimize();
+    virtual void train();
+    virtual double score(State* state, double* maxBound, double* minBound);
     
     // aux methods, loading, saving, etc.
     void save(boost::property_tree::ptree* ptree);
@@ -72,5 +72,4 @@ public:
     System* getSystem();
     void setStat(Stat*);
     Stat* getStat();
-    double score(State* state, double* maxBound, double* minBound);
 };

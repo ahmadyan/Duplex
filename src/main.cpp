@@ -21,6 +21,7 @@
 #include "nonconvexoptimizer.h"
 #include "descentOptimizer.h"
 #include "functionalOptimizer.h"
+#include "systemOptimizer.h"
 
 using namespace config4cpp;
 
@@ -39,7 +40,7 @@ namespace{
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
-enum class mode {load, duplex, fopt, opt, sa, clustering, invalid};
+enum class mode {load, duplex, fopt, opt, sa, clustering, system, invalid};
 mode getMode(Settings* settings){
     auto m=mode::invalid;
     if (settings->check("mode", "load")){
@@ -54,6 +55,8 @@ mode getMode(Settings* settings){
         m=mode::sa;
     }else if (settings->check("mode", "clustering")){
         m=mode::clustering;
+    }else if (settings->check("mode", "system")){
+        m=mode::system;
     }
     return m;
 }
@@ -125,8 +128,6 @@ int main(int argc, char** argv){
             // -----------------------------------------------------
             case mode::fopt:
                 duplex = new FunctionalOptimizer(settings);
-                cout << "constructor complete, now training" << endl ;
-
                 duplex->train();
                 break;
             
@@ -141,6 +142,11 @@ int main(int argc, char** argv){
                 //duplex->simulated_annealing();
                 break;
             
+            case mode::system:
+                duplex = new SystemOptimizer(settings);
+                duplex->train();
+                break;
+                
             // -----------------------------------------------------
             case mode::clustering:
                 clustering = new Clustering(settings);

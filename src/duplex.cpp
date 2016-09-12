@@ -55,7 +55,7 @@ void Duplex::insert(int i, State* qnear, State* qnew){
 }
 
 void Duplex::optimize(){
-    cout << "Executing duplex optimization ..." << endl ;
+    cout << "Executing duplex optimization ... engine = "  << engine << endl ;
     initialize();
     int iteration=(int)(db->getSize());
     State* qnew;
@@ -92,50 +92,9 @@ Stat* Duplex::getStat(){
 // Evaluates each states and assign them a score.
 // States with lower score are better candidates, state with the minimum score (0) is the optimal solution.
 double Duplex::score(State* state, double* maxBound, double* minBound){
-    double distance = 0;
-    // In functional optimization, we have to evaluat each objective seperately.
-    if (settings->check("mode", "fopt")){
-        double b = settings->lookupFloat("parameter.b");
-        double c0 = settings->lookupFloat("parameter.c0");
-        double* boundary = new double[2];
-        boundary[0] = b;
-        boundary[1] = 0;
-        
-        double* objectives = state->getObjective();
-        double* goals = goal->getObjective();
-        int objectiveSize = state->getObjectiveSize();
-        //measure objective
-        //currently we support the following types of objectives
-        //1. boundary: equivalent to the boundary conditions in BVPs. The closer we get to the boundary value, the better
-        //2. boundary-strict: similar to boundary, but if we are crossing the bounary value the sameples is not usefull anymore.
-        //   for example, for the length of the curve we use bounadry-hard objectives, so the length is strictly less than boundary
-        //3. maximize
-        //4. minimize
-        for (int i = 0; i < objectiveSize; i++){
-            auto potentialdistance = state->distance(2, state->getParameter(), boundary);
-            auto potentialsum = (state->getParameter()[1] * (b-state->getParameter()[0]) ) / 2.0 ;
-            double normalizedDistance = (objectives[i] - goals[i]) / (max[i] - min[i]);
-            normalizedDistance *= normalizedDistance;
-            if ((objectiveType[i] == "boundary-strict")
-                && (objectives[i]>opt[i])                   //if the length of the curve is bigger than the strict boundary, discard this trace
-                && (objectives[i]+potentialdistance>opt[i]) //evaluating the potential of this sample: if we even take the direct route to the boundary
-                //condition and still the length is more than the bondary, discard this sample
-                ){
-                normalizedDistance = std::numeric_limits<int>::max();
-            }
-            if ((objectiveType[i] == "maximize")
-                && (objectives[i]>max[i])
-                && (objectives[i] + potentialsum > max[i])){
-                normalizedDistance = 0;
-            }
-            distance += normalizedDistance;
-        }
-        delete[] boundary;    //todo: remove this
-    }else{
-        //Most of the time, we can use Eucledean distance as the score. Closer to the goal, the better
-        distance = goal->distance(state, maxBound, minBound);
-    }
-    
+    // Most of the time, we can use Eucledean distance as the score. Closer to the goal, the better
+    // if a particular model needs a better scoring method, they can over-ride this function (similar to functional optimizer class)
+    auto distance = goal->distance(state, maxBound, minBound);
     state->setScore(distance);
     return distance;
 }
