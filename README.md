@@ -1,6 +1,8 @@
 Duplex Optimization
 ===================
 
+[Duplex's website](http://ahmadyan.github.io/Duplex/)
+
 Duplex is a high-performance optimization algorithm for nonconvex, nonlinear, and functional optimization problems.
 The following core capabilities are included:
 * Duplex can optimize nonlinear non-convex functions.
@@ -18,11 +20,6 @@ Duplex requires the following dependencies to compile:
 
 Usage
 -----
-build-directory for xcode is /Users/adel/code/Duplex/xcode/Duplex.xcode/build/Debug/Duplex.xcode
-Run --> ./Duplex.xcode --config /Users/adel/code/Duplex/bin/runtime.cfg
-Need to set the environment variable DUPLEX_SIM_ID
-
-
-Todo list:
-----------  
-  * Use JIT compiler to evaluate inline expressions faster
+    * build-directory for xcode is /Users/adel/code/Duplex/xcode/Duplex.xcode/build/Debug/Duplex.xcode
+    * Run --> ./Duplex.xcode --config /Users/adel/code/Duplex/bin/runtime.cfg
+    * Need to set the environment variable DUPLEX_SIM_ID
