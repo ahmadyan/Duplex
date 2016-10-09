@@ -26,7 +26,7 @@ class Clustering{
     priority_queue<DState*, vector<DState*>, dstateLesserComparator > pq;
     
 public:
-    Clustering(Settings* s);
+    Clustering(Settings* s, Data* trainingData);
     ~Clustering();
     void kmean();
     void clustering();

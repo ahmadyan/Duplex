@@ -40,7 +40,7 @@ namespace{
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
-enum class mode {load, duplex, fopt, opt, sa, clustering, system, invalid};
+enum class mode {load, duplex, fopt, opt, sa, clustering, system, classification, invalid};
 mode getMode(Settings* settings){
     auto m=mode::invalid;
     if (settings->check("mode", "load")){
@@ -57,6 +57,8 @@ mode getMode(Settings* settings){
         m=mode::clustering;
     }else if (settings->check("mode", "system")){
         m=mode::system;
+    }else if(settings->check("mode", "classification")){
+        m=mode::classification;
     }
     return m;
 }
@@ -107,6 +109,8 @@ int main(int argc, char** argv){
 		Clustering* clustering = NULL;
         boost::property_tree::ptree ptree;  //used to load/save the data
         
+        Data* trainingData;
+        Data* testData;
         //determining which algorithm to execute
         auto m = getMode(settings);
         
@@ -151,10 +155,17 @@ int main(int argc, char** argv){
                 
             // -----------------------------------------------------
             case mode::clustering:
-                clustering = new Clustering(settings);
+                trainingData = new Data(settings);
+                clustering = new Clustering(settings, trainingData);
                 clustering->train(settings->lookupString("clustering.mode"));
                 break;
             
+            case mode::classification:
+                trainingData = new Data(settings);
+                clustering = new Clustering(settings, trainingData);
+                clustering->train(settings->lookupString("clustering.mode"));
+                break;
+                
             // -----------------------------------------------------
             case mode::invalid:
                 log << "Unknown optimization mode is selected.";

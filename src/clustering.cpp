@@ -3,9 +3,9 @@
 #include <sstream>
 #include <fstream>
 
-Clustering::Clustering(Settings* s){
+Clustering::Clustering(Settings* s, Data* trainingData){
     settings = s;
-    samples = new Data(settings);
+    samples = trainingData;
     sampleSize = samples->getSize();
     k = settings->lookupInt("clustering.clusters");
     sampleDimension = samples->getDimension();
