@@ -151,3 +151,5 @@ bin/duplex_figure_eggholder.m
 *.gnuplot
 
 bin/mnist_train.csv
+
+bin/mnist_train_small.csv

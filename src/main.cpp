@@ -13,6 +13,7 @@
 #include "system.h"
 #include "graphics.h"
 #include "clustering.h"
+#include "classification.h"
 #include "plotfactory.h"
 #include <config4cpp/Configuration.h>
 #include <boost/property_tree/ptree.hpp>
@@ -107,6 +108,7 @@ int main(int argc, char** argv){
         
 		Duplex* duplex = NULL;
 		Clustering* clustering = NULL;
+        Classifier* classifier = NULL;
         boost::property_tree::ptree ptree;  //used to load/save the data
         
         Data* trainingData;
@@ -162,8 +164,8 @@ int main(int argc, char** argv){
             
             case mode::classification:
                 trainingData = new Data(settings);
-                clustering = new Clustering(settings, trainingData);
-                clustering->train(settings->lookupString("clustering.mode"));
+                classifier = new Classifier(settings, trainingData);
+                classifier->train(settings->lookupString("classification.mode"));
                 break;
                 
             // -----------------------------------------------------
