@@ -8,7 +8,7 @@ class DState {
     int sampleSize;
 public:
     vector<vector<double> > centers;
-    vector<int> tags;
+    vector<int> labels;
     vector<double> cost;
     double totalCost;
     

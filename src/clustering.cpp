@@ -43,8 +43,8 @@ Data* Clustering::getData(){
     return samples;
 }
 
-vector<int> Clustering::getTags(){
-    return tags;
+vector<int> Clustering::getLabels(){
+    return labels;
 }
 
 vector<double> Clustering::getCostHistory(){
@@ -64,7 +64,7 @@ void Clustering::kmean(){
         vector<double> c(s);
         centers.push_back(c);
     }
-    tags = vector<int>(sampleSize, -1);
+    labels = vector<int>(sampleSize, -1);
     
     auto pdelta = 0.0;
     auto delta = 0.0;
@@ -79,7 +79,7 @@ void Clustering::kmean(){
                 auto dist = distance(samples->getData(i), centers[j]);
                 if(dist<min_distance){
                     min_distance=dist;
-                    tags[i]=j;
+                    labels[i]=j;
                 }
             }
         }
@@ -92,9 +92,9 @@ void Clustering::kmean(){
         
         for(int i=0;i<sampleSize;i++){
             auto s = samples->getData(i);
-            totalSamplesInCluster[ tags[i] ]++;
+            totalSamplesInCluster[ labels[i] ]++;
             for(int j=0;j<sampleDimension;j++){
-                sumDistanceInCluster[tags[i]][j] += s[j];
+                sumDistanceInCluster[labels[i]][j] += s[j];
             }
         }
         
@@ -136,7 +136,7 @@ void Clustering::kmeanInitialize(){
         centers.push_back( vector<double>(samples->getData(rand()%samples->getSize())));
     }
     
-    tags = vector<int>(sampleSize, -1);
+    labels = vector<int>(sampleSize, -1);
     pdelta = 0.0;
     delta = 0.0;
     notConverged = true;
@@ -157,9 +157,9 @@ void Clustering::kmeanUpdateCenters(DState* q){
     //}
     for(int i=0;i<sampleSize;i++){
         auto s = samples->getData(i);
-        totalSamplesInCluster[ q->tags[i] ]++;
+        totalSamplesInCluster[ q->labels[i] ]++;
         for(int j=0;j<sampleDimension;j++){
-            sumDistanceInCluster[q->tags[i]][j] += s[j];
+            sumDistanceInCluster[q->labels[i]][j] += s[j];
         }
     }
     pdelta = delta;
@@ -192,8 +192,8 @@ void Clustering::kmeanCheckConvergence(){
 vector<double> Clustering::kmeanClusterEnergy(){
     vector<double> energy(k, 0);
     for(int i=0;i<sampleSize;i++){
-        auto d = abs(distance(samples->getData(i), centers[tags[i]]));
-        energy[tags[i]] += d*d;
+        auto d = abs(distance(samples->getData(i), centers[labels[i]]));
+        energy[labels[i]] += d*d;
     }
     return energy;
 }
@@ -225,7 +225,7 @@ void Clustering::kmeanClassic(){
     //    cout << costHistory[i] << "," ;
     //}cout << endl ;
     centers=q->centers;
-    tags = q->tags;
+    labels = q->labels;
 
 }
 
@@ -291,8 +291,8 @@ DState* Clustering::localStep(DState* qnear){
 double Clustering::cost(DState* q){
     vector<double> energy(k, 0);
     for(int i=0;i<sampleSize;i++){
-        auto d = abs(distance(samples->getData(i), q->centers[q->tags[i]]));
-        energy[q->tags[i]] += d*d;
+        auto d = abs(distance(samples->getData(i), q->centers[q->labels[i]]));
+        energy[q->labels[i]] += d*d;
     }
     q->cost=energy;
     
@@ -312,7 +312,7 @@ void Clustering::evaluate(DState* q){
             auto dist = distance(samples->getData(i), q->centers[j]);
             if(dist<min_distance){
                 min_distance=dist;
-                q->tags[i]=j;
+                q->labels[i]=j;
             }
         }
     }
@@ -342,7 +342,7 @@ void Clustering::kmeanDuplex(){
     }
     cout << "Best result: " << optCost << endl ;
     centers=states[optState]->centers;
-    tags = states[optState]->tags;
+    labels = states[optState]->labels;
 }
 
 void Clustering::train(string alg){

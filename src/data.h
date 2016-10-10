@@ -7,8 +7,14 @@ protected:
     int dimension;
     string format;
     string sourceFileName;
+    
     vector<vector<double> > payload;
-    vector<int> tags;
+    
+    bool bias;
+    //labels:
+    vector<int> labels;
+    bool hasLabel;
+    int labelColumn;
     
 public:
     Data(Settings* setting);
@@ -21,6 +27,9 @@ public:
     int getSize();
     int getDimension();
     vector<double> getData(int);
+    void setLabel(int, int);
+    int getLabel(int);
     ~Data();
     string plotScatter();
+    
 };

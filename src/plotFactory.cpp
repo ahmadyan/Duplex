@@ -187,7 +187,7 @@ string PlotFactory::plotDistance(){
 
 string PlotFactory::scatterPlot(){
     auto samples = clustering->getData();
-    auto tags = clustering->getTags();
+    auto tags = clustering->getLabels();
     stringstream cmdstr;
     int k=3;
     cmdstr << "plot ";

@@ -44,7 +44,7 @@ State* GradientDescent::update(State* u){
             input[i] = prev[i] + velocity;
         }
     }
-    clipParameters(input);
+    //clipParameters(input);
     v->setParameter(input);
     return v;
 }

@@ -11,6 +11,15 @@ Data::Data(Settings* settings){
     auto size = settings->lookupInt("data.size");
     sourceFileName = settings->lookupString("data.source");
     format=settings->lookupString("data.format");
+    hasLabel = settings->check("data.has_label", "true");
+    bias = settings->check("data.bias", "true");
+    if(bias) dimension++;
+    labelColumn=-1;
+    if(hasLabel){
+        labelColumn = settings->lookupInt("data.label_column");
+        labels = vector<int>(size);
+    }
+    
     importData(sourceFileName, size);
 }
 
@@ -25,12 +34,19 @@ void Data::importData(string filename, int size){
     ifstream source(sourceFileName);
     string line;
     if(source.is_open()){
+        int row=0;
         while(getline(source,line)){
-            vector<double> sample = vector<double>(dimension, 0);
+            row++;
+            vector<double> sample;
+            if(bias) sample.push_back(1);
             tokenizer<char_separator<char>> tokens(line, sep);
             int i=0;
             for(auto it=tokens.begin(); it!=tokens.end(); it++, i++){
-                sample[i] = lexical_cast<double>(*it) ;
+                if(hasLabel && i==labelColumn){
+                    labels[row] = lexical_cast<int>(*it) ;
+                }else{
+                    sample.push_back(lexical_cast<double>(*it));
+                }
             }
             payload.push_back(sample);
         }
@@ -82,6 +98,23 @@ int Data::getSize(){
 
 vector<double> Data::getData(int i){
     return payload[i];
+}
+
+int Data::getLabel(int i){
+    if(i<0 || i>labels.size()){
+        cout << "Cannot access the label, index out of range " << i << " labels.size()=" << labels.size() << endl ;
+        return -1;
+    }else{
+        return labels[i];
+    }
+}
+
+void Data::setLabel(int i, int v){
+    if(i<0 || i>labels.size()){
+        cout << "Cannot set the label, index out of range " << i << " labels.size()=" << labels.size() << endl ;
+    }else{
+        labels[i]=v;
+    }
 }
 
 int Data::getDimension(){

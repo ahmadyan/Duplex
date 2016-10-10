@@ -2,7 +2,7 @@
 
 DState::DState(Settings* s, int sz){
     sampleSize = sz;
-    tags = vector<int>(sampleSize, -1);
+    labels = vector<int>(sampleSize, -1);
 }
 
 DState::DState(DState* q){
@@ -10,7 +10,7 @@ DState::DState(DState* q){
     for(int i=0;i<q->centers.size(); i++){
         centers.push_back(vector<double>(q->centers[i]));
     }
-    tags = vector<int>(sampleSize, -1);
+    labels = vector<int>(sampleSize, -1);
 }
 
 DState::~DState(){}

@@ -9,7 +9,7 @@ using namespace std;
 class Clustering{
     Settings* settings;
     vector<vector<double> > centers;
-    vector<int> tags;
+    vector<int> labels;
     Data* samples;
     int sampleSize;
     int k;
@@ -34,7 +34,7 @@ public:
     double distance(vector<double> src, vector<double> dst);
     double distance(vector<double> src, double* dst);
     Data* getData();
-    vector<int> getTags();
+    vector<int> getLabels();
     vector<double> getCostHistory();
     double kmeanCostFunction();
     vector<double> kmeanClusterEnergy();
