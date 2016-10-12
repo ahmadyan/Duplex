@@ -34,15 +34,9 @@ void NonconvexOptimizer::setObjective(){
     }
 }
 
-void NonconvexOptimizer::initialize(){
+void NonconvexOptimizer::setup(){
     setObjective();
     cout << "Duplex initialization started. It make take a while to analyze the root." << endl;
-    double* init = getInitialState();
-    double* reward = new double[parameterDimension];
-    
-    for (int i = 0; i < parameterDimension; i++)
-        reward[i] = 1;
-    
     //setting boundaries for the objectives
     objectiveType = settings->listValues("objective", "uid-objective.goal.mode");
     vector<string> objectiveGoalMinStringVector = settings->listValues("objective", "uid-objective.goal.min");
@@ -72,19 +66,23 @@ void NonconvexOptimizer::initialize(){
         parameterMin[i] = stod(parametersMinStringVector[i]);
         parameterMax[i] = stod(parametersMaxStringVector[i]);
     }
-    
     stat = new Stat(settings, max, min, opt);
     cout << "Statistic class initialized." << endl;
-    
+}
+
+void NonconvexOptimizer::initialize(){
+    setup();
+    double* init = getInitialState();
+    double* reward = new double[parameterDimension];
+    for (int i = 0; i < parameterDimension; i++) reward[i] = 1;
     //Setting up the root node
     State* root = new State(parameterDimension, objectiveDimension);
     root->setParameter(init);
     root->setReward(reward, (double)parameterDimension);
     root->setID(0);
     root->setParentID(-1);
-    system->eval(root);
-    double distance = score(root, max, min);
-    stat->updateError(distance);
+    auto score = evaluate(root);
+    stat->updateError(score);
     db->insert(root);
     cout << "Root node set." << endl;
 }

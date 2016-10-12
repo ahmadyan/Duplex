@@ -53,6 +53,7 @@ public:
     int getParameterSize();
     vector<vector<double> > getJacobian();
     void setJacobian(vector<vector<double> >);
+    void setJacobian(double*);
     double getDerivative(int i, int j);
     vector<double> getDerivativeVector(int i);
     

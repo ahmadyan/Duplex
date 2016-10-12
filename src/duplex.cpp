@@ -57,15 +57,20 @@ void Duplex::insert(int i, State* qnear, State* qnew){
 void Duplex::optimize(){
     cout << "Executing duplex optimization ... engine = "  << engine << endl ;
     initialize();
+    cout << "  , optimum=" << optimum->getScore() << endl ;
     int iteration=(int)(db->getSize());
     State* qnew;
     do{
         auto qprev = globalStep();
         qnew  = localStep(iteration, qprev);
         auto cost = evaluate(qnew);
-        cout << cost << endl ;
         insert(iteration, qprev, qnew);
+        cout << cost << "  , optimum=" << optimum->getScore() << endl ;
     }while(isConverged(iteration++, qnew));
+    cout << "Optimum solution:" << optimum->getScore() << endl ;
+    for(int i=0;i<parameterDimension;i++){
+        cout <<  optimum->getParameter()[i] << " " ;
+    }
 }
 
 void Duplex::train(){

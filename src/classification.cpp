@@ -4,16 +4,37 @@
 #include "adam.h"
 #include "adadelta.h"
 #include "nadam.h"
+#include "adagrad.h"
+#include "adam.h"
+#include "adadelta.h"
+#include "nadam.h"
 #include <cmath>
 
-Classifier::Classifier(Settings* s, Data* trainingData):Duplex(s){
+Classifier::Classifier(Settings* s, Data* trainingData):NonconvexOptimizer(s){
     data = trainingData;
     settings = s;
     featureSize = settings->lookupFloat("data.dimension") - 1; // 1 counts for the label column
     classSize = settings->lookupFloat("classification.classes");
     sampleSize = settings->lookupFloat("data.size");
     engine = "multi-class logistic regression";
-    optimizer = new GradientDescent(settings);
+    if(settings->check("optimization.algorithm", "gd")){
+        optimizer = new GradientDescent(settings);
+        engine = "descent-optimizer-gradient-descent";
+    }else if(settings->check("optimization.algorithm", "adagrad")){
+        optimizer  = new Adagrad(settings);
+        engine = "descent-optimizer-adagrad";
+    }else if(settings->check("optimization.algorithm", "nadam")){
+        optimizer  = new Nadam(settings);
+        engine = "descent-optimizer-nadam";
+    }else if(settings->check("optimization.algorithm", "adam") || settings->check("optimization.algorithm", "adamax")){
+        optimizer = new Adam(settings);
+        engine = "descent-optimizer-adam/adamax";
+    }else if(settings->check("optimization.algorithm", "adadelta")){
+        optimizer  = new Adadelta(settings);
+        engine = "descent-optimizer-adadelta";
+    }else{
+        optimizer = new GradientDescent(settings);
+    }
     cout << "Initializing multi-class regression algorithm " << endl
         << ".Features= " << featureSize << endl
         << ".Classes= " << classSize << endl
@@ -49,7 +70,7 @@ double Classifier::regularizer(double* theta){
 }
 
 // Compute cost and gradient for logistic regression using theta as a parameter
-double* Classifier::costFunction(double* theta){
+double* Classifier::loss(double* theta){
     double* result = new double[parameterDimension];
     double r = 0;
     for(int i=0;i<sampleSize;i++){
@@ -65,7 +86,6 @@ double* Classifier::costFunction(double* theta){
     return result;
 }
 
-// this gradient implementation is buggy
 double* Classifier::gradient(double* theta){
     auto dim=data->getDimension();
     double* grad = new double[dim];
@@ -83,85 +103,57 @@ double* Classifier::gradient(double* theta){
     return grad;
 }
 
-void Classifier::initialize(){
-    //Setting up the root node
-    State* root = new State(parameterDimension, objectiveDimension);
-    double* theta = new double[parameterDimension];
-    for(int i=0;i<parameterDimension;i++){
-        theta[i]=0;
-    }
-    root->setParameter(theta);
-    root->setID(0);
-    root->setParentID(-1);
-    root->setObjective(costFunction(theta));
-    cout << costFunction(theta)[0] << endl ;
-    cout << "gradient information" << endl ;
-
-    auto g = gradient(theta);
-    for(int i=0;i<parameterDimension;i++){
-        cout << g[i] << endl ;
-        // -0.100000
-        // -12.009217
-        // -11.262842
-    }
-    
-    vector<vector<double> > jac;
-    vector<double> grad;
-    for(int i=0;i<data->getDimension();i++)
-        grad.push_back(g[i]);
-    jac.push_back(grad);
-    root->setJacobian(jac);
-    delete g;
-    
-    
-    insert(0, root, root);
-    
-    max = new double[objectiveDimension];
-    min = new double[objectiveDimension];
-    vector<string> objectiveMinStringVector = settings->listValues("objective", "uid-objective.min");
-    vector<string> objectiveMaxStringVector = settings->listValues("objective", "uid-objective.max");
-    for (int i = 0; i<objectiveDimension; i++){
-        min[i] = stod(objectiveMinStringVector[i]);
-        max[i] = stod(objectiveMaxStringVector[i]);
-    }
-    stat = new Stat(settings, max, min, opt);
-    
-    // for(int i=0;i<sampleSize;i++){
-    //    cout << data->toString(i) << endl ;
-    //    cout << data->getLabel(i) << endl ;
-    // }
-}
-
-State* Classifier::globalStep(){
-    return db->getState();
-}
-
 State* Classifier::localStep(int i, State* qnear){
-    return optimizer->update(qnear);
+    /*State* qnew = new State(parameterDimension, objectiveDimension);
+    //theta = theta - (alpha/m) * (X' * (X*theta - y));
+    auto theta = qnear->getParameter();
+    auto theta_new = new double[parameterDimension]();
+    auto grad = qnear->getDerivativeVector(0);
+    //auto learning_rate = 0.1;
+    for(int i=0;i<qnear->getParameterSize();i++){
+        theta_new[i] = theta[i] -  0.001*grad[i];
+        cout << "* " << i << " " << theta[i] << " " << theta_new[i] << " " << grad[i] << endl ;
+    }
+    qnew->setParameter(theta_new);
+    return qnew;*/
+    
+    //return optimizer->update(qnear);
+    computeTemperature(i);
+    //auto nextCandidateParameter = computeNextCandidateParameter(qnear);
+    //double* input = generateNewInput(qnear);
+    auto learning_rate=(1/(1+i));
+    auto theta = qnear->getParameter();
+    auto theta_new = new double[parameterDimension]();
+    auto grad = qnear->getDerivativeVector(0);
+    for(int i=0;i<qnear->getParameterSize();i++){
+        auto noise = computeStepLength();
+        theta_new[i] = theta[i] -  learning_rate*grad[i] + noise;
+        cout << "* " << i << " " << theta[i] << " " << theta_new[i] << " " << grad[i] << " " << noise<< endl ;
+    }
+    State* qnew = new State(parameterDimension, objectiveDimension);
+    qnew->setParameter(theta_new);
+    qnew->setParent(qnear);
+    return qnew;
 }
 
 double Classifier::evaluate(State* qnew){
-    auto x = qnew->getParameter();
-    for(int i=0;i<parameterDimension;i++){
-        cout << x[i] << " ," ;
-    }cout << "" << endl ;
     auto theta = qnew->getParameter();
-    auto cost = costFunction(theta);
+    cout << theta[0] << " " << theta[1] << " " << theta[2] << endl ;
+    auto cost = loss(theta);
     auto grad = gradient(theta);
     qnew->setObjective(cost);
-    vector<vector<double> > jac;
-    vector<double> g;
-    for(int i=0;i<data->getDimension();i++)
-        g.push_back(grad[i]);
-    jac.push_back(g);
-    qnew->setJacobian(jac);
-    delete grad;
+    qnew->setJacobian(grad);
+    score(qnew, max, min);
     return qnew->getObjective()[0];
 }
 
-bool Classifier::isConverged(int iteration, State* q){
-    stat->updateConvergence(q);
-    auto epsilon = settings->lookupFloat("optimization.epsilon");
-    //return ( (stat->getDeltaConvergence()>epsilon) && iteration<iterationCap );
-    return ( iteration<iterationCap );
+// Overrides the default scoring method (based on L2-distance to the optimum solution) with a loss
+// based scoring method, we optimize by lowering the loss
+double Classifier::score(State* state, double* maxBound, double* minBound){
+    // objective was computed in evaluate using loss(theta)
+    auto score = state->getObjective()[0];
+    state->setScore(score);
+    double prevScore = optimum? optimum->getScore(): 9999;
+    if(score<prevScore) optimum=state;
+    return score;
 }

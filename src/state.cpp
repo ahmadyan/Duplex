@@ -263,3 +263,13 @@ void State::setJacobian(vector<vector<double> > j){
     jacobian=j;
 }
 
+// convert the double* grad into vector<double> and pushes it into the jacobian matrix
+// assumes only one objective
+// deletes the grad array afterward
+void State::setJacobian(double* grad){
+    vector<double> g;
+    for(int i=0;i<parameterDimension;i++)
+        g.push_back(grad[i]);
+    jacobian.push_back(g);
+    delete grad;
+}

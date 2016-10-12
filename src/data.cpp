@@ -19,10 +19,10 @@ Data::Data(Settings* settings){
         labelColumn = settings->lookupInt("data.label_column");
         labels = vector<int>(size);
     }
-    
     importData(sourceFileName, size);
 }
 
+// imports the csv file into vector<vector<double> > payload using boost::tokenizer
 void Data::importData(string filename, int size){
     char_separator<char> sep;
     if(format=="tab"){
@@ -34,16 +34,15 @@ void Data::importData(string filename, int size){
     ifstream source(sourceFileName);
     string line;
     if(source.is_open()){
-        int row=0;
         while(getline(source,line)){
-            row++;
             vector<double> sample;
             if(bias) sample.push_back(1);
             tokenizer<char_separator<char>> tokens(line, sep);
             int i=0;
             for(auto it=tokens.begin(); it!=tokens.end(); it++, i++){
                 if(hasLabel && i==labelColumn){
-                    labels[row] = lexical_cast<int>(*it) ;
+                    // payload.size() is an indicator of how many "rows" we have processed so far
+                    labels[payload.size()] = lexical_cast<int>(*it) ;
                 }else{
                     sample.push_back(lexical_cast<double>(*it));
                 }
@@ -113,6 +112,8 @@ void Data::setLabel(int i, int v){
     if(i<0 || i>labels.size()){
         cout << "Cannot set the label, index out of range " << i << " labels.size()=" << labels.size() << endl ;
     }else{
+        cout << "Setting label" << endl ;
+
         labels[i]=v;
     }
 }

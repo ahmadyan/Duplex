@@ -1,13 +1,14 @@
 #pragma once
 #include <iostream>
 #include "duplex.h"
+#include "nonconvexOptimizer.h"
 #include "optimizer.h"
 #include "configuration.h"
 #include "data.h"
 
 using namespace std;
 
-class Classifier: public Duplex{
+class Classifier: public NonconvexOptimizer{
     Data* data;
     Optimizer* optimizer;
     Settings* settings;
@@ -17,17 +18,14 @@ class Classifier: public Duplex{
 public:
     Classifier(Settings*, Data*);
     ~Classifier();
-    
-    void initialize();
     double* getInitialState();
-    State* globalStep();
     State* localStep(int, State*);
     double evaluate(State*);
-    bool isConverged(int, State*);
-    double* costFunction(double* theta);
+    double* loss(double* theta);
     double sigmoid(double x);
     double dot(double* theta, vector<double>);
     double logistic(double* theta, vector<double>);
     double regularizer(double* theta);
     double* gradient(double* theta);
+    double score(State* state, double* maxBound, double* minBound);
 };

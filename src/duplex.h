@@ -50,6 +50,8 @@ protected:
     double* parameterMin;
     double* parameterMax;
     vector<string> objectiveType;
+    // points to optimum solution with lowest score/loss, should be updated in score method
+    State* optimum;
 public:
     Duplex(Settings* s);
     ~Duplex();
