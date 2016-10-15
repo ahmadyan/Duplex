@@ -87,48 +87,33 @@ double* Classifier::loss(double* theta){
 }
 
 double* Classifier::gradient(double* theta){
-    auto dim=data->getDimension();
-    double* grad = new double[dim];
-    for(int i=0;i<dim;i++) grad[i]=0;
+    double* grad = new double[parameterDimension];
+    for(int i=0;i<parameterDimension;i++) grad[i]=0;
     for(int i=0;i<sampleSize;i++){
         auto x = data->getData(i);
         auto y = data->getLabel(i);
         auto h = logistic(theta, x);
-        for(int j=0;j<dim;j++){
+        for(int j=0;j<parameterDimension;j++){
             grad[j] += (h - y) * x[j];
         }
     }
-    for (int j=0;j<dim;j++)
+    for (int j=0;j<parameterDimension;j++)
         grad[j] /= sampleSize;
     return grad;
 }
 
 State* Classifier::localStep(int i, State* qnear){
-    /*State* qnew = new State(parameterDimension, objectiveDimension);
     //theta = theta - (alpha/m) * (X' * (X*theta - y));
-    auto theta = qnear->getParameter();
-    auto theta_new = new double[parameterDimension]();
-    auto grad = qnear->getDerivativeVector(0);
-    //auto learning_rate = 0.1;
-    for(int i=0;i<qnear->getParameterSize();i++){
-        theta_new[i] = theta[i] -  0.001*grad[i];
-        cout << "* " << i << " " << theta[i] << " " << theta_new[i] << " " << grad[i] << endl ;
-    }
-    qnew->setParameter(theta_new);
-    return qnew;*/
-    
-    //return optimizer->update(qnear);
     computeTemperature(i);
-    //auto nextCandidateParameter = computeNextCandidateParameter(qnear);
     //double* input = generateNewInput(qnear);
-    auto learning_rate=(1/(1+i));
+    auto learning_rate=0.05;//(1/(1+0.1*i));
     auto theta = qnear->getParameter();
     auto theta_new = new double[parameterDimension]();
     auto grad = qnear->getDerivativeVector(0);
-    for(int i=0;i<qnear->getParameterSize();i++){
+    for(int j=0;j<qnear->getParameterSize();j++){
         auto noise = computeStepLength();
-        theta_new[i] = theta[i] -  learning_rate*grad[i] + noise;
-        cout << "* " << i << " " << theta[i] << " " << theta_new[i] << " " << grad[i] << " " << noise<< endl ;
+        theta_new[j] = theta[j] - learning_rate*grad[j] + noise;
+        cout << "* " << j << " " << theta[j] << " " << theta_new[j] << " grad=" << grad[j] << "  noise=" << noise<< endl ;
     }
     State* qnew = new State(parameterDimension, objectiveDimension);
     qnew->setParameter(theta_new);
