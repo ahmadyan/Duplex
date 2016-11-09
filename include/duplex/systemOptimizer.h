@@ -11,4 +11,7 @@ public:
     ~SystemOptimizer();
     void optimize();
     State* localStep(int i, State* qnear);
+	void setup();
+	void initialize();
+	void post();
 };

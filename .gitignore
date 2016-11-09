@@ -153,3 +153,4 @@ bin/duplex_figure_eggholder.m
 bin/mnist_train.csv
 
 bin/mnist_train_small.csv
+bin/fort.7

@@ -155,7 +155,6 @@ double NonconvexOptimizer::computeStepLength(){
             break;
     }
     return stepLength;
-    
 }
 
 double* NonconvexOptimizer::generateNewInput(State* q){
@@ -187,6 +186,13 @@ double NonconvexOptimizer::evaluate(State* qnew){
     system->eval(qnew, 0);                  //simulate the circuit with the
     score(qnew, max, min);
     return qnew->getScore();
+}
+
+void NonconvexOptimizer::post() {
+	cout << "Optimum solution:" << optimum->getScore() << endl;
+	for (int i = 0; i<parameterDimension; i++) {
+		cout << optimum->getParameter()[i] << " ";
+	}
 }
 
 bool NonconvexOptimizer::isConverged(int iteration, State* q){

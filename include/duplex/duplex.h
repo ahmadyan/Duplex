@@ -64,6 +64,7 @@ public:
     virtual double evaluate(State*)=0;
     virtual bool isConverged(int, State*)=0;
     virtual void optimize();
+	virtual void post();
     virtual void train();
     virtual double score(State* state, double* maxBound, double* minBound);
     

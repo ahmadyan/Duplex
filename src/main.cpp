@@ -104,7 +104,7 @@ int main(int argc, char** argv){
 		}catch (exception& e){
             verbose = settings->lookupBoolean("verbose");
 		}
-        log << "Parsing config file complete." << endl ;
+        log << "Parsing config file " << vm["config"].as<std::string>().c_str()  << " complete." << endl ;
         
 		Duplex* duplex = NULL;
 		Clustering* clustering = NULL;

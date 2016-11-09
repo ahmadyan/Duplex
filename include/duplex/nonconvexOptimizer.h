@@ -23,4 +23,5 @@ public:
     double* generateNewInput(State* q);
     double computeStepLength();
     void setup();
+	void post();
 };

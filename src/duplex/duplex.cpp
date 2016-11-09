@@ -57,7 +57,6 @@ void Duplex::insert(int i, State* qnear, State* qnew){
 void Duplex::optimize(){
     cout << "Executing duplex optimization ... engine = "  << engine << endl ;
     initialize();
-    cout << "  , optimum=" << optimum->getScore() << endl ;
     int iteration=(int)(db->getSize());
     State* qnew;
     do{
@@ -65,12 +64,8 @@ void Duplex::optimize(){
         qnew  = localStep(iteration, qprev);
         auto cost = evaluate(qnew);
         insert(iteration, qprev, qnew);
-        cout << cost << "  , optimum=" << optimum->getScore() << endl ;
     }while(isConverged(iteration++, qnew));
-    cout << "Optimum solution:" << optimum->getScore() << endl ;
-    for(int i=0;i<parameterDimension;i++){
-        cout <<  optimum->getParameter()[i] << " " ;
-    }
+	post();
 }
 
 void Duplex::train(){
@@ -102,6 +97,10 @@ double Duplex::score(State* state, double* maxBound, double* minBound){
     auto distance = goal->distance(state, maxBound, minBound);
     state->setScore(distance);
     return distance;
+}
+
+void Duplex::post() {
+	cout << "Duplex terminated successfully." << endl;
 }
 
 void Duplex::save(boost::property_tree::ptree* ptree){
