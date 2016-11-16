@@ -1,5 +1,10 @@
 #include "RRT.h"
 #include <cmath>
+#include <iostream>
+#include <random>
+#include <fstream>
+#include <stdlib.h>     /* srand, rand */
+#include <time.h>
 
 RRT::RRT(Settings* s):Duplex(s){
     engine = "rrt";
@@ -9,6 +14,7 @@ RRT::~RRT(){
 }
 
 double* RRT::getInitialState(){
+	srand(time(NULL));
     double* init = new double[parameterDimension];
     bool initialStateAssignmentIsRandom = settings->check("initial_state_assignment", "random");
     
@@ -87,49 +93,103 @@ void RRT::initialize(){
     stat->updateError(distance);
     db->insert(root);
     cout << "Root node set." << endl;
+	//myfile.open("C:\\MyGit\\RRTSearch\\bin\\mydata.txt");
+	myfile.open("RRTtreedata.txt");
+
+
 }
 
-// There are three approaches for taking the global step
-// 1. only generate samples in the goal region. This is very depth oriented and forces duplex
-// to directly converge toward the goal region.	however duplex can get stuck in local minimas
-// along the  path, which forces us to make the goal region bigger, thus makes duplex behaves
-// more like RRT in the extreme case where goal region is the entire state space, duplex is RRT.
-// 2. Similar to (1), we start by covering a big region of the state space at the begining, but
-// we shrink the goal region as the algorithm progresses. In duplex, the size of the goal region
-// is directly related to the temperature. In the end, all our samples will be around the goal state.
-//	3. fitness: this is usefull in cases where we don't have a clear definition of the goal region.
-// In that case, instead of generating a goal sample and picking the closest node, we pick the
-// best fitted node among the nodes in the random tree. In order to to that, we keep a priority-queue
-// of the X numbers of best observed nodes so far and pick randomly among them. This is the same
-// as survival of the fittest concept in genetic algorithms. However, toward the end of the algorithm,
-// duplex becomes very depth-oriented.
+
 State* RRT::globalStep(){
+	double delta = initialStepLength;
     State* qsample = new State(parameterDimension, objectiveDimension);
-    qsample->setParameter(qsample->uniformRandomVector(parameterDimension, goalRegionBoxMin, goalRegionBoxMax));
-    if (shrinkGoalRegionWithTemperateOption){
-        double* objective = new double[objectiveDimension];
-        for (int i = 0; i < objectiveDimension; i++){
-            delta = abs(goalRegionBoxMax[i] - goalRegionBoxMin[i]);
-            objective[i] = qsample->unifRand(opt[i] - temperature*delta, opt[i] + temperature*delta);
-        }
-        qsample->setObjective(objective);
-    }else{
-        qsample->setObjective(qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax));
-    }
-    return db->nearestNode(qsample);
+   // qsample->setParameter(qsample->uniformRandomVector(parameterDimension, goalRegionBoxMin, goalRegionBoxMax));
+	auto randomstate = qsample->uniformRandomVector(objectiveDimension, goalRegionBoxMin, goalRegionBoxMax);
+	qsample->setParameter(randomstate);
+	qsample->setObjective(randomstate);
+    auto qprev = NearestState(qsample);
+	
+
+	double* qsampleobj = qsample->getObjective();
+	double* qprevobj = qprev->getObjective();
+	/*if (two_points_distance(qsample, qprev) < delta) {
+		qsample->setID(db->getSize() );
+		qsample->setParent(qprev);
+		db->insert(qsample);
+		//writeTofile(qprev, qsample);
+		return qsample;
+	}
+	else {*/
+		double theta = atan2(qsampleobj[1]-qprevobj[1], qsampleobj[0] - qprevobj[0]);
+		State* qnew = new State(parameterDimension, objectiveDimension);
+		double* input = new double[2];
+		input[0] = qprevobj[0] + delta *cos(theta)*rand() / double(RAND_MAX);
+		input[1] = qprevobj[1] + delta *sin(theta)*rand() / double(RAND_MAX);
+		qnew->setParameter(input);
+		qnew->setID(db->getSize() );
+		qnew->setParent(qprev);
+		db->insert(qnew);
+		writeTofile(qprev, qnew);
+		return qnew;
+	//}
+}
+State* RRT::NearestState(State* qrand) {
+	double best = 2 * parameterMax[1];
+	//double* init = getInitialState();
+	auto bestnode = db->getState();
+	//State* bestnode = new State(parameterDimension, objectiveDimension);
+	/*bestnode->setObjective(init);
+	bestnode->setParameter(init);*/
+	for (int i = 1;i < db->getSize();++i) {
+		auto test = db->getState(i);
+		double dist = two_points_distance(test, qrand);
+		if (dist < best) {
+			best = dist;
+			bestnode = test;
+		}
+	}
+	return bestnode;
+}
+double RRT::two_points_distance(State* p, State*q){
+	int osize = q->getObjectiveSize();
+	auto qobj = q->getObjective();
+	auto pobj = p->getObjective();
+	double dis=0;
+	for (int i = 0; i < osize;++i) {
+		dis += pow((pobj[i] - qobj[i]), 2);
+	}
+	dis = sqrt(dis);
+	return dis;
+}
+State* RRT::localStep(int i, State* qnear){
+	return qnear;
 }
 
-State* RRT::localStep(int i, State* qnear){
-    State* qnew = new State(parameterDimension, objectiveDimension);
-    return qnew;
-}
 
 double RRT::evaluate(State* qnew){
-    system->eval(qnew, 0);                  //simulate the circuit with the
-    score(qnew, max, min);
-    return qnew->getScore();
+	system->eval(qnew, 0);                  //simulate the circuit with the
+	score(qnew, max, min);
+	return qnew->getScore();
 }
 
 bool RRT::isConverged(int iteration, State* q){
-    return iteration<iterationCap;
+	/*bool inDestination;
+	auto qlatest = db->getState();
+	double* qlatetpara = qlatest->getParameter();
+	inDestination = (qlatetpara[0] > goalRegionBoxMin[0]) && (qlatetpara[1] > goalRegionBoxMin[1]) && (qlatetpara[0] < goalRegionBoxMax[0]) && (qlatetpara[1] < goalRegionBoxMax[1]);*/
+	bool inDestination = false;
+    bool out = (iteration<iterationCap) || inDestination;
+	if (out) {
+		return out;
+	}
+	else {
+		myfile.close();
+		return out;
+	}
+}
+
+void RRT::writeTofile(State* qprev, State* qnew) {
+	double* qprevobj = qprev->getParameter();
+	double* qnewobj = qnew->getParameter();
+	myfile << qprevobj[0] << " " << qprevobj[1] << " " << qnewobj[0] << " " << qnewobj[1] << endl;
 }
