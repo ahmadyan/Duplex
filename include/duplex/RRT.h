@@ -1,14 +1,14 @@
 #pragma once
 #include <iostream>
 #include "duplex.h"
-
+#include <fstream>
 using namespace std;
 
 class RRT: public Duplex{
 public:
     RRT(Settings* s);
     ~RRT();
-    
+	ofstream myfile;
     double* getInitialState();
     void setObjective();
     
@@ -17,4 +17,9 @@ public:
     State* localStep(int, State*);
     double evaluate(State*);
     bool isConverged(int, State*);
+	State* NearestState(State* );
+	//double* RRT::generateNewInput(State* q);
+	double two_points_distance(State* , State*);
+	void writeTofile(State* , State* );
 };
+

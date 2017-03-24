@@ -15,6 +15,7 @@
 #include "clustering.h"
 #include "classification.h"
 #include "plotfactory.h"
+#include "RRT.h"
 #include <config4cpp/Configuration.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
@@ -41,7 +42,7 @@ namespace{
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
-enum class mode {load, duplex, fopt, opt, sa, clustering, system, classification, invalid};
+enum class mode {load, duplex, fopt, opt, sa, clustering, system, classification, invalid,RRT};
 mode getMode(Settings* settings){
     auto m=mode::invalid;
     if (settings->check("mode", "load")){
@@ -60,7 +61,9 @@ mode getMode(Settings* settings){
         m=mode::system;
     }else if(settings->check("mode", "classification")){
         m=mode::classification;
-    }
+	}else if (settings->check("mode", "RRT")) {
+		m = mode::RRT;
+	}
     return m;
 }
 
@@ -116,7 +119,6 @@ int main(int argc, char** argv){
         auto m = getMode(settings);
         
         log.tick();
-        
         switch(m){
             // -----------------------------------------------------
             case mode::load:
@@ -153,6 +155,10 @@ int main(int argc, char** argv){
                 duplex = new SystemOptimizer(settings);
                 duplex->train();
                 break;
+			case mode::RRT:
+				duplex = new RRT(settings);
+				duplex->train();
+				break;
                 
             // -----------------------------------------------------
             case mode::clustering:
@@ -194,6 +200,7 @@ int main(int argc, char** argv){
 			}
         }
         
+
         //clean-up
         if(clustering) delete clustering;
         if(duplex) delete duplex;
