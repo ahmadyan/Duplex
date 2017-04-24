@@ -42,9 +42,9 @@ namespace{
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
-enum class mode {load, duplex, fopt, opt, sa, clustering, system, classification, invalid,RRT};
+enum class mode {load, duplex, fopt, opt, sa, clustering, system, classification, invalid, RRT};
 mode getMode(Settings* settings){
-    auto m=mode::invalid;
+    auto m = mode::invalid;
     if (settings->check("mode", "load")){
         m=mode::load;
     }else if (settings->check("mode", "duplex")){

@@ -18,8 +18,11 @@ Duplex requires the following dependencies to compile:
   * User has to set an environment variable DUPLEX_SIM_ID to an integer value. If you don't want to set the environment variable, run Duplex from the python wrapper (duplex.py) in test directory. Python wrapper requires Python 3+.
   * GnuPlot for drawing plots.
 
+Build
+-----
+Duplex uses CMake as a build system. You need to build the config4cpp project manually and put the result in /libraries/config4cpp
+
 Usage
 -----
-    * build-directory for xcode is /Users/adel/code/Duplex/xcode/Duplex.xcode/build/Debug/Duplex.xcode
-    * Run --> ./Duplex.xcode --config /Users/adel/code/Duplex/bin/runtime.cfg
+    * ./duplex --config /Users/adel/code/Duplex/bin/runtime.cfg
     * Need to set the environment variable DUPLEX_SIM_ID
