@@ -105,7 +105,7 @@ include_directories(
     )
 
 find_package(Boost 1.51 COMPONENTS program_options REQUIRED)
-find_package(config4cpp)
-
-include_directories(${Boost_INCLUDE_DIR} ${CONFIG4CPP_INCLUDE_DIR})
+find_package(config4cpp REQUIRED)
+find_package(Eigen3 REQUIRED)
+include_directories(${Boost_INCLUDE_DIR} ${CONFIG4CPP_INCLUDE_DIR} ${EIGEN3_INCLUDE_DIR})
 target_link_libraries(duplex ${Boost_LIBRARIES} ${CONFIG4CPP_LIBRARY})

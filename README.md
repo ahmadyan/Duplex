@@ -1,28 +1,38 @@
-Duplex Optimization
-===================
+# Duplex Optimization
+
+[![CircleCI](https://circleci.com/gh/ahmadyan/Duplex.svg?style=svg)](https://circleci.com/gh/ahmadyan/Duplex)
 
 [Duplex's website](http://ahmadyan.github.io/Duplex/)
 
-Duplex is a high-performance optimization algorithm for nonconvex, nonlinear, and functional optimization problems.
-The following core capabilities are included:
+Duplex is a high-performance optimization algorithm for nonconvex, nonlinear, and functional optimization problems. The following core capabilities are included:
+
 * Duplex can optimize nonlinear non-convex functions.
 * Duplex implements variety of gradient-descent based optimizations internally, such as Momentum, AdaDelta, Adamax, 
 * Duplex supports unsupervised learning algoriths for clustering. 
 * If the gradient information are not available (for circuit optimization), duplex uses reinforcement learning to predict the landscape of energy function.
+* Duplex supports Synopsys HSPICE for solving nonlinear systems.
 
-Installation
-------------
-Duplex requires the following dependencies to compile:
-  * Boost 1.51 (Headers and compiled binaries)
-  * [Config4cpp](http://www.config4star.org/)
-  * User has to set an environment variable DUPLEX_SIM_ID to an integer value. If you don't want to set the environment variable, run Duplex from the python wrapper (duplex.py) in test directory. Python wrapper requires Python 3+.
-  * GnuPlot for drawing plots.
+## Dependencies
 
-Build
------
-Duplex uses CMake as a build system. You need to build the config4cpp project manually and put the result in /libraries/config4cpp
+Duplex requires the following dependencies to be installed:
 
-Usage
------
-    * ./duplex --config /Users/adel/code/Duplex/bin/runtime.cfg
-    * Need to set the environment variable DUPLEX_SIM_ID
+* [Eigen 3.3.0](http://eigen.tuxfamily.org) linear algebra library. Install eigen using 
+		<code>brew install eigen</code>
+* [Boost 1.51](http://www.boost.org) Duplex requires both headers and compiled binaries. Install using <code>brew install boost</code>
+* [Config4cpp](http://www.config4star.org/) configuration library. The binaries for the config4cpp for macOS are already shipped with Duplex (<code>/submodules/config4cpp/lib</code>).
+* GnuPlot for drawing plots *(Optional)*. Install gnuplot using
+	<code>brew install gnuplot</code>
+
+## Build
+Duplex uses [CMake](www.cmake.org) as a build system.
+<code>mkdir build</code>
+<code>cd build</code>
+<code>cmake ..</code>
+<code>make</code>
+
+Use <code>cmake .. -GXcode</code> to generate the xcode project file (or other generators).
+
+## Usage
+* ./duplex --config ../bin/runtime.cfg
+* Need to set the environment variable DUPLEX_SIM_ID
+* User has to set an environment variable DUPLEX_SIM_ID to an integer value. If you don't want to set the environment variable, run Duplex from the python wrapper (test/duplex.py) in test directory. Python wrapper requires Python 3+.
