@@ -1,0 +1,3 @@
+[submodule "submodules/config4cpp"]
+	path = submodules/config4cpp
+	url = git@github.com:ahmadyan/config4cpp.git

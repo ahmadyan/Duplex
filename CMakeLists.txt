@@ -104,10 +104,6 @@ include_directories(
     ${PROJECT_SOURCE_DIR}/include/utility
     )
 
-# include_directories(/Users/seyedahmadyan/Snapchat/Dev/config4cpp/include)
-# link_directories(/Users/seyedahmadyan/Snapchat/Dev/config4cpp/lib)
-# target_link_libraries(duplex    config4cpp)
-
 find_package(Boost 1.51 COMPONENTS program_options REQUIRED)
 find_package(config4cpp)
 
