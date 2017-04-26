@@ -33,6 +33,6 @@ Duplex uses [CMake](www.cmake.org) as a build system.
 Use <code>cmake .. -GXcode</code> to generate the xcode project file (or other generators).
 
 ## Usage
-* ./duplex --config ../bin/runtime.cfg
-* Need to set the environment variable DUPLEX_SIM_ID
-* User has to set an environment variable DUPLEX_SIM_ID to an integer value. If you don't want to set the environment variable, run Duplex from the python wrapper (test/duplex.py) in test directory. Python wrapper requires Python 3+.
+* ./duplex --config example.cfg
+* Example configuration files are available in the /bin directory
+* If using hspice as a numerical simulator, User should set an environment variable DUPLEX_SIM_ID to an integer value. If you don't want to set the environment variable, run Duplex from the python wrapper (test/duplex.py) in test directory. Python wrapper requires Python 3+.
