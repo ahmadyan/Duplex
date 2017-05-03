@@ -1,3 +1,7 @@
 [submodule "submodules/config4cpp"]
 	path = submodules/config4cpp
 	url = git@github.com:ahmadyan/config4cpp.git
+	
+[submodule "submodules/Pangolin"]
+	path = submodules/Pangolin
+	url = git@github.com:ahmadyan/Pangolin.git
