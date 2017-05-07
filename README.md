@@ -2,15 +2,17 @@
 
 [![CircleCI](https://circleci.com/gh/ahmadyan/Duplex.svg?style=svg)](https://circleci.com/gh/ahmadyan/Duplex)
 
-[Duplex's website](http://ahmadyan.github.io/Duplex/)
+[Duplex's website](http://adel.ac/duplex)
 
-Duplex is a high-performance optimization algorithm for nonconvex, nonlinear, and functional optimization problems. The following core capabilities are included:
+Duplex is a high-performance global optimization algorithm for nonconvex, nonlinear, and functional optimization problems. The following core capabilities are included:
 
-* Duplex can optimize nonlinear non-convex functions.
-* Duplex implements variety of gradient-descent based optimizations internally, such as Momentum, AdaDelta, Adamax, 
+* Duplex can find global optimum of nonlinear non-convex functions.
+* Duplex implements variety of gradient-descent based optimizations internally, such as Momentum, AdaDelta, Adamax. Duplex can also optimize when the gradient information are not available.
 * Duplex supports unsupervised learning algoriths for clustering. 
 * If the gradient information are not available (for circuit optimization), duplex uses reinforcement learning to predict the landscape of energy function.
 * Duplex supports Synopsys HSPICE for solving nonlinear systems.
+
+The latest release and a complete manual may be found at the Duplex home page: http://adel.ac/duplex
 
 ## Dependencies
 
@@ -27,17 +29,15 @@ Duplex requires the following dependencies to be installed:
 ## Build
 Duplex uses [CMake](www.cmake.org) as a build system.
 
-<code>
-	mkdir build
-	
+	git clone git://github.com/ahmadyan/Duplex
+	cd Duplex
+	mkdir build	
 	cd build
-	
 	cmake ..
-	
 	make
-</code>
 
 Use <code>cmake .. -GXcode</code> to generate the xcode project file (or other generators).
+Few examples are provided in <code>/bin</code> directory. Few MATLAB tests are available in the <code>/test</code> directory.
 
 ## Usage
 * ./duplex --config example.cfg
