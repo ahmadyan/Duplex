@@ -1,7 +1,7 @@
 //  Duplex optimization tool
 //
 //  Created by Adel Ahmadyan on 4/23/15.
-//  Copyright (c) 2015 Adel Ahmadyan. All rights reserved.
+//  Copyright (c) 2015-2017 Adel Ahmadyan. All rights reserved.
 //
 
 #include <boost/program_options.hpp>
@@ -14,13 +14,13 @@
 #include "graphics.h"
 #include "clustering.h"
 #include "classification.h"
-#include "plotfactory.h"
+#include "plotFactory.h"
 #include "RRT.h"
 #include <config4cpp/Configuration.h>
 #include <boost/property_tree/ptree.hpp>
 #include <boost/property_tree/xml_parser.hpp>
 
-#include "nonconvexoptimizer.h"
+#include "nonconvexOptimizer.h"
 #include "descentOptimizer.h"
 #include "functionalOptimizer.h"
 #include "systemOptimizer.h"
@@ -36,43 +36,55 @@ FILE _iob[] = { *stdin, *stdout, *stderr };
 extern "C" FILE * __cdecl __iob_func(void){return _iob;}
 #endif
 
-namespace{
+namespace {
 	const size_t ERROR_IN_COMMAND_LINE = 1;
 	const size_t SUCCESS = 0;
 	const size_t ERROR_UNHANDLED_EXCEPTION = 2;
 }
 
 enum class mode {load, duplex, fopt, opt, sa, clustering, system, classification, invalid, RRT};
-mode getMode(Settings* settings){
+
+mode getMode(Settings* settings) {
     auto m = mode::invalid;
-    if (settings->check("mode", "load")){
-        m=mode::load;
-    }else if (settings->check("mode", "duplex")){
-        m=mode::duplex;
-    }else if (settings->check("mode", "fopt")){
-        m=mode::fopt;
-    }else if (settings->check("mode", "opt")){
-        m=mode::opt;
-    }else if (settings->check("mode", "simulated-annealing")){
-        m=mode::sa;
-    }else if (settings->check("mode", "clustering")){
-        m=mode::clustering;
-    }else if (settings->check("mode", "system")){
-        m=mode::system;
-    }else if(settings->check("mode", "classification")){
-        m=mode::classification;
-	}else if (settings->check("mode", "RRT")) {
+    if (settings->check("mode", "load")) {
+        m = mode::load;
+    }
+    else if (settings->check("mode", "duplex")) {
+        m = mode::duplex;
+    }
+    else if (settings->check("mode", "fopt")) {
+        m = mode::fopt;
+    }
+    else if (settings->check("mode", "opt")) {
+        m = mode::opt;
+    }
+    else if (settings->check("mode", "simulated-annealing")) {
+        m = mode::sa;
+    }
+    else if (settings->check("mode", "clustering")) {
+        m = mode::clustering;
+    }
+    else if (settings->check("mode", "system")) {
+        m = mode::system;
+    }
+    else if (settings->check("mode", "classification")) {
+        m = mode::classification;
+	}
+    else if (settings->check("mode", "RRT")) {
 		m = mode::RRT;
 	}
     return m;
 }
 
-int main(int argc, char** argv){
+void autodiffTest();
+
+int main(int argc, char** argv) {
+    autodiffTest();
 	Log log;
-    log << "Duplex optimization tool." << endl ;
+    log << "Duplex optimization tool." << endl;
 	Settings*  settings = new Settings();
-	srand((unsigned int)time(0));
-    log << "settings created, procceeding to parsing arguments" << endl ;
+	srand( (unsigned int) time(0));
+    log << "settings created, procceeding to parsing arguments" << endl;
 	try{
 		namespace po = boost::program_options;
 		po::options_description desc("Options");
@@ -82,17 +94,17 @@ int main(int argc, char** argv){
 			("config,c", po::value<string>(), "Specifies the configuration file")
 			("like", "this");
 		po::variables_map vm;
-		try{
+		try {
 			po::store(po::parse_command_line(argc, argv, desc), vm); // can throw 
 			// --help option
-			if (vm.count("help")){		
+			if (vm.count("help")) {		
 				std::cout << "Duplex optimization engine. " << std::endl
 					      << "Version 0.1    (C) 2015 Seyed Nematollah (Adel) Ahmadyan, All right reserved." << std::endl
 					      << desc << std::endl;
 				return SUCCESS;
 			}
 			po::notify(vm); // throws on error, so do after help in case there are any problems 
-		} catch (po::error& e){
+		} catch (po::error& e) {
 			std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
 			std::cerr << desc << std::endl;
 			cin.get();
@@ -101,14 +113,14 @@ int main(int argc, char** argv){
 		cout << "Parsing arguments complete. Proceed to parsing config file ..." << endl;
 		settings->parse(vm["config"].as<std::string>().c_str(), "Duplex");
 
-        bool verbose=true;
-		try{
+        bool verbose = true;
+		try {
             verbose = vm["verbose"].as<int>();
-		}catch (exception& e){
+		} catch (exception& e) {
             verbose = settings->lookupBoolean("verbose");
 		}
         log << "Parsing config file " << vm["config"].as<std::string>().c_str()  << " complete." << endl ;
-        
+
 		Duplex* duplex = NULL;
 		Clustering* clustering = NULL;
         boost::property_tree::ptree ptree;  //used to load/save the data
@@ -119,7 +131,7 @@ int main(int argc, char** argv){
         auto m = getMode(settings);
         
         log.tick();
-        switch(m){
+        switch(m) {
             // -----------------------------------------------------
             case mode::load:
                 // Load the XML file into the property tree.
@@ -187,10 +199,10 @@ int main(int argc, char** argv){
         //savefile.close();
         
         // Plotting the results
-        if(settings->check("plot.enable", "true")){
+        if (settings->check("plot.enable", "true")) {
             PlotFactory* pf = new PlotFactory(settings, duplex, clustering);
 			vector<string> plots = settings->listVariables("plot", "uid-plot");
-			for (int i = 0; i < plots.size(); i++){
+			for (int i = 0; i < plots.size(); i++) {
 				Graphics* graphic = new Graphics(settings->lookupString("plot.gnuplot"));
                 string plotStr = pf->getPlot(i);
                 graphic->execute(plotStr);
@@ -199,25 +211,25 @@ int main(int argc, char** argv){
 				delete graphic;
 			}
         }
-        
 
         //clean-up
-        if(clustering) delete clustering;
-        if(duplex) delete duplex;
-		if(settings) delete settings;
+        if (clustering) delete clustering;
+        if (duplex) delete duplex;
+		if (settings) delete settings;
         
-	}catch (SettingsException se){
+	} catch (SettingsException se) {
 		std::cerr << "CONFIG ERROR: " << se.what() << std::endl << std::endl;
 		cin.get();
 		return ERROR_IN_COMMAND_LINE;
-	}catch (std::exception& e){
+	} catch (std::exception& e) {
 		std::cerr << "Unhandled Exception reached the top of main: "
 			<< e.what() << ", application will now exit" << std::endl;
 		cin.get();
 		return ERROR_UNHANDLED_EXCEPTION;
 	}
     
-    log << "Shutting down" << endl ;
+    log << "Shutting down" << endl;
 	cin.get();
 	return SUCCESS;
 }
+

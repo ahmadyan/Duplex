@@ -89,6 +89,8 @@ add_executable(duplex
                 src/utility/configuration.cpp
                 src/utility/graphics.cpp
                 src/utility/plotFactory.cpp
+
+                src/test/autodiffTest.cpp
                 )
 
 
@@ -96,11 +98,13 @@ add_executable(duplex
 include_directories(
     ${PROJECT_BINARY_DIR}
     ${PROJECT_SOURCE_DIR}/include
+    ${PROJECT_SOURCE_DIR}/include/autodiff
     ${PROJECT_SOURCE_DIR}/include/core
     ${PROJECT_SOURCE_DIR}/include/duplex
     ${PROJECT_SOURCE_DIR}/include/duplex/optimizer
     ${PROJECT_SOURCE_DIR}/include/system
     ${PROJECT_SOURCE_DIR}/include/utility
+    ${PROJECT_SOURCE_DIR}/include/examples
     )
 
 find_package(Boost 1.51 COMPONENTS program_options REQUIRED)

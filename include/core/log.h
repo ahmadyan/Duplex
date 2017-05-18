@@ -32,12 +32,14 @@ public:
     
     static const std::string default_log_header;
     
-    Log(const std::string& log_header = default_log_header , std::ostream& out_stream = std::cout)
-        : _log_header(log_header), out(out_stream), newline(true)
-    {}
+    Log (const std::string& log_header = default_log_header, std::ostream& out_stream = std::cout)
+        : out(out_stream), _log_header(log_header)
+    {
+        newline = true; 
+    }
 
     //overloads <<endl
-    Log& operator<<(endl_type endl){
+    Log& operator<< (endl_type endl) {
         newline = true;
         out << endl;
         return (*this);
