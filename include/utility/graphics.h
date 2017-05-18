@@ -7,7 +7,8 @@
 
 using namespace std;
 
-class Graphics{
+class Graphics
+{
     string gnuplot;
     FILE *gnuplotPipe;
 public:

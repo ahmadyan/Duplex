@@ -4,7 +4,8 @@
 #include <vector>
 using namespace std;
 
-class SettingsException{
+class SettingsException
+{
 public:
 	SettingsException(const char * str);
 	SettingsException(const SettingsException & other);
@@ -16,11 +17,12 @@ private:
 	SettingsException operator=(const SettingsException &);
 };
 
-class Settings{
+class Settings
+{
 public:
 	Settings();
 	~Settings();
-	void parse(const char * cfgSource, const char * scope = "")throw (SettingsException);
+	void parse(const char * cfgSource, const char * scope = "") throw (SettingsException);
 	bool check(const char* name, const char* value) const throw (SettingsException);
 	const char * lookupString(const char * name) const throw (SettingsException);
 	void lookupList(const char *name, const char **&array,int &arraySize) const throw (SettingsException);
