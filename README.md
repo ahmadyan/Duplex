@@ -44,3 +44,6 @@ Few examples are provided in <code>/bin</code> directory. Few MATLAB tests are a
 * Currently the duplex binaries and the configurations has to be in the same directory, so please output the binary in the bin folder.
 * Example configuration files are available in the /bin directory
 * If using hspice as a numerical simulator, User should set an environment variable DUPLEX_SIM_ID to an integer value. If you don't want to set the environment variable, run Duplex from the python wrapper (test/duplex.py) in test directory. Python wrapper requires Python 3+.
+
+## Misc
+Duplex uses llvm coding style. Any PR will be formatted using clang-format.

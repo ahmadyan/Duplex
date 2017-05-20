@@ -34,7 +34,6 @@ extern "C" {
 struct kdtree;
 struct kdres;
 
-
 /* create a kd-tree for "k"-dimensional data */
 struct kdtree *kd_create(int k);
 
@@ -48,7 +47,7 @@ void kd_clear(struct kdtree *tree);
  * will be called on data pointers (see kd_insert) when nodes
  * are to be removed from the tree.
  */
-void kd_data_destructor(struct kdtree *tree, void (*destr)(void*));
+void kd_data_destructor(struct kdtree *tree, void (*destr)(void *));
 
 /* insert a node, specifying its position, and optional data */
 int kd_insert(struct kdtree *tree, const double *pos, void *data);
@@ -73,10 +72,14 @@ struct kdres *kd_nearest3f(struct kdtree *tree, float x, float y, float z);
  * a valid result set is always returned which may contain 0 or more elements.
  * The result set must be deallocated with kd_res_free, after use.
  */
-struct kdres *kd_nearest_range(struct kdtree *tree, const double *pos, double range);
-struct kdres *kd_nearest_rangef(struct kdtree *tree, const float *pos, float range);
-struct kdres *kd_nearest_range3(struct kdtree *tree, double x, double y, double z, double range);
-struct kdres *kd_nearest_range3f(struct kdtree *tree, float x, float y, float z, float range);
+struct kdres *kd_nearest_range(struct kdtree *tree, const double *pos,
+                               double range);
+struct kdres *kd_nearest_rangef(struct kdtree *tree, const float *pos,
+                                float range);
+struct kdres *kd_nearest_range3(struct kdtree *tree, double x, double y,
+                                double z, double range);
+struct kdres *kd_nearest_range3f(struct kdtree *tree, float x, float y, float z,
+                                 float range);
 
 /* frees a result set returned by kd_nearest_range() */
 void kd_res_free(struct kdres *set);
@@ -87,7 +90,8 @@ int kd_res_size(struct kdres *set);
 /* rewinds the result set iterator */
 void kd_res_rewind(struct kdres *set);
 
-/* returns non-zero if the set iterator reached the end after the last element */
+/* returns non-zero if the set iterator reached the end after the last element
+ */
 int kd_res_end(struct kdres *set);
 
 /* advances the result set iterator, returns non-zero on success, zero if
@@ -106,9 +110,8 @@ void *kd_res_item3f(struct kdres *set, float *x, float *y, float *z);
 /* equivalent to kd_res_item(set, 0) */
 void *kd_res_item_data(struct kdres *set);
 
-
 #ifdef __cplusplus
 }
 #endif
 
-#endif	/* _KDTREE_H_ */
+#endif /* _KDTREE_H_ */

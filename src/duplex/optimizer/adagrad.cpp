@@ -1,48 +1,45 @@
 #include "adagrad.h"
 #include <cmath>
 
-Adagrad::Adagrad(Settings* s):Optimizer(s){
-    learning_rate_base = settings->lookupFloat("optimization.learning_rate");
-    fudgeFactor = settings->lookupFloat("optimization.fudge_factor");
-    autocorr = settings->lookupFloat("optimization.autocorrelation");
-    cout << "Initializing Adagrad optimizer complete"
-        << ", learning rate = " << learning_rate_base
-        << ", fudge factor = " << fudgeFactor
-        << ", auto correlation factor = " << autocorr
-        << endl;
-    cache = new double[parameterDimension]();
-    init=false;
+Adagrad::Adagrad(Settings *s) : Optimizer(s) {
+  learning_rate_base = settings->lookupFloat("optimization.learning_rate");
+  fudgeFactor = settings->lookupFloat("optimization.fudge_factor");
+  autocorr = settings->lookupFloat("optimization.autocorrelation");
+  cout << "Initializing Adagrad optimizer complete"
+       << ", learning rate = " << learning_rate_base
+       << ", fudge factor = " << fudgeFactor
+       << ", auto correlation factor = " << autocorr << endl;
+  cache = new double[parameterDimension]();
+  init = false;
 }
 
-Adagrad::~Adagrad(){}
+Adagrad::~Adagrad() {}
 
-bool Adagrad::hasGradientInformation(){
-    return true;
-}
+bool Adagrad::hasGradientInformation() { return true; }
 
-State* Adagrad::update(State* u){
-    auto prev = u->getParameter();
-    auto v = new State(parameterDimension, objectiveDimension);
-    auto input = new double[parameterDimension]();
-    auto learningRate = learning_rate_base;
-    auto dx = u->getDerivativeVector(0);
-    
-    // cache += dx**2
-    // cache[i] += dx[i]*dx[i];
-    for(int i=0;i<parameterDimension;i++){
-        if(!init){
-            init=true;
-            cache[i] = dx[i]*dx[i];
-        }else{
-            cache[i] = autocorr*cache[i] + (1-autocorr)*dx[i]*dx[i];
-        }
+State *Adagrad::update(State *u) {
+  auto prev = u->getParameter();
+  auto v = new State(parameterDimension, objectiveDimension);
+  auto input = new double[parameterDimension]();
+  auto learningRate = learning_rate_base;
+  auto dx = u->getDerivativeVector(0);
+
+  // cache += dx**2
+  // cache[i] += dx[i]*dx[i];
+  for (int i = 0; i < parameterDimension; i++) {
+    if (!init) {
+      init = true;
+      cache[i] = dx[i] * dx[i];
+    } else {
+      cache[i] = autocorr * cache[i] + (1 - autocorr) * dx[i] * dx[i];
     }
-    
-    // x += - learning_rate * dx / (np.sqrt(cache) + eps)
-    for(int i=0;i<parameterDimension;i++){
-        input[i] = prev[i] - learningRate * dx[i] / (sqrt(cache[i])+fudgeFactor);
-    }
-    clipParameters(input);
-    v->setParameter(input);
-    return v;
+  }
+
+  // x += - learning_rate * dx / (np.sqrt(cache) + eps)
+  for (int i = 0; i < parameterDimension; i++) {
+    input[i] = prev[i] - learningRate * dx[i] / (sqrt(cache[i]) + fudgeFactor);
+  }
+  clipParameters(input);
+  v->setParameter(input);
+  return v;
 }

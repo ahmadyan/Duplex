@@ -7,36 +7,36 @@
 //
 #pragma once
 #include "configuration.h"
-#include "state.h"
 #include "hspice.h"
+#include "state.h"
 enum simulatorType { HSPICE, GSL, MATLAB, INTERNAL };
 
-class System{
-	Settings* config;
-	simulatorType type;
-	Hspice* engine;
-    
-    //parameters for hspice simulations
-    string simulationICFileResult ;
-    string simulationICFileSource ;
-    string simulationType;
-    string simulationLogFilename;
-    vector<string> setting;
-    vector<string> objectives;
-    vector<string> parameterName;
-    vector<string> parameterUnit;
-    
-	//for internal simulator
-	int parameterSize;
-	int objectiveSize; 
-	vector<string> functions;
-	vector<string> variables;    
-    vector<vector<string> > jacobian;
-    
+class System {
+  Settings *config;
+  simulatorType type;
+  Hspice *engine;
+
+  // parameters for hspice simulations
+  string simulationICFileResult;
+  string simulationICFileSource;
+  string simulationType;
+  string simulationLogFilename;
+  vector<string> setting;
+  vector<string> objectives;
+  vector<string> parameterName;
+  vector<string> parameterUnit;
+
+  // for internal simulator
+  int parameterSize;
+  int objectiveSize;
+  vector<string> functions;
+  vector<string> variables;
+  vector<vector<string>> jacobian;
+
 public:
-	System(Settings* config);
-	~System();
-    void eval(State*, double t);
-    void eval(State*);
-    string getFunction(int i);
+  System(Settings *config);
+  ~System();
+  void eval(State *, double t);
+  void eval(State *);
+  string getFunction(int i);
 };
